@@ -5,15 +5,15 @@
   "description": "Track your betting stakes and manage your gambling activities",
   "permissions": ["storage", "sidePanel", "activeTab"],
   "icons": {
-    "16": "icons/icon16.svg",
-    "48": "icons/icon48.svg",
-    "128": "icons/icon128.svg"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "action": {
     "default_title": "Open Side Panel",
     "default_icon": {
-      "16": "icons/icon16.svg",
-      "48": "icons/icon48.svg"
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
     }
   },
   "side_panel": {
