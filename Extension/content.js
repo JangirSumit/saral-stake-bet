@@ -2,9 +2,7 @@ let gameSidebar,
   startBetButton,
   betAmountInput,
   profitInput,
-  cashoutInput,
-  lastCrashButton;
-let statusCheckInterval;
+  cashoutInput;
 let autoBetRunning = false;
 let lastStatus = "";
 let currentBet = null;
@@ -33,14 +31,33 @@ function initializeElements() {
     ?.closest("label")
     ?.querySelector("input");
 
-  console.log("Elements found:", { gameSidebar, startBetButton, statusSpan, lastCrashes });
+  console.log("Elements found:", { gameSidebar, startBetButton, lastCrashes });
 
   if (!gameSidebar || !startBetButton) {
     console.log("Elements not ready, retrying in 1 second...");
     setTimeout(initializeElements, 1000);
   } else {
     lastStatus = startBetButton?.textContent || "";
-    statusCheckInterval = setInterval(checkButtonTextChange, 100);
+    
+    // Watch for button text changes
+    if (startBetButton) {
+      const buttonObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList' || mutation.type === 'characterData') {
+            const currentText = startBetButton.textContent;
+            if (currentText !== lastStatus) {
+              console.log("Button text changed:", currentText);
+              lastStatus = currentText;
+            }
+          }
+        });
+      });
+      buttonObserver.observe(startBetButton, { 
+        childList: true, 
+        subtree: true, 
+        characterData: true 
+      });
+    }
     
     // Watch for new crash entries
     if (lastCrashes) {
@@ -76,15 +93,7 @@ function addCrashToHistory(crashValue) {
   currentBet = null;
 }
 
-function checkButtonTextChange() {
-  if (startBetButton) {
-    const currentText = startBetButton.textContent;
-    if (currentText !== lastStatus) {
-      console.log("Button text changed:", currentText);
-      lastStatus = currentText;
-    }
-  }
-}
+
 
 // Initialize on load
 if (document.readyState === "loading") {
