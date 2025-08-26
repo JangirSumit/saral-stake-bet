@@ -54,7 +54,7 @@ function initializeElements() {
 
               // When button shows 'Bet', new round is ready
               if (currentText === "Bet" && autoBetRunning && !skipBetting) {
-                setTimeout(() => placeBet(), 500);
+                placeBet();
               }
 
               lastStatus = currentText;
