@@ -1,12 +1,13 @@
 let gameSidebar,
   startBetButton,
-  statusSpan,
   betAmountInput,
   profitInput,
-  cashoutInput;
+  cashoutInput,
+  lastCrashButton;
 let statusCheckInterval;
 let autoBetRunning = false;
 let lastStatus = "";
+let currentBet = null;
 
 const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
 
@@ -17,13 +18,14 @@ function initializeElements() {
   startBetButton = document.querySelector(
     "[data-testid='game-frame'] .game-sidebar > button"
   );
-  statusSpan = startBetButton?.querySelector("span");
   betAmountInput = document.querySelector(
     "[data-testid='game-frame'] [data-testid='input-game-amount']"
   );
   profitInput = document.querySelector(
     "[data-testid='game-frame'] [data-testid='profit-input']"
   );
+  const lastCrashes = document.querySelector(".past-bets");
+
   cashoutInput = [
     ...(gameSidebar?.querySelectorAll("label span[slot='label']") || []),
   ]
@@ -31,7 +33,7 @@ function initializeElements() {
     ?.closest("label")
     ?.querySelector("input");
 
-  console.log("Elements found:", { gameSidebar, startBetButton, statusSpan });
+  console.log("Elements found:", { gameSidebar, startBetButton, statusSpan, lastCrashes });
 
   if (!gameSidebar || !startBetButton) {
     console.log("Elements not ready, retrying in 1 second...");
@@ -39,8 +41,39 @@ function initializeElements() {
   } else {
     lastStatus = startBetButton?.textContent || "";
     statusCheckInterval = setInterval(checkButtonTextChange, 100);
+    
+    // Watch for new crash entries
+    if (lastCrashes) {
+      const crashObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+            const newCrash = mutation.addedNodes[0];
+            if (newCrash.nodeType === Node.ELEMENT_NODE) {
+              const crashValue = newCrash.textContent;
+              console.log('New crash detected:', crashValue);
+              addCrashToHistory(crashValue);
+            }
+          }
+        });
+      });
+      crashObserver.observe(lastCrashes, { childList: true });
+    }
+    
     console.log("Button text monitoring started automatically");
   }
+}
+
+function addCrashToHistory(crashValue) {
+  const historyData = currentBet ? 
+    { ...currentBet, crashValue } : 
+    { betAmount: "0", cashoutAt: "0", crashValue, timestamp: new Date().toLocaleTimeString(), skipped: true };
+  
+  console.log('Sending history data:', historyData);
+  chrome.runtime.sendMessage({
+    action: "addHistory",
+    data: historyData
+  });
+  currentBet = null;
 }
 
 function checkButtonTextChange() {
@@ -76,6 +109,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       cashoutInput.dispatchEvent(new Event("input", { bubbles: true }));
       cashoutInput.dispatchEvent(new Event("change", { bubbles: true }));
     }
+    
+    currentBet = {
+      betAmount: amount,
+      cashoutAt: cashout,
+      timestamp: new Date().toLocaleTimeString()
+    };
   }
 
   if (message.action === "startAutoBet") {

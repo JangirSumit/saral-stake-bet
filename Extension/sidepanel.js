@@ -45,3 +45,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+// Listen for history updates from content script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "addHistory") {
+    console.log('Received history data:', message.data);
+    addHistoryItem(message.data);
+  }
+});
+
+function addHistoryItem(data) {
+  console.log('Adding history item:', data);
+  const historyList = document.getElementById("historyList");
+  if (!historyList) {
+    console.error('History list element not found');
+    return;
+  }
+  
+  const item = document.createElement("div");
+  item.className = "history-item";
+  
+  let status, details;
+  if (data.skipped) {
+    status = "Skipped";
+    details = "No bet placed";
+  } else {
+    status = parseFloat(data.crashValue) >= parseFloat(data.crashoutAt) ? "Won" : "Lost";
+    details = `Bet: $${data.betAmount} | Cashout: ${data.cashoutAt}x`;
+  }
+  
+  item.innerHTML = `
+    <div class="history-title">Crashed at ${data.crashValue}x, ${status}</div>
+    <div class="history-details">${details}</div>
+    <div class="history-time">${data.timestamp}</div>
+  `;
+  
+  historyList.insertBefore(item, historyList.firstChild);
+  console.log('History item added to DOM');
+  
+  // Keep only last 100 items
+  while (historyList.children.length > 100) {
+    historyList.removeChild(historyList.lastChild);
+  }
+}
