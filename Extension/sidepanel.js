@@ -62,8 +62,14 @@ function addHistoryItem(data) {
     return;
   }
   
+  // Remove latest class from previous item
+  const previousLatest = historyList.querySelector('.history-item.latest');
+  if (previousLatest) {
+    previousLatest.classList.remove('latest');
+  }
+  
   const item = document.createElement("div");
-  item.className = "history-item";
+  item.className = "history-item latest";
   
   let status, details;
   if (data.skipped) {
