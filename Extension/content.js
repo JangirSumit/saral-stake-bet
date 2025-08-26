@@ -122,7 +122,6 @@ function addCrashToHistory(crashValue) {
         skipped: true,
       };
 
-  console.log("Sending history data:", historyData);
   chrome.runtime.sendMessage({
     action: "addHistory",
     data: historyData,
