@@ -6,6 +6,11 @@ let gameSidebar,
 let autoBetRunning = false;
 let lastStatus = "";
 let currentBet = null;
+let betConfig = {};
+let crashHistory = [];
+let consecutiveLowCrashes = 0;
+let skipBetting = false;
+let currentBetAmount = 0;
 
 const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
 
@@ -81,6 +86,14 @@ function initializeElements() {
 }
 
 function addCrashToHistory(crashValue) {
+  const crash = parseFloat(crashValue);
+  crashHistory.unshift(crash);
+  
+  // Check crash patterns and adjust betting
+  if (autoBetRunning) {
+    handleAutoBetting(crash);
+  }
+  
   const historyData = currentBet ? 
     { ...currentBet, crashValue } : 
     { betAmount: "0", cashoutAt: "0", crashValue, timestamp: new Date().toLocaleTimeString(), skipped: true };
@@ -91,6 +104,66 @@ function addCrashToHistory(crashValue) {
     data: historyData
   });
   currentBet = null;
+}
+
+function handleAutoBetting(crash) {
+  const { crashAt, crashTimes, onWin, onLoss } = betConfig;
+  
+  // Track consecutive low crashes
+  if (crash < crashAt) {
+    consecutiveLowCrashes++;
+  } else {
+    consecutiveLowCrashes = 0;
+    skipBetting = false;
+  }
+  
+  // Skip betting if too many consecutive low crashes
+  if (consecutiveLowCrashes >= crashTimes) {
+    skipBetting = true;
+  }
+  
+  // Adjust bet amount based on result
+  if (currentBet) {
+    if (crash >= parseFloat(currentBet.cashoutAt)) {
+      // Won - adjust by onWin %
+      currentBetAmount = adjustBetAmount(currentBetAmount, onWin);
+    } else {
+      // Lost - adjust by onLoss %
+      currentBetAmount = adjustBetAmount(currentBetAmount, onLoss);
+    }
+  }
+  
+  // Place next bet if conditions are met
+  setTimeout(() => {
+    if (autoBetRunning && !skipBetting && startBetButton?.textContent === "Bet") {
+      placeBet();
+    }
+  }, 1000);
+}
+
+function adjustBetAmount(amount, percentage) {
+  const percent = parseFloat(percentage) || 0;
+  const multiplier = 1 + (percent / 100);
+  return (amount * multiplier).toFixed(2);
+}
+
+function placeBet() {
+  if (betAmountInput && cashoutInput) {
+    betAmountInput.value = currentBetAmount;
+    cashoutInput.value = betConfig.cashout;
+    
+    betAmountInput.dispatchEvent(new Event('input', { bubbles: true }));
+    cashoutInput.dispatchEvent(new Event('input', { bubbles: true }));
+    
+    currentBet = {
+      betAmount: currentBetAmount,
+      cashoutAt: betConfig.cashout,
+      timestamp: new Date().toLocaleTimeString()
+    };
+    
+    // Click bet button
+    setTimeout(() => startBetButton?.click(), 500);
+  }
 }
 
 
@@ -105,8 +178,19 @@ if (document.readyState === "loading") {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "fillBetData") {
-    const { amount, cashout } = message.data;
-
+    const { amount, cashout, stopCrashAt, stopCrashTimes, loss, win } = message.data;
+    
+    betConfig = {
+      amount: parseFloat(amount),
+      cashout: parseFloat(cashout),
+      crashAt: parseFloat(stopCrashAt),
+      crashTimes: parseInt(stopCrashTimes),
+      onLoss: loss,
+      onWin: win
+    };
+    
+    currentBetAmount = betConfig.amount;
+    
     if (betAmountInput && amount) {
       betAmountInput.value = amount;
       betAmountInput.dispatchEvent(new Event("input", { bubbles: true }));
@@ -118,21 +202,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       cashoutInput.dispatchEvent(new Event("input", { bubbles: true }));
       cashoutInput.dispatchEvent(new Event("change", { bubbles: true }));
     }
-    
-    currentBet = {
-      betAmount: amount,
-      cashoutAt: cashout,
-      timestamp: new Date().toLocaleTimeString()
-    };
   }
 
   if (message.action === "startAutoBet") {
     autoBetRunning = true;
+    consecutiveLowCrashes = 0;
+    skipBetting = false;
     console.log("Auto-betting started");
   }
 
   if (message.action === "stopAutoBet") {
     autoBetRunning = false;
+    skipBetting = false;
     console.log("Auto-betting stopped");
   }
 });
