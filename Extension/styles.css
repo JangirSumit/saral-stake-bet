@@ -1,0 +1,86 @@
+body {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: #fff;
+}
+h3 {
+  color: #22c55e;
+  text-align: center;
+  margin-bottom: 20px;
+}
+input {
+  margin: 5px 0;
+  padding: 12px;
+  width: calc(100% - 24px);
+  background: #1e293b;
+  border: 1px solid #22c55e;
+  color: #fff;
+  border-radius: 4px;
+}
+label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 3px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+.form-group {
+  margin-bottom: 10px;
+}
+button {
+  margin: 5px 0;
+  padding: 12px;
+  width: 100%;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+button:hover {
+  background: #b91c1c;
+}
+.save-btn {
+  background: #22c55e;
+}
+.save-btn:hover {
+  background: #16a34a;
+}
+#data {
+  margin-top: 20px;
+  padding: 15px;
+  background: #1e293b;
+  border: 1px solid #374151;
+  border-radius: 4px;
+}
+.amount {
+  color: #fbbf24;
+  font-weight: bold;
+}
+.panel {
+  margin-top: 20px;
+  padding: 15px;
+  background: #1e293b;
+  border: 1px solid #dc2626;
+  border-radius: 4px;
+}
+.panel h4 {
+  color: #dc2626;
+  margin: 0 0 15px 0;
+  font-size: 14px;
+}
+.inline-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.inline-group input {
+  width: 60px;
+  margin: 0;
+}
+.inline-group span {
+  color: #94a3b8;
+  font-size: 12px;
+}
