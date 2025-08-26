@@ -3,7 +3,7 @@
   "name": "Saral Stake Bet",
   "version": "1.0",
   "description": "Track your betting stakes and manage your gambling activities",
-  "permissions": ["storage", "sidePanel"],
+  "permissions": ["storage", "sidePanel", "activeTab"],
   "icons": {
     "16": "icons/icon16.svg",
     "48": "icons/icon48.svg",
@@ -21,5 +21,11 @@
   },
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["content.js"]
+    }
+  ]
 }

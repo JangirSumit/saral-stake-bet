@@ -7,38 +7,41 @@ document.addEventListener("DOMContentLoaded", () => {
   const crashTimes = document.getElementById("crashTimes");
   const saveBtn = document.getElementById("saveBtn");
 
-  const gameSidebar = document.querySelector(
-    "[data-testid='game-frame'] .game-sidebar"
-  );
-  const StartBetButton = document.querySelector(
-    "[data-testid='game-frame'] .game-sidebar > button"
-  );
-  const statusSpan = StartBetButton.querySelector("span");
-  const betAmountInput = document.querySelector(
-    "[data-testid='game-frame'] [data-testid='input-game-amount']"
-  );
-  const profitInput = document.querySelector(
-    "[data-testid='game-frame'] [data-testid='profit-input']"
-  );
-  const cashoutInput = [
-    ...gameSidebar.querySelectorAll("label span[slot='label']"),
-  ]
-    .find((el) => el.textContent.trim() === "Cashout At")
-    ?.closest("label")
-    ?.querySelector("input");
+  const startStopBtn = document.getElementById("startStopBtn");
+  let isRunning = false;
 
+  saveBtn.addEventListener("click", () => {
+    const betData = {
+      amount: betAmount.value,
+      cashout: cashoutAt.value,
+      loss: onLoss.value,
+      win: onWin.value,
+      stopCrashAt: crashAt.value,
+      stopCrashTimes: crashTimes.value,
+    };
+    
+    chrome.storage.local.set({ betData }, () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "fillBetData", data: betData });
+      });
+    });
+  });
 
-  // saveBtn.addEventListener("click", () => {
-  //   const betData = {
-  //     amount: betAmount.value,
-  //     cashout: cashoutInput.value,
-  //     loss: onLoss.value,
-  //     win: onWin.value,
-  //     stopCrashAt: crashAt.value,
-  //     stopCrashTimes: crashTimes.value,
-  //   };
-  //   chrome.storage.local.set({ betData }, () => {
-  //     console.log("Bet started with stop rules");
-  //   });
-  // });
+  startStopBtn.addEventListener("click", () => {
+    isRunning = !isRunning;
+    
+    if (isRunning) {
+      startStopBtn.textContent = "🛑 Stop Betting";
+      startStopBtn.className = "btn-running";
+    } else {
+      startStopBtn.textContent = "🎯 Start Betting";
+      startStopBtn.className = "btn-stopped";
+    }
+    
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, { 
+        action: isRunning ? "startAutoBet" : "stopAutoBet" 
+      });
+    });
+  });
 });
