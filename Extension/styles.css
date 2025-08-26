@@ -71,6 +71,12 @@ button:hover {
   margin: 0 0 15px 0;
   font-size: 14px;
 }
+.panel:first-of-type {
+  border-color: #22c55e;
+}
+.panel:first-of-type h4 {
+  color: #22c55e;
+}
 .inline-group {
   display: flex;
   align-items: center;
