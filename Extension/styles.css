@@ -143,7 +143,7 @@ label { font-size: 10px; margin-bottom: 2px; }
 .history-list { max-height: 200px; overflow-y: auto; }
 .history-item { 
   border-bottom: 1px solid #374151; 
-  padding: 6px 10; 
+  padding: 6px 10px; 
   font-size: 11px;
 }
 .history-item:last-child { border-bottom: none; }
