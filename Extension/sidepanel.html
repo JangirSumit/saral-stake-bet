@@ -1,40 +1,40 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { padding: 20px; font-family: Arial, sans-serif; background: #0f172a; color: #fff; }
-    h3 { color: #22c55e; text-align: center; margin-bottom: 20px; }
-    input { margin: 5px 0; padding: 12px; width: calc(100% - 24px); background: #1e293b; border: 1px solid #22c55e; color: #fff; border-radius: 4px; }
-    label { display: block; margin-top: 10px; margin-bottom: 3px; color: #94a3b8; font-size: 12px; }
-    .form-group { margin-bottom: 10px; }
-    button { margin: 5px 0; padding: 12px; width: 100%; background: #dc2626; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    button:hover { background: #b91c1c; }
-    .save-btn { background: #22c55e; }
-    .save-btn:hover { background: #16a34a; }
-    #data { margin-top: 20px; padding: 15px; background: #1e293b; border: 1px solid #374151; border-radius: 4px; }
-    .amount { color: #fbbf24; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <h3>🎲 Betting Tracker</h3>
-  <div class="form-group">
-    <label>Bet Amount</label>
-    <input type="number" id="betAmount" step="0.01" placeholder="0.00">
-  </div>
-  <div class="form-group">
-    <label>Cashout At</label>
-    <input type="number" id="cashoutAt" step="0.01" placeholder="0.00">
-  </div>
-  <div class="form-group">
-    <label>On Loss</label>
-    <input type="number" id="onLoss" step="0.01" placeholder="0.00">
-  </div>
-  <div class="form-group">
-    <label>On Win</label>
-    <input type="number" id="onWin" step="0.01" placeholder="0.00">
-  </div>
-  <button id="saveBtn" class="save-btn">💰 Start Bet</button>
-  <script src="sidepanel.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h3>🎲 Betting Tracker</h3>
+    <div class="form-group">
+      <label>Bet Amount</label>
+      <input type="number" id="betAmount" step="0.01" placeholder="0.00" />
+    </div>
+    <div class="form-group">
+      <label>Cashout At</label>
+      <input type="number" id="cashoutAt" step="0.01" placeholder="0.00" />
+    </div>
+    <div class="form-group">
+      <label>On Loss</label>
+      <input type="number" id="onLoss" step="0.01" placeholder="0.00" />
+    </div>
+    <div class="form-group">
+      <label>On Win</label>
+      <input type="number" id="onWin" step="0.01" placeholder="0.00" />
+    </div>
+    <button id="saveBtn" class="save-btn">💰 Start Bet</button>
+
+    <div class="panel">
+      <h4>🛑 Stop Betting Rules</h4>
+      <div class="inline-group">
+        <span>Stop betting if crashes at</span>
+        <input type="number" id="crashAt" step="0.01" placeholder="1.00" />
+        <span>at</span>
+        <input type="number" id="crashTimes" step="1" placeholder="3" />
+        <span>times</span>
+      </div>
+    </div>
+
+    <script src="sidepanel.js"></script>
+  </body>
 </html>

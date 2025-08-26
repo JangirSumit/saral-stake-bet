@@ -3,8 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const cashoutAt = document.getElementById("cashoutAt");
   const onLoss = document.getElementById("onLoss");
   const onWin = document.getElementById("onWin");
+  const crashAt = document.getElementById("crashAt");
+  const crashTimes = document.getElementById("crashTimes");
   const saveBtn = document.getElementById("saveBtn");
-  const dataDiv = document.getElementById("data");
 
   saveBtn.addEventListener("click", () => {
     const betData = {
@@ -12,10 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
       cashout: cashoutAt.value,
       loss: onLoss.value,
       win: onWin.value,
+      stopCrashAt: crashAt.value,
+      stopCrashTimes: crashTimes.value
     };
     chrome.storage.local.set({ betData }, () => {
-      dataDiv.innerHTML = `<span class="amount">🎯 Bet Saved:</span> $${betData.amount}`;
-      betAmount.value = cashoutAt.value = onLoss.value = onWin.value = "";
+      console.log('Bet started with stop rules');
     });
   });
 });
