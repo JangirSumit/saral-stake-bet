@@ -1,22 +1,21 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const dataInput = document.getElementById('dataInput');
-  const saveBtn = document.getElementById('saveBtn');
-  const loadBtn = document.getElementById('loadBtn');
-  const dataDiv = document.getElementById('data');
+document.addEventListener("DOMContentLoaded", () => {
+  const betAmount = document.getElementById("betAmount");
+  const cashoutAt = document.getElementById("cashoutAt");
+  const onLoss = document.getElementById("onLoss");
+  const onWin = document.getElementById("onWin");
+  const saveBtn = document.getElementById("saveBtn");
+  const dataDiv = document.getElementById("data");
 
-  saveBtn.addEventListener('click', () => {
-    const data = dataInput.value;
-    if (data) {
-      chrome.storage.local.set({ betData: data }, () => {
-        dataDiv.innerHTML = `<span class="amount">🎯 Bet Saved:</span> ${data}`;
-        dataInput.value = '';
-      });
-    }
-  });
-
-  loadBtn.addEventListener('click', () => {
-    chrome.storage.local.get(['betData'], (result) => {
-      dataDiv.innerHTML = result.betData ? `<span class="amount">💲 Last Bet:</span> ${result.betData}` : '🚫 No betting history found';
+  saveBtn.addEventListener("click", () => {
+    const betData = {
+      amount: betAmount.value,
+      cashout: cashoutAt.value,
+      loss: onLoss.value,
+      win: onWin.value,
+    };
+    chrome.storage.local.set({ betData }, () => {
+      dataDiv.innerHTML = `<span class="amount">🎯 Bet Saved:</span> $${betData.amount}`;
+      betAmount.value = cashoutAt.value = onLoss.value = onWin.value = "";
     });
   });
 });
