@@ -19,17 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
       stopCrashAt: crashAt.value,
       stopCrashTimes: crashTimes.value,
     };
-    
+
     chrome.storage.local.set({ betData }, () => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, { action: "fillBetData", data: betData });
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "fillBetData",
+          data: betData,
+        });
       });
     });
   });
 
   startStopBtn.addEventListener("click", () => {
     isRunning = !isRunning;
-    
+
     if (isRunning) {
       startStopBtn.textContent = "🛑 Stop Betting";
       startStopBtn.className = "btn-running";
@@ -37,10 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
       startStopBtn.textContent = "🎯 Start Betting";
       startStopBtn.className = "btn-stopped";
     }
-    
+
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, { 
-        action: isRunning ? "startAutoBet" : "stopAutoBet" 
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: isRunning ? "startAutoBet" : "stopAutoBet",
       });
     });
   });
@@ -49,46 +52,56 @@ document.addEventListener("DOMContentLoaded", () => {
 // Listen for history updates from content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "addHistory") {
-    console.log('Received history data:', message.data);
+    console.log("Received history data:", message.data);
     addHistoryItem(message.data);
+  }
+
+  if (message.action === "updateButtonStatus") {
+    const statusElement = document.getElementById("buttonStatus");
+    if (statusElement) {
+      statusElement.textContent = `Status: ${message.data.buttonText}`;
+    }
   }
 });
 
 function addHistoryItem(data) {
-  console.log('Adding history item:', data);
+  console.log("Adding history item:", data);
   const historyList = document.getElementById("historyList");
   if (!historyList) {
-    console.error('History list element not found');
+    console.error("History list element not found");
     return;
   }
-  
+
   // Remove latest class from previous item
-  const previousLatest = historyList.querySelector('.history-item.latest');
+  const previousLatest = historyList.querySelector(".history-item.latest");
   if (previousLatest) {
-    previousLatest.classList.remove('latest');
+    previousLatest.classList.remove("latest");
   }
-  
+
   const item = document.createElement("div");
   item.className = "history-item latest";
-  
+
   let status, details;
   if (data.skipped) {
     status = "Skipped";
     details = "No bet placed";
   } else {
-    status = parseFloat(data.crashValue) >= parseFloat(data.crashoutAt) ? "Won" : "Lost";
+    status =
+      parseFloat(data.crashValue) >= parseFloat(data.crashoutAt)
+        ? "Won"
+        : "Lost";
     details = `Bet: $${data.betAmount} | Cashout: ${data.cashoutAt}x`;
   }
-  
+
   item.innerHTML = `
-    <div class="history-title">Crashed at ${data.crashValue}x, ${status}</div>
+    <div class="history-title">Crashed at ${data.crashValue}, ${status}</div>
     <div class="history-details">${details}</div>
     <div class="history-time">${data.timestamp}</div>
   `;
-  
+
   historyList.insertBefore(item, historyList.firstChild);
-  console.log('History item added to DOM');
-  
+  console.log("History item added to DOM");
+
   // Keep only last 100 items
   while (historyList.children.length > 100) {
     historyList.removeChild(historyList.lastChild);

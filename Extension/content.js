@@ -52,6 +52,13 @@ function initializeElements() {
             if (currentText !== lastStatus) {
               console.log("Button text changed:", currentText);
 
+              // Send button status to sidepanel
+              console.log("Sending button status:", currentText);
+              chrome.runtime.sendMessage({
+                action: "updateButtonStatus",
+                data: { buttonText: currentText },
+              });
+
               // When button shows 'Bet', new round is ready
               if (currentText === "Bet" && autoBetRunning && !skipBetting) {
                 placeBet();
@@ -86,6 +93,12 @@ function initializeElements() {
       crashObserver.observe(lastCrashes, { childList: true });
     }
 
+    // Send initial button status
+    chrome.runtime.sendMessage({
+      action: "updateButtonStatus",
+      data: { buttonText: lastStatus },
+    });
+    
     console.log("Button text monitoring started automatically");
   }
 }
