@@ -1,32 +1,66 @@
 name: Release Extension
 
 on:
-  push:    # triggers on all branches and tags
-    branches:
-      - '**'   # all branches
-    tags:
-      - 'v*'   # version tags
+  workflow_dispatch:
 
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed for creating releases
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # needed to fetch all tags
+
+      - name: Get next version
+        id: version
+        run: |
+          # Get latest tag, or fallback to v0.0.0
+          latest=$(git tag --sort=-creatordate | head -n1 || echo "")
+          if [ -z "$latest" ]; then
+            latest="v0.0.0"
+          fi
+
+          # Strip "v" prefix
+          ver=${latest#v}
+
+          # Split into major.minor.patch (default 0 if missing)
+          IFS='.' read -r major minor patch <<< "$ver"
+          major=${major:-0}
+          minor=${minor:-0}
+          patch=${patch:-0}
+
+          # Increment patch
+          patch=$((patch+1))
+
+          new="v$major.$minor.$patch"
+
+          echo "Latest: $latest"
+          echo "Next:   $new"
+
+          echo "version=$new" >> $GITHUB_OUTPUT
+
+
+      - name: Create Git Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
 
       - name: Create Extension Package
         run: |
           cd Extension
-          zip -r ../saral-stake-bet-${{ github.ref_name }}.zip .
+          zip -r ../saral-stake-bet-${{ steps.version.outputs.version }}.zip .
 
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Release ${{ steps.version.outputs.version }}
           draft: false
           prerelease: false
         env:
@@ -38,6 +72,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./saral-stake-bet-${{ github.ref_name }}.zip
-          asset_name: saral-stake-bet-${{ github.ref_name }}.zip
+          asset_path: ./saral-stake-bet-${{ steps.version.outputs.version }}.zip
+          asset_name: saral-stake-bet-${{ steps.version.outputs.version }}.zip
           asset_content_type: application/zip
