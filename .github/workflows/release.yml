@@ -17,12 +17,31 @@ jobs:
       - name: Get next version
         id: version
         run: |
-          latest=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+          # Get latest tag, or fallback to v0.0.0
+          latest=$(git tag --sort=-creatordate | head -n1 || echo "")
+          if [ -z "$latest" ]; then
+            latest="v0.0.0"
+          fi
+
+          # Strip "v" prefix
           ver=${latest#v}
+
+          # Split into major.minor.patch (default 0 if missing)
           IFS='.' read -r major minor patch <<< "$ver"
+          major=${major:-0}
+          minor=${minor:-0}
+          patch=${patch:-0}
+
+          # Increment patch
           patch=$((patch+1))
+
           new="v$major.$minor.$patch"
+
+          echo "Latest: $latest"
+          echo "Next:   $new"
+
           echo "version=$new" >> $GITHUB_OUTPUT
+
 
       - name: Create Git Tag
         run: |
