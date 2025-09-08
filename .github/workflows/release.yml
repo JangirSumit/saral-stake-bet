@@ -1,11 +1,7 @@
 name: Release Extension
 
 on:
-  push:    # triggers on all branches and tags
-    branches:
-      - '**'   # all branches
-    tags:
-      - 'v*'   # version tags
+  workflow_dispatch:   # 👈 manual trigger only
 
 jobs:
   release:
