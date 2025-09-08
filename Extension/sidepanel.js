@@ -22,14 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resumeAt: resumeAt.value,
     };
 
-    chrome.storage.local.set({ betData }, () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: "fillBetData",
-          data: betData,
-        });
-      });
-    });
+    chrome.storage.local.set({ betData });
   });
 
   startStopBtn.addEventListener("click", () => {
@@ -38,16 +31,37 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isRunning) {
       startStopBtn.textContent = "🛑 Stop Betting";
       startStopBtn.className = "btn-running";
+      
+      // Send config and start betting
+      const betData = {
+        amount: betAmount.value,
+        cashout: cashoutAt.value,
+        loss: onLoss.value,
+        win: onWin.value,
+        stopCrashAt: crashAt.value,
+        stopCrashTimes: crashTimes.value,
+        resumeAt: resumeAt.value,
+      };
+      
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "fillBetData",
+          data: betData,
+        });
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "startAutoBet",
+        });
+      });
     } else {
       startStopBtn.textContent = "🎯 Start Betting";
       startStopBtn.className = "btn-stopped";
-    }
-
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        action: isRunning ? "startAutoBet" : "stopAutoBet",
+      
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "stopAutoBet",
+        });
       });
-    });
+    }
   });
 });
 

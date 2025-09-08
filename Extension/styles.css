@@ -141,7 +141,7 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 .button-status { margin-bottom: 8px; }
 
 /* History list */
-.history-list { max-height: 200px; overflow-y: auto; }
+.history-list { max-height: 250px; overflow-y: auto; }
 .history-item { 
   border-bottom: 1px solid #374151; 
   padding: 6px 10px; 
