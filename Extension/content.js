@@ -97,6 +97,8 @@ function initializeElements() {
 }
 
 function addCrashToHistory(crashValue) {
+  // Handle win case (e.g., "3.68× 2.50×")
+  const isWin = crashValue.includes('×') && crashValue.split('×').length > 2;
   const crash = parseFloat(crashValue);
   crashHistory.unshift(crash);
 
@@ -106,7 +108,7 @@ function addCrashToHistory(crashValue) {
   }
 
   const historyData = currentBet
-    ? { ...currentBet, crashValue }
+    ? { ...currentBet, crashValue, isWin }
     : {
         betAmount: "0",
         cashoutAt: "0",

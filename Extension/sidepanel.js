@@ -97,17 +97,19 @@ function addHistoryItem(data) {
   const item = document.createElement("div");
   item.className = "history-item latest";
 
-  let status, details;
+  let status, details, colorClass;
   if (data.skipped) {
     status = "Skipped";
     details = "No bet placed";
+    colorClass = "history-skip";
   } else {
-    status =
-      parseFloat(data.crashValue) >= parseFloat(data.crashoutAt)
-        ? "Won"
-        : "Lost";
-    details = `Bet: $${data.betAmount} | Cashout: ${data.cashoutAt}x`;
+    const won = data.isWin || parseFloat(data.crashValue) >= parseFloat(data.cashoutAt);
+    status = won ? "Won" : "Lost";
+    details = `Bet: ₹${data.betAmount} | Cashout: ${data.cashoutAt}x`;
+    colorClass = won ? "history-win" : "history-loss";
   }
+  
+  item.classList.add(colorClass);
 
   item.innerHTML = `
     <div class="history-title">Crashed at ${data.crashValue}, ${status}</div>
