@@ -130,7 +130,7 @@ function addCrashToHistory(crashValue) {
 }
 
 function handleAutoBetting(crash) {
-  const { crashAt, crashTimes, onWin, onLoss } = betConfig;
+  const { crashAt, crashTimes, onWin, onLoss, resumeAt } = betConfig;
 
   // Track consecutive low crashes
   if (crash < crashAt) {
@@ -143,6 +143,12 @@ function handleAutoBetting(crash) {
   // Skip betting if too many consecutive low crashes
   if (consecutiveLowCrashes >= crashTimes) {
     skipBetting = true;
+  }
+
+  // Resume betting if crash crosses resumeAt threshold
+  if (skipBetting && crash >= resumeAt) {
+    skipBetting = false;
+    consecutiveLowCrashes = 0;
   }
 
   // Adjust bet amount based on result
@@ -195,7 +201,7 @@ if (document.readyState === "loading") {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "fillBetData") {
-    const { amount, cashout, stopCrashAt, stopCrashTimes, loss, win } =
+    const { amount, cashout, stopCrashAt, stopCrashTimes, loss, win, resumeAt } =
       message.data;
 
     betConfig = {
@@ -205,6 +211,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       crashTimes: parseInt(stopCrashTimes),
       onLoss: loss,
       onWin: win,
+      resumeAt: parseFloat(resumeAt),
     };
 
     currentBetAmount = betConfig.amount;

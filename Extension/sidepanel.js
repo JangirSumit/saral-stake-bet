@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const onWin = document.getElementById("onWin");
   const crashAt = document.getElementById("crashAt");
   const crashTimes = document.getElementById("crashTimes");
+  const resumeAt = document.getElementById("resumeAt");
   const saveBtn = document.getElementById("saveBtn");
 
   const startStopBtn = document.getElementById("startStopBtn");
@@ -18,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
       win: onWin.value,
       stopCrashAt: crashAt.value,
       stopCrashTimes: crashTimes.value,
+      resumeAt: resumeAt.value,
     };
 
     chrome.storage.local.set({ betData }, () => {
