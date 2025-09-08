@@ -40,39 +40,32 @@ function initializeElements() {
   } else {
     lastStatus = startBetButton?.textContent || "";
 
-    // Watch for button text changes
-    if (startBetButton) {
-      const buttonObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (
-            mutation.type === "childList" ||
-            mutation.type === "characterData"
-          ) {
-            const currentText = startBetButton.textContent.trim();
-            if (currentText !== lastStatus) {
-              console.log("Button text changed:", currentText);
+    // Watch for button changes
+    if (startBetButton && gameSidebar) {
+      const buttonObserver = new MutationObserver(() => {
+        const currentButton = gameSidebar.querySelector(':scope > button');
+        const currentText = currentButton?.textContent?.trim() || "";
+        if (currentText !== lastStatus) {
+          console.log("Button text changed:", currentText);
+          startBetButton = currentButton;
 
-              // Send button status to sidepanel
-              console.log("Sending button status:", currentText);
-              chrome.runtime.sendMessage({
-                action: "updateButtonStatus",
-                data: { buttonText: currentText },
-              });
+          chrome.runtime.sendMessage({
+            action: "updateButtonStatus",
+            data: { buttonText: currentText },
+          });
 
-              // When button shows 'Bet', new round is ready
-              if (currentText === "Bet" && autoBetRunning && !skipBetting) {
-                placeBet();
-              }
-
-              lastStatus = currentText;
-            }
+          if (currentText === "Bet" && autoBetRunning && !skipBetting) {
+            setTimeout(() => placeBet(), 100);
           }
-        });
+
+          lastStatus = currentText;
+        }
       });
-      buttonObserver.observe(startBetButton, {
+      buttonObserver.observe(gameSidebar, {
         childList: true,
         subtree: true,
-        characterData: true,
+        attributes: true,
+        characterData: true
       });
     }
 
