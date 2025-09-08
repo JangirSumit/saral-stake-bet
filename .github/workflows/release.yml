@@ -1,7 +1,7 @@
 name: Release Extension
 
 on:
-  workflow_dispatch:   # manual only
+  workflow_dispatch:
 
 jobs:
   release:
@@ -12,29 +12,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # needed to fetch tags
+          fetch-depth: 0   # needed to fetch all tags
 
       - name: Get next version
         id: version
         run: |
-          # Get latest tag (or default v1.0.0)
           latest=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
-
-          # Strip "v" prefix
           ver=${latest#v}
-
-          # Split into major.minor.patch
           IFS='.' read -r major minor patch <<< "$ver"
-
-          # Increment patch
           patch=$((patch+1))
-
           new="v$major.$minor.$patch"
-
-          echo "Latest version: $latest"
-          echo "Next version: $new"
-
           echo "version=$new" >> $GITHUB_OUTPUT
+
+      - name: Create Git Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
 
       - name: Create Extension Package
         run: |
