@@ -48,7 +48,7 @@ function initializeElements() {
             mutation.type === "childList" ||
             mutation.type === "characterData"
           ) {
-            const currentText = startBetButton.textContent;
+            const currentText = startBetButton.textContent.trim();
             if (currentText !== lastStatus) {
               console.log("Button text changed:", currentText);
 
