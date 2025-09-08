@@ -1,32 +1,37 @@
 name: Release Extension
 
 on:
-  push:
+  push:    # triggers on all branches and tags
+    branches:
+      - '**'   # all branches
     tags:
-      - 'v*'
+      - 'v*'   # version tags
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed for creating releases
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Create Extension Package
         run: |
           cd Extension
           zip -r ../saral-stake-bet-${{ github.ref_name }}.zip .
-          
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
-          
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
