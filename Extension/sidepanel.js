@@ -25,6 +25,21 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.storage.local.set({ betData });
   });
 
+  const fullscreenBtn = document.getElementById("fullscreenBtn");
+  const historyList = document.getElementById("historyList");
+  
+  fullscreenBtn.addEventListener("click", () => {
+    if (historyList.classList.contains("fullscreen")) {
+      historyList.classList.remove("fullscreen");
+      document.body.classList.remove("fullscreen-mode");
+      fullscreenBtn.textContent = "⛶";
+    } else {
+      historyList.classList.add("fullscreen");
+      document.body.classList.add("fullscreen-mode");
+      fullscreenBtn.textContent = "✖";
+    }
+  });
+
   startStopBtn.addEventListener("click", () => {
     isRunning = !isRunning;
 

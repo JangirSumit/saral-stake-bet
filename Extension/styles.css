@@ -199,3 +199,45 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0.6; }
 }
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.fullscreen-btn {
+  width: auto;
+  padding: 2px 6px;
+  margin: 0;
+  font-size: 12px;
+  background: #374151;
+  border: 1px solid #6b7280;
+}
+.fullscreen-btn:hover {
+  background: #4b5563;
+}
+.history-list.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  max-height: none;
+  background: #0f172a;
+  z-index: 9999;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.fullscreen-mode .fullscreen-btn {
+  position: fixed !important;
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 10000 !important;
+  background: #dc2626 !important;
+  color: #fff !important;
+  width: auto !important;
+  padding: 8px 12px !important;
+  font-size: 16px !important;
+}
+.fullscreen-mode .fullscreen-btn:hover {
+  background: #b91c1c !important;
+}
