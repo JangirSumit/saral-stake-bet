@@ -184,3 +184,18 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   border-radius: 3px;
   margin-bottom: 8px;
 }
+.refresh-note {
+  font-size: 10px;
+  color: #f59e0b;
+  text-align: center;
+  padding: 4px;
+  background: #451a03;
+  border: 1px solid #f59e0b;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  animation: blink 2s infinite;
+}
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.6; }
+}
