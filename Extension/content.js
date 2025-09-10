@@ -55,10 +55,7 @@ function initializeElements() {
             data: { buttonText: currentText },
           });
 
-          if (currentText === "Bet" && autoBetRunning && (!skipBetting || resumeTriggered)) {
-            if (resumeTriggered) {
-              resumeTriggered = false;
-            }
+          if (currentText === "Bet" && autoBetRunning && !skipBetting) {
             setTimeout(() => placeBet(), 100);
           }
 
@@ -157,7 +154,6 @@ function handleAutoBetting(crash) {
 
   // Resume betting if crash crosses resumeAt threshold
   if (skipBetting && crash >= resumeAt) {
-    resumeTriggered = true;
     skipBetting = false;
     consecutiveLowCrashes = 0;
   }

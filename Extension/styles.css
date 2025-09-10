@@ -199,6 +199,31 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0.6; }
 }
+.bet-notification {
+  font-size: 11px;
+  text-align: center;
+  padding: 6px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+  animation: slideIn 0.3s ease-out;
+}
+.bet-notification.hidden {
+  display: none;
+}
+.bet-notification.placed {
+  background: #065f46;
+  color: #10b981;
+  border: 1px solid #10b981;
+}
+.bet-notification.skipped {
+  background: #451a03;
+  color: #f59e0b;
+  border: 1px solid #f59e0b;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .history-header {
   display: flex;
   justify-content: space-between;

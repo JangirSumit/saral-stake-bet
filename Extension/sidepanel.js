@@ -102,7 +102,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       statusElement.textContent = `Status: ${message.data.buttonText}`;
     }
   }
+
+  if (message.action === "showBetStatus") {
+    showBetNotification(message.data);
+  }
 });
+
+function showBetNotification(data) {
+  const notification = document.getElementById("betNotification");
+  if (!notification) return;
+
+  if (data.type === "placed") {
+    notification.textContent = `💰 Bet Placed: ₹${data.amount} @ ${data.cashout}x`;
+    notification.className = "bet-notification placed";
+  } else {
+    notification.textContent = `⏸️ Bet Skipped: ${data.reason}`;
+    notification.className = "bet-notification skipped";
+  }
+
+  setTimeout(() => {
+    notification.classList.add("hidden");
+  }, 3000);
+}
 
 function addHistoryItem(data) {
   console.log("Adding history item:", data);
