@@ -6,6 +6,7 @@ let betConfig = {};
 let crashHistory = [];
 let consecutiveLowCrashes = 0;
 let skipBetting = false;
+let resumeTriggered = false;
 let currentBetAmount = 0;
 
 const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
@@ -54,7 +55,10 @@ function initializeElements() {
             data: { buttonText: currentText },
           });
 
-          if (currentText === "Bet" && autoBetRunning && !skipBetting) {
+          if (currentText === "Bet" && autoBetRunning && (!skipBetting || resumeTriggered)) {
+            if (resumeTriggered) {
+              resumeTriggered = false;
+            }
             setTimeout(() => placeBet(), 100);
           }
 
@@ -127,26 +131,7 @@ function addCrashToHistory(crashValue) {
 function handleAutoBetting(crash) {
   const { crashAt, crashTimes, onWin, onLoss, resumeAt } = betConfig;
 
-  // Track consecutive low crashes
-  if (crash < crashAt) {
-    consecutiveLowCrashes++;
-  } else {
-    consecutiveLowCrashes = 0;
-    skipBetting = false;
-  }
-
-  // Skip betting if too many consecutive low crashes
-  if (consecutiveLowCrashes >= crashTimes) {
-    skipBetting = true;
-  }
-
-  // Resume betting if crash crosses resumeAt threshold
-  if (skipBetting && crash >= resumeAt) {
-    skipBetting = false;
-    consecutiveLowCrashes = 0;
-  }
-
-  // Adjust bet amount based on result
+  // Adjust bet amount based on previous bet result
   if (currentBet) {
     if (crash >= parseFloat(currentBet.cashoutAt)) {
       // Won - adjust by onWin %
@@ -157,7 +142,25 @@ function handleAutoBetting(crash) {
     }
   }
 
-  // Betting will be triggered when button text changes to 'Bet'
+  // Track consecutive low crashes
+  if (crash <= crashAt) {
+    consecutiveLowCrashes++;
+  } else {
+    consecutiveLowCrashes = 0;
+    skipBetting = false;
+  }
+
+  // Skip betting if too many consecutive low crashes
+  if (consecutiveLowCrashes >= crashTimes-1) {
+    skipBetting = true;
+  }
+
+  // Resume betting if crash crosses resumeAt threshold
+  if (skipBetting && crash >= resumeAt) {
+    resumeTriggered = true;
+    skipBetting = false;
+    consecutiveLowCrashes = 0;
+  }
 }
 
 function adjustBetAmount(amount, percentage) {

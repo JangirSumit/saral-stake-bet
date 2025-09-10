@@ -23,6 +23,15 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     chrome.storage.local.set({ betData });
+    
+    // Show saved feedback
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = "✅ Saved!";
+    saveBtn.style.background = "#16a34a";
+    setTimeout(() => {
+      saveBtn.textContent = originalText;
+      saveBtn.style.background = "";
+    }, 1500);
   });
 
   const fullscreenBtn = document.getElementById("fullscreenBtn");
