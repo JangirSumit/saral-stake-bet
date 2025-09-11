@@ -204,7 +204,7 @@ function handleStopResumeLogic(crash) {
     `Crash: ${crash}, skipBetting: ${skipBetting}, consecutiveLowCrashes: ${consecutiveLowCrashes}, currentBet: ${!!currentBet}`
   );
 
-  // Resume betting immediately when any crash crosses resumeAt threshold
+  // Resume betting immediately when any crash crosses resumeAt threshold (check all crashes during skip)
   if (skipBetting && crash >= resumeAt) {
     console.log(`Resume triggered! Crash ${crash} >= resumeAt ${resumeAt}`);
     skipBetting = false;
@@ -212,7 +212,7 @@ function handleStopResumeLogic(crash) {
     return;
   }
 
-  // Count consecutive bet losses on low crashes (crash <= crashAt)
+  // Count consecutive bet losses on low crashes (crash <= crashAt) - only when we had a bet
   if (currentBet) {
     if (crash < parseFloat(currentBet.cashoutAt)) {
       // Bet lost - check if it's a low crash
