@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const crashTimes = document.getElementById("crashTimes");
   const resumeAt = document.getElementById("resumeAt");
   const saveBtn = document.getElementById("saveBtn");
+  const resetBetBtn = document.getElementById("resetBetBtn");
 
   const startStopBtn = document.getElementById("startStopBtn");
   let isRunning = false;
@@ -36,6 +37,28 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       saveBtn.textContent = originalText;
       saveBtn.style.background = "";
+    }, 1500);
+  });
+
+  resetBetBtn.addEventListener("click", () => {
+    const betData = {
+      resetBetAmount: betAmount.value
+    };
+    
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: "resetBetAmount",
+        data: betData,
+      });
+    });
+    
+    // Show reset feedback
+    const originalText = resetBetBtn.textContent;
+    resetBetBtn.textContent = "✅ Reset!";
+    resetBetBtn.style.background = "#16a34a";
+    setTimeout(() => {
+      resetBetBtn.textContent = originalText;
+      resetBetBtn.style.background = "";
     }, 1500);
   });
 

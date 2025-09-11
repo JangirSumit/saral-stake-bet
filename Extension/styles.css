@@ -142,6 +142,11 @@ button:hover {
 input { padding: 6px; font-size: 12px; }
 label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 .btn-small { padding: 6px; font-size: 11px; margin: 2px 0; }
+.mt-2 { display: flex; gap: 4px; }
+.mt-2 button { width: 50%; margin: 2px 0; }
+.mt-2.full-width { display: block; }
+.mt-2.full-width button { width: 100%; }
+.fullscreen-btn { width: auto !important; }
 .button-status { margin-bottom: 8px; }
 
 /* History list */

@@ -343,4 +343,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     skipBetting = false;
     console.log("Auto-betting stopped");
   }
+
+  if (message.action === "resetBetAmount") {
+    const { resetBetAmount } = message.data;
+    currentBetAmount = parseFloat(resetBetAmount);
+    console.log(`Bet amount reset to: ${currentBetAmount}`);
+    
+    // Update current bet amount display
+    chrome.runtime.sendMessage({
+      action: "updateCurrentBetAmount",
+      data: { amount: currentBetAmount }
+    });
+  }
 });
