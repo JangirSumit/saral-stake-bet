@@ -191,8 +191,8 @@ function addHistoryItem(data) {
   historyList.insertBefore(item, historyList.firstChild);
   console.log("History item added to DOM");
 
-  // Keep only last 100 items
-  while (historyList.children.length > 100) {
+  // Keep only last 50 items
+  while (historyList.children.length > 50) {
     historyList.removeChild(historyList.lastChild);
   }
 }
