@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const startStopBtn = document.getElementById("startStopBtn");
   let isRunning = false;
 
+  // Add collapse/expand functionality
+  document.getElementById('configHeader').addEventListener('click', () => togglePanel('config'));
+  document.getElementById('stopHeader').addEventListener('click', () => togglePanel('stop'));
+  document.getElementById('resumeHeader').addEventListener('click', () => togglePanel('resume'));
+
   saveBtn.addEventListener("click", () => {
     const betData = {
       amount: betAmount.value,
@@ -114,6 +119,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "showBetStatus") {
     showBetNotification(message.data);
   }
+
+  if (message.action === "updateCurrentBetAmount") {
+    const currentBetElement = document.getElementById("currentBetAmount");
+    if (currentBetElement) {
+      currentBetElement.textContent = `Next Bet: ₹${message.data.amount}`;
+    }
+  }
 });
 
 function showBetNotification(data) {
@@ -176,5 +188,18 @@ function addHistoryItem(data) {
   // Keep only last 100 items
   while (historyList.children.length > 100) {
     historyList.removeChild(historyList.lastChild);
+  }
+}
+
+function togglePanel(panelId) {
+  const content = document.getElementById(panelId + 'Content');
+  const toggle = document.getElementById(panelId + 'Toggle');
+  
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    toggle.classList.remove('collapsed');
+  } else {
+    content.classList.add('collapsed');
+    toggle.classList.add('collapsed');
   }
 }

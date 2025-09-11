@@ -11,10 +11,15 @@
       <span class="status-dot red" title="Not Connected"></span>
       <span class="status-text">Status: Ready</span>
     </div>
+    <div id="currentBetAmount" class="current-bet-amount">Next Bet: ₹0.00</div>
     <div id="betNotification" class="bet-notification hidden"></div>
 
     <div class="panel">
-      <h4>💰 Betting Configuration</h4>
+      <div class="panel-header" id="configHeader">
+        <h4>💰 Betting Configuration</h4>
+        <span class="toggle-icon" id="configToggle">▼</span>
+      </div>
+      <div class="panel-content" id="configContent">
       <div class="form-group">
         <label>Bet Amount</label>
         <input type="number" id="betAmount" step="0.01" placeholder="0.00" />
@@ -31,10 +36,15 @@
         <label>On Win (%)</label>
         <input type="number" id="onWin" step="0.01" placeholder="25.00" />
       </div>
+      </div>
     </div>
 
     <div class="panel">
-      <h4>🛑 Stop Betting Rules</h4>
+      <div class="panel-header" id="stopHeader">
+        <h4>🛑 Stop Betting Rules</h4>
+        <span class="toggle-icon" id="stopToggle">▼</span>
+      </div>
+      <div class="panel-content" id="stopContent">
       <div class="inline-group">
         <span>Stop betting if crashes at</span>
         <input type="number" id="crashAt" step="0.01" placeholder="1.00" />
@@ -42,13 +52,19 @@
         <input type="number" id="crashTimes" step="1" placeholder="3" />
         <span>times</span>
       </div>
+      </div>
     </div>
 
     <div class="panel">
-      <h4>🔄 Resume Betting</h4>
+      <div class="panel-header" id="resumeHeader">
+        <h4>🔄 Resume Betting</h4>
+        <span class="toggle-icon" id="resumeToggle">▼</span>
+      </div>
+      <div class="panel-content" id="resumeContent">
       <div class="inline-group">
         <span>Resume if crash crosses</span>
         <input type="number" id="resumeAt" step="0.01" placeholder="2.00" />
+      </div>
       </div>
     </div>
 
