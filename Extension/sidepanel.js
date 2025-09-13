@@ -172,11 +172,9 @@ function showBetNotification(data) {
   if (data.type === "placed") {
     notification.textContent = `💰 Bet Placed: ₹${data.amount} @ ${data.cashout}x`;
     notification.className = "bet-notification placed";
-    currentBetElement.textContent += "-> placed";
   } else {
     notification.textContent = `⏸️ Bet Skipped: ${data.reason}`;
     notification.className = "bet-notification skipped";
-    currentBetElement.textContent += "-> skipped";
   }
 
   setTimeout(() => {

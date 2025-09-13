@@ -72,34 +72,36 @@ function betWatcher() {
         });
 
         if (currentText === "Bet" && autoBetRunning) {
-          console.log(
-            "Button ready - currentBet:",
-            !!currentBet,
-            "skipBetting:",
-            skipBetting,
-            "consecutiveLowCrashes:",
-            consecutiveLowCrashes
-          );
-
-          // Check if we should skip due to consecutive losses
-          if (consecutiveLowCrashes >= betConfig.crashTimes) {
-            skipBetting = true;
+          setTimeout(() => {
             console.log(
-              `Pre-bet check: Skipping due to ${consecutiveLowCrashes} consecutive losses`
+              "Button ready - currentBet:",
+              !!currentBet,
+              "skipBetting:",
+              skipBetting,
+              "consecutiveLowCrashes:",
+              consecutiveLowCrashes
             );
-          }
 
-          if (!skipBetting) {
-            placeBet();
-          } else {
-            console.log("Bet skipped due to consecutive low crashes");
-            currentBet = null; // Ensure no bet is tracked
-            // Notify bet skipped
-            chrome.runtime.sendMessage({
-              action: "showBetStatus",
-              data: { type: "skipped", reason: "Consecutive low crashes" },
-            });
-          }
+            // Check if we should skip due to consecutive losses
+            if (consecutiveLowCrashes >= betConfig.crashTimes) {
+              skipBetting = true;
+              console.log(
+                `Pre-bet check: Skipping due to ${consecutiveLowCrashes} consecutive losses`
+              );
+            }
+
+            if (!skipBetting) {
+              placeBet();
+            } else {
+              console.log("Bet skipped due to consecutive low crashes");
+              currentBet = null; // Ensure no bet is tracked
+              // Notify bet skipped
+              chrome.runtime.sendMessage({
+                action: "showBetStatus",
+                data: { type: "skipped", reason: "Consecutive low crashes" },
+              });
+            }
+          }, 50);
         }
 
         lastStatus = currentText;
