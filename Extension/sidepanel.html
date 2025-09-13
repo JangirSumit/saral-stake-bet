@@ -49,12 +49,15 @@
         <span class="toggle-icon" id="stopToggle">▼</span>
       </div>
       <div class="panel-content" id="stopContent">
-      <div class="inline-group">
-        <span>Crashes (bet-loss) at</span>
-        <input type="number" id="crashAt" step="0.01" placeholder="1.00" />
-        <span>at</span>
-        <input type="number" id="crashTimes" step="1" placeholder="3" />
-        <span>times</span>
+      <div class="form-row">
+        <div class="form-half">
+          <label>Crash At</label>
+          <input type="number" id="crashAt" step="0.01" placeholder="1.00" />
+        </div>
+        <div class="form-half">
+          <label>Times</label>
+          <input type="number" id="crashTimes" step="1" placeholder="3" />
+        </div>
       </div>
       </div>
     </div>
@@ -65,9 +68,15 @@
         <span class="toggle-icon" id="resumeToggle">▼</span>
       </div>
       <div class="panel-content" id="resumeContent">
-      <div class="inline-group">
-        <span>Crash crosses</span>
-        <input type="number" id="resumeAt" step="0.01" placeholder="2.00" />
+      <div class="form-row">
+        <div class="form-half">
+          <label>Resume At</label>
+          <input type="number" id="resumeAt" step="0.01" placeholder="2.00" />
+        </div>
+        <div class="form-half">
+          <label>Adjust Bet (%)</label>
+          <input type="number" id="resumeAdjust" step="0.01" placeholder="0.00" />
+        </div>
       </div>
       </div>
     </div>
