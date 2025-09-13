@@ -92,6 +92,20 @@ button:hover {
   color: #94a3b8;
   font-size: 12px;
 }
+.form-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.form-half {
+  flex: 1;
+}
+.form-half label {
+  margin-top: 0;
+}
+.form-half input {
+  width: calc(100% - 24px);
+}
 
 /* Spacing utilities */
 .mt-1 { margin-top: 5px; }
