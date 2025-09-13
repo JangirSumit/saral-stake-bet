@@ -220,6 +220,20 @@ function handleStopResumeLogic(crash) {
   // Resume betting immediately when any crash crosses resumeAt threshold (check all crashes during skip)
   if (skipBetting && crash >= resumeAt) {
     console.log(`Resume triggered! Crash ${crash} >= resumeAt ${resumeAt}`);
+    
+    // Apply resume adjustment to bet amount
+    if (betConfig.resumeAdjust !== 0) {
+      const oldAmount = currentBetAmount;
+      currentBetAmount = adjustBetAmount(currentBetAmount, betConfig.resumeAdjust);
+      console.log(`Resume bet adjustment: ${oldAmount} -> ${currentBetAmount} (${betConfig.resumeAdjust}%)`);
+      
+      // Update current bet amount display
+      chrome.runtime.sendMessage({
+        action: "updateCurrentBetAmount",
+        data: { amount: currentBetAmount },
+      });
+    }
+    
     skipBetting = false;
     consecutiveLowCrashes = 0;
     return;
@@ -329,6 +343,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       loss,
       win,
       resumeAt,
+      resumeAdjust,
     } = message.data;
 
     betConfig = {
@@ -339,6 +354,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       onLoss: parseFloat(loss),
       onWin: parseFloat(win),
       resumeAt: parseFloat(resumeAt),
+      resumeAdjust: parseFloat(resumeAdjust) || 0,
     };
 
     currentBetAmount = betConfig.amount;

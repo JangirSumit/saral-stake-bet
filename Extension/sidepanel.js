@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const crashAt = document.getElementById("crashAt");
   const crashTimes = document.getElementById("crashTimes");
   const resumeAt = document.getElementById("resumeAt");
+  const resumeAdjust = document.getElementById("resumeAdjust");
   const saveBtn = document.getElementById("saveBtn");
   const resetBetBtn = document.getElementById("resetBetBtn");
 
@@ -32,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
       stopCrashAt: crashAt.value,
       stopCrashTimes: crashTimes.value,
       resumeAt: resumeAt.value,
+      resumeAdjust: resumeAdjust.value,
     };
 
     chrome.storage.local.set({ betData });
@@ -99,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
         stopCrashAt: crashAt.value,
         stopCrashTimes: crashTimes.value,
         resumeAt: resumeAt.value,
+        resumeAdjust: resumeAdjust.value,
       };
 
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
