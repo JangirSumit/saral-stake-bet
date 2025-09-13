@@ -61,6 +61,7 @@ function betWatcher() {
     const buttonObserver = new MutationObserver(() => {
       const currentButton = gameSidebar.querySelector(":scope > button");
       const currentText = currentButton?.textContent?.trim() || "";
+
       if (currentText !== lastStatus) {
         console.log("Button text changed:", currentText);
         startBetButton = currentButton;
@@ -72,17 +73,23 @@ function betWatcher() {
 
         if (currentText === "Bet" && autoBetRunning) {
           console.log(
-            "Button ready - currentBet:", !!currentBet, "skipBetting:", skipBetting, "consecutiveLowCrashes:", consecutiveLowCrashes
+            "Button ready - currentBet:",
+            !!currentBet,
+            "skipBetting:",
+            skipBetting,
+            "consecutiveLowCrashes:",
+            consecutiveLowCrashes
           );
-          
+
           // Check if we should skip due to consecutive losses
           if (consecutiveLowCrashes >= betConfig.crashTimes) {
             skipBetting = true;
-            console.log(`Pre-bet check: Skipping due to ${consecutiveLowCrashes} consecutive losses`);
+            console.log(
+              `Pre-bet check: Skipping due to ${consecutiveLowCrashes} consecutive losses`
+            );
           }
-          
+
           if (!skipBetting) {
-            console.log("Placing bet...");
             placeBet();
           } else {
             console.log("Bet skipped due to consecutive low crashes");
@@ -139,10 +146,10 @@ function addCrashToHistory(crashValue) {
   const isWin = crashValue.includes("×") && crashValue.split("×").length > 2;
   const crash = parseFloat(crashValue);
   crashHistory.unshift(crash);
-  
+
   // Keep only latest 50 crashes to prevent UI performance issues
-  if (crashHistory.length > 50) {
-    crashHistory = crashHistory.slice(0, 50);
+  if (crashHistory.length > 10) {
+    crashHistory = crashHistory.slice(0, 10);
   }
 
   // Ignore the first crash after starting auto betting
@@ -155,7 +162,7 @@ function addCrashToHistory(crashValue) {
   // Always process stop/resume logic when auto betting is running
   if (autoBetRunning) {
     handleStopResumeLogic(crash);
-    
+
     // Only adjust bet amounts if we actually had a bet placed
     if (currentBet) {
       adjustBetAmountBasedOnResult(crash);
@@ -185,15 +192,19 @@ function addCrashToHistory(crashValue) {
 function adjustBetAmountBasedOnResult(crash) {
   const { onWin, onLoss } = betConfig;
   const oldAmount = currentBetAmount;
-  
+
   if (crash >= parseFloat(currentBet.cashoutAt)) {
     // Won - adjust by onWin % (typically negative to decrease bet)
     currentBetAmount = adjustBetAmount(currentBetAmount, -Math.abs(onWin));
-    console.log(`WON: ${oldAmount} -> ${currentBetAmount} (${onWin}% decrease)`);
+    console.log(
+      `WON: ${oldAmount} -> ${currentBetAmount} (${onWin}% decrease)`
+    );
   } else {
     // Lost - adjust by onLoss % (typically positive to increase bet)
     currentBetAmount = adjustBetAmount(currentBetAmount, Math.abs(onLoss));
-    console.log(`LOST: ${oldAmount} -> ${currentBetAmount} (${onLoss}% increase)`);
+    console.log(
+      `LOST: ${oldAmount} -> ${currentBetAmount} (${onLoss}% increase)`
+    );
   }
 }
 
@@ -218,11 +229,15 @@ function handleStopResumeLogic(crash) {
       // Bet lost - check if it's a low crash
       if (crash <= crashAt) {
         consecutiveLowCrashes++;
-        console.log(`Low crash bet loss detected. Count: ${consecutiveLowCrashes}`);
-        
+        console.log(
+          `Low crash bet loss detected. Count: ${consecutiveLowCrashes}`
+        );
+
         // Skip betting if reached crashTimes
         if (consecutiveLowCrashes >= crashTimes) {
-          console.log(`Will skip betting after ${consecutiveLowCrashes} consecutive low crash losses`);
+          console.log(
+            `Will skip betting after ${consecutiveLowCrashes} consecutive low crash losses`
+          );
           skipBetting = true;
         }
       } else {
@@ -256,14 +271,14 @@ function adjustBetAmount(amount, percentage) {
 function placeBet() {
   if (betAmountInput && cashoutInput) {
     console.log(`Setting bet amount to: ${currentBetAmount}`);
-    
+
     // Clear and set values with small delays
     betAmountInput.value = "";
     setTimeout(() => {
       setInputValue(betAmountInput, currentBetAmount);
       setTimeout(() => {
         setInputValue(cashoutInput, betConfig.cashout);
-        
+
         currentBet = {
           betAmount: currentBetAmount,
           cashoutAt: betConfig.cashout,
@@ -283,11 +298,11 @@ function placeBet() {
             cashout: betConfig.cashout,
           },
         });
-        
+
         // Update current bet amount display
         chrome.runtime.sendMessage({
           action: "updateCurrentBetAmount",
-          data: { amount: currentBetAmount }
+          data: { amount: currentBetAmount },
         });
       }, 50);
     }, 50);
@@ -347,12 +362,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "resetBetAmount") {
     const { resetBetAmount } = message.data;
     currentBetAmount = parseFloat(resetBetAmount);
+    crashHistory = [];
+    consecutiveLowCrashes = 0;
+    skipBetting = false;
+    resumeTriggered = false;
+    resumeNextRound = false;
+    currentBetAmount = 0;
+    ignorePreviousCrash = false;
     console.log(`Bet amount reset to: ${currentBetAmount}`);
-    
+
     // Update current bet amount display
     chrome.runtime.sendMessage({
       action: "updateCurrentBetAmount",
-      data: { amount: currentBetAmount }
+      data: { amount: currentBetAmount },
     });
   }
 });

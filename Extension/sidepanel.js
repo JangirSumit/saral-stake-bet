@@ -13,9 +13,15 @@ document.addEventListener("DOMContentLoaded", () => {
   let isRunning = false;
 
   // Add collapse/expand functionality
-  document.getElementById('configHeader').addEventListener('click', () => togglePanel('config'));
-  document.getElementById('stopHeader').addEventListener('click', () => togglePanel('stop'));
-  document.getElementById('resumeHeader').addEventListener('click', () => togglePanel('resume'));
+  document
+    .getElementById("configHeader")
+    .addEventListener("click", () => togglePanel("config"));
+  document
+    .getElementById("stopHeader")
+    .addEventListener("click", () => togglePanel("stop"));
+  document
+    .getElementById("resumeHeader")
+    .addEventListener("click", () => togglePanel("resume"));
 
   saveBtn.addEventListener("click", () => {
     const betData = {
@@ -29,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     chrome.storage.local.set({ betData });
-    
+
     // Show saved feedback
     const originalText = saveBtn.textContent;
     saveBtn.textContent = "✅ Saved!";
@@ -42,16 +48,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   resetBetBtn.addEventListener("click", () => {
     const betData = {
-      resetBetAmount: betAmount.value
+      resetBetAmount: betAmount.value,
     };
-    
+
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.tabs.sendMessage(tabs[0].id, {
         action: "resetBetAmount",
         data: betData,
       });
     });
-    
+
     // Show reset feedback
     const originalText = resetBetBtn.textContent;
     resetBetBtn.textContent = "✅ Reset!";
@@ -64,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const fullscreenBtn = document.getElementById("fullscreenBtn");
   const historyList = document.getElementById("historyList");
-  
+
   fullscreenBtn.addEventListener("click", () => {
     if (historyList.classList.contains("fullscreen")) {
       historyList.classList.remove("fullscreen");
@@ -83,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isRunning) {
       startStopBtn.textContent = "🛑 Stop Betting";
       startStopBtn.className = "btn-running";
-      
+
       // Send config and start betting
       const betData = {
         amount: betAmount.value,
@@ -94,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
         stopCrashTimes: crashTimes.value,
         resumeAt: resumeAt.value,
       };
-      
+
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "fillBetData",
@@ -107,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       startStopBtn.textContent = "🎯 Start Betting";
       startStopBtn.className = "btn-stopped";
-      
+
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "stopAutoBet",
@@ -128,7 +134,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const statusText = document.querySelector(".status-text");
     const statusDot = document.querySelector(".status-dot");
     const startStopBtn = document.getElementById("startStopBtn");
-    
+
     if (statusText && statusDot && startStopBtn) {
       statusText.textContent = `Status: ${message.data.buttonText}`;
       if (message.data.buttonText === "Ready") {
@@ -159,14 +165,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 function showBetNotification(data) {
   const notification = document.getElementById("betNotification");
+  const currentBetElement = document.getElementById("currentBetAmount");
+
   if (!notification) return;
 
   if (data.type === "placed") {
     notification.textContent = `💰 Bet Placed: ₹${data.amount} @ ${data.cashout}x`;
     notification.className = "bet-notification placed";
+    currentBetElement.textContent += "-> placed";
   } else {
     notification.textContent = `⏸️ Bet Skipped: ${data.reason}`;
     notification.className = "bet-notification skipped";
+    currentBetElement.textContent += "-> skipped";
   }
 
   setTimeout(() => {
@@ -197,12 +207,13 @@ function addHistoryItem(data) {
     details = "No bet placed";
     colorClass = "history-skip";
   } else {
-    const won = data.isWin || parseFloat(data.crashValue) >= parseFloat(data.cashoutAt);
+    const won =
+      data.isWin || parseFloat(data.crashValue) >= parseFloat(data.cashoutAt);
     status = won ? "Won" : "Lost";
     details = `Bet: ₹${data.betAmount} | Cashout: ${data.cashoutAt}x`;
     colorClass = won ? "history-win" : "history-loss";
   }
-  
+
   item.classList.add(colorClass);
 
   item.innerHTML = `
@@ -221,14 +232,14 @@ function addHistoryItem(data) {
 }
 
 function togglePanel(panelId) {
-  const content = document.getElementById(panelId + 'Content');
-  const toggle = document.getElementById(panelId + 'Toggle');
-  
-  if (content.classList.contains('collapsed')) {
-    content.classList.remove('collapsed');
-    toggle.classList.remove('collapsed');
+  const content = document.getElementById(panelId + "Content");
+  const toggle = document.getElementById(panelId + "Toggle");
+
+  if (content.classList.contains("collapsed")) {
+    content.classList.remove("collapsed");
+    toggle.classList.remove("collapsed");
   } else {
-    content.classList.add('collapsed');
-    toggle.classList.add('collapsed');
+    content.classList.add("collapsed");
+    toggle.classList.add("collapsed");
   }
 }
