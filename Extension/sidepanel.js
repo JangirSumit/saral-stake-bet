@@ -165,7 +165,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 function showBetNotification(data) {
   const notification = document.getElementById("betNotification");
-  const currentBetElement = document.getElementById("currentBetAmount");
 
   if (!notification) return;
 
