@@ -191,25 +191,6 @@ function addCrashToHistory(crashValue) {
   currentBet = null;
 }
 
-function adjustBetAmountBasedOnResult(crash) {
-  const { onWin, onLoss } = betConfig;
-  const oldAmount = currentBetAmount;
-
-  if (crash >= parseFloat(currentBet.cashoutAt)) {
-    // Won - adjust by onWin % (typically negative to decrease bet)
-    currentBetAmount = adjustBetAmount(currentBetAmount, -Math.abs(onWin));
-    console.log(
-      `WON: ${oldAmount} -> ${currentBetAmount} (${onWin}% decrease)`
-    );
-  } else {
-    // Lost - adjust by onLoss % (typically positive to increase bet)
-    currentBetAmount = adjustBetAmount(currentBetAmount, Math.abs(onLoss));
-    console.log(
-      `LOST: ${oldAmount} -> ${currentBetAmount} (${onLoss}% increase)`
-    );
-  }
-}
-
 function handleStopResumeLogic(crash) {
   const { crashAt, crashTimes, resumeAt } = betConfig;
 
@@ -220,20 +201,25 @@ function handleStopResumeLogic(crash) {
   // Resume betting immediately when any crash crosses resumeAt threshold (check all crashes during skip)
   if (skipBetting && crash >= resumeAt) {
     console.log(`Resume triggered! Crash ${crash} >= resumeAt ${resumeAt}`);
-    
+
     // Apply resume adjustment to bet amount
     if (betConfig.resumeAdjust !== 0) {
       const oldAmount = currentBetAmount;
-      currentBetAmount = adjustBetAmount(currentBetAmount, betConfig.resumeAdjust);
-      console.log(`Resume bet adjustment: ${oldAmount} -> ${currentBetAmount} (${betConfig.resumeAdjust}%)`);
-      
+      currentBetAmount = adjustBetAmount(
+        currentBetAmount,
+        betConfig.resumeAdjust
+      );
+      console.log(
+        `Resume bet adjustment: ${oldAmount} -> ${currentBetAmount} (${betConfig.resumeAdjust}%)`
+      );
+
       // Update current bet amount display
       chrome.runtime.sendMessage({
         action: "updateCurrentBetAmount",
         data: { amount: currentBetAmount },
       });
     }
-    
+
     skipBetting = false;
     consecutiveLowCrashes = 0;
     return;
@@ -267,21 +253,6 @@ function handleStopResumeLogic(crash) {
       console.log(`Bet won - reset consecutive loss count`);
     }
   }
-}
-
-function setInputValue(input, value) {
-  if (!input) return;
-  input.focus();
-  input.value = value;
-  input.dispatchEvent(new Event("input", { bubbles: true }));
-  input.dispatchEvent(new Event("change", { bubbles: true }));
-  input.blur();
-}
-
-function adjustBetAmount(amount, percentage) {
-  const percent = parseFloat(percentage) || 0;
-  const multiplier = 1 + percent / 100;
-  return (amount * multiplier).toFixed(2);
 }
 
 function placeBet() {
@@ -323,6 +294,46 @@ function placeBet() {
       }, 50);
     }, 50);
   }
+}
+
+function adjustBetAmountBasedOnResult(crash) {
+  const { onWin, onLoss } = betConfig;
+  const oldAmount = currentBetAmount;
+
+  if (crash >= parseFloat(currentBet.cashoutAt)) {
+    // Won - adjust by onWin % (typically negative to decrease bet)
+    currentBetAmount = adjustBetAmount(currentBetAmount, -Math.abs(onWin));
+    console.log(
+      `WON: ${oldAmount} -> ${currentBetAmount} (${onWin}% decrease)`
+    );
+  } else {
+    // Lost - adjust by onLoss % (typically positive to increase bet)
+    currentBetAmount = adjustBetAmount(currentBetAmount, Math.abs(onLoss));
+    console.log(
+      `LOST: ${oldAmount} -> ${currentBetAmount} (${onLoss}% increase)`
+    );
+  }
+}
+
+function setInputValue(input, value) {
+  if (!input) return;
+  input.focus();
+  input.value = value;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  input.blur();
+}
+
+function roundBetAmount(amount) {
+  const num = parseFloat(amount);
+  return Math.round(num).toFixed(2);
+}
+
+function adjustBetAmount(amount, percentage) {
+  const percent = parseFloat(percentage) || 0;
+  const multiplier = 1 + percent / 100;
+  const adjustedAmount = amount * multiplier;
+  return roundBetAmount(adjustedAmount);
 }
 
 // Initialize on load
