@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const crashTimes = document.getElementById("crashTimes");
   const resumeAt = document.getElementById("resumeAt");
   const resumeAdjust = document.getElementById("resumeAdjust");
+  const resetThreshold = document.getElementById("resetThreshold");
   const saveBtn = document.getElementById("saveBtn");
   const resetBetBtn = document.getElementById("resetBetBtn");
 
@@ -23,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("resumeHeader")
     .addEventListener("click", () => togglePanel("resume"));
+  document
+    .getElementById("resetHeader")
+    .addEventListener("click", () => togglePanel("reset"));
 
   saveBtn.addEventListener("click", () => {
     const betData = {
@@ -34,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       stopCrashTimes: crashTimes.value,
       resumeAt: resumeAt.value,
       resumeAdjust: resumeAdjust.value,
+      resetThreshold: resetThreshold.value,
     };
 
     chrome.storage.local.set({ betData });
@@ -102,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
         stopCrashTimes: crashTimes.value,
         resumeAt: resumeAt.value,
         resumeAdjust: resumeAdjust.value,
+        resetThreshold: resetThreshold.value,
       };
 
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {

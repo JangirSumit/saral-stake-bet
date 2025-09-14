@@ -14,6 +14,8 @@ let skipBetting = false;
 let resumeTriggered = false;
 let resumeNextRound = false;
 let currentBetAmount = 0;
+let originalBetAmount = 0;
+let lastBetAmount = 0;
 let ignorePreviousCrash = false;
 
 const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
@@ -202,23 +204,24 @@ function handleStopResumeLogic(crash) {
   if (skipBetting && crash >= resumeAt) {
     console.log(`Resume triggered! Crash ${crash} >= resumeAt ${resumeAt}`);
 
-    // Apply resume adjustment to bet amount
+    // Apply resume adjustment to last bet amount
     if (betConfig.resumeAdjust !== 0) {
       const oldAmount = currentBetAmount;
-      currentBetAmount = adjustBetAmount(
-        currentBetAmount,
-        betConfig.resumeAdjust
-      );
+      currentBetAmount = adjustBetAmount(lastBetAmount, betConfig.resumeAdjust);
       console.log(
-        `Resume bet adjustment: ${oldAmount} -> ${currentBetAmount} (${betConfig.resumeAdjust}%)`
+        `Resume bet adjustment: ${oldAmount} -> ${currentBetAmount} (${betConfig.resumeAdjust}% from last bet ${lastBetAmount})`
       );
-
-      // Update current bet amount display
-      chrome.runtime.sendMessage({
-        action: "updateCurrentBetAmount",
-        data: { amount: currentBetAmount },
-      });
+    } else {
+      // Use last bet amount if no adjustment
+      currentBetAmount = lastBetAmount;
+      console.log(`Resume: Using last bet amount ${lastBetAmount}`);
     }
+
+    // Update current bet amount display
+    chrome.runtime.sendMessage({
+      action: "updateCurrentBetAmount",
+      data: { amount: currentBetAmount },
+    });
 
     skipBetting = false;
     consecutiveLowCrashes = 0;
@@ -265,6 +268,9 @@ function placeBet() {
       setInputValue(betAmountInput, currentBetAmount);
       setTimeout(() => {
         setInputValue(cashoutInput, betConfig.cashout);
+
+        // Store the last bet amount before creating currentBet
+        lastBetAmount = currentBetAmount;
 
         currentBet = {
           betAmount: currentBetAmount,
@@ -313,6 +319,9 @@ function adjustBetAmountBasedOnResult(crash) {
       `LOST: ${oldAmount} -> ${currentBetAmount} (${onLoss}% increase)`
     );
   }
+
+  // Check if reset threshold is exceeded
+  checkResetThreshold();
 }
 
 function setInputValue(input, value) {
@@ -324,9 +333,44 @@ function setInputValue(input, value) {
   input.blur();
 }
 
-function roundBetAmount(amount) {
+function roundBetAmount(amount, roundOff = true) {
   const num = parseFloat(amount);
-  return Math.round(num).toFixed(2);
+  if (roundOff) {
+    return Math.round(num).toFixed(2);
+  }
+  return num.toFixed(2);
+}
+
+function checkResetThreshold() {
+  if (betConfig.resetThreshold !== 0) {
+    const changePercent =
+      ((currentBetAmount - originalBetAmount) / originalBetAmount) * 100;
+
+    // Check if threshold is exceeded (positive or negative)
+    const thresholdExceeded =
+      betConfig.resetThreshold > 0
+        ? changePercent >= betConfig.resetThreshold
+        : changePercent <= betConfig.resetThreshold;
+
+    if (thresholdExceeded) {
+      console.log(
+        `Reset threshold reached: ${changePercent.toFixed(2)}% ${
+          betConfig.resetThreshold > 0 ? ">=" : "<="
+        } ${betConfig.resetThreshold}%`
+      );
+      currentBetAmount = originalBetAmount;
+      console.log(`Bet amount reset to original: ${originalBetAmount}`);
+
+      // Update current bet amount display
+      chrome.runtime.sendMessage({
+        action: "updateCurrentBetAmount",
+        data: { amount: currentBetAmount },
+      });
+
+      return true;
+    }
+  }
+  return false;
 }
 
 function adjustBetAmount(amount, percentage) {
@@ -355,6 +399,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       win,
       resumeAt,
       resumeAdjust,
+      resetThreshold,
     } = message.data;
 
     betConfig = {
@@ -366,9 +411,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       onWin: parseFloat(win),
       resumeAt: parseFloat(resumeAt),
       resumeAdjust: parseFloat(resumeAdjust) || 0,
+      resetThreshold: parseFloat(resetThreshold) || 0,
     };
 
     currentBetAmount = betConfig.amount;
+    originalBetAmount = betConfig.amount;
 
     setInputValue(betAmountInput, amount);
     setInputValue(cashoutInput, cashout);
