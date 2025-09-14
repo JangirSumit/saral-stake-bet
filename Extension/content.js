@@ -307,11 +307,19 @@ function adjustBetAmountBasedOnResult(crash) {
   const oldAmount = currentBetAmount;
 
   if (crash >= parseFloat(currentBet.cashoutAt)) {
-    // Won - adjust by onWin % (typically negative to decrease bet)
-    currentBetAmount = adjustBetAmount(currentBetAmount, -Math.abs(onWin));
-    console.log(
-      `WON: ${oldAmount} -> ${currentBetAmount} (${onWin}% decrease)`
-    );
+    // Won - check if onWin is 0% to reset to original amount
+    if (onWin === 0) {
+      currentBetAmount = originalBetAmount;
+      console.log(
+        `WON: ${oldAmount} -> ${currentBetAmount} (reset to original)`
+      );
+    } else {
+      // Won - adjust by onWin % (typically negative to decrease bet)
+      currentBetAmount = adjustBetAmount(currentBetAmount, -Math.abs(onWin));
+      console.log(
+        `WON: ${oldAmount} -> ${currentBetAmount} (${onWin}% decrease)`
+      );
+    }
   } else {
     // Lost - adjust by onLoss % (typically positive to increase bet)
     currentBetAmount = adjustBetAmount(currentBetAmount, Math.abs(onLoss));
