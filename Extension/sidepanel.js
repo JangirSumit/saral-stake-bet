@@ -8,11 +8,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const resumeAt = document.getElementById("resumeAt");
   const resumeAdjust = document.getElementById("resumeAdjust");
   const resetThreshold = document.getElementById("resetThreshold");
+  const profitTimes = document.getElementById("profitTimes");
   const saveBtn = document.getElementById("saveBtn");
   const resetBetBtn = document.getElementById("resetBetBtn");
 
   const startStopBtn = document.getElementById("startStopBtn");
   let isRunning = false;
+
+  // Initialize all panels as collapsed
+  const panels = ['config', 'stop', 'resume', 'reset', 'history'];
+  panels.forEach(panelId => {
+    const content = document.getElementById(panelId + "Content");
+    const toggle = document.getElementById(panelId + "Toggle");
+    if (content && toggle) {
+      content.classList.add("collapsed");
+      toggle.classList.add("collapsed");
+    }
+  });
 
   // Add collapse/expand functionality
   document
@@ -27,6 +39,14 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("resetHeader")
     .addEventListener("click", () => togglePanel("reset"));
+  document
+    .getElementById("historyHeader")
+    .addEventListener("click", (e) => {
+      // Don't toggle if fullscreen button was clicked
+      if (e.target.id !== "fullscreenBtn") {
+        togglePanel("history");
+      }
+    });
 
   saveBtn.addEventListener("click", () => {
     const betData = {
@@ -39,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resumeAt: resumeAt.value,
       resumeAdjust: resumeAdjust.value,
       resetThreshold: resetThreshold.value,
+      profitTimes: profitTimes.value,
     };
 
     chrome.storage.local.set({ betData });
@@ -108,6 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resumeAt: resumeAt.value,
         resumeAdjust: resumeAdjust.value,
         resetThreshold: resetThreshold.value,
+        profitTimes: profitTimes.value,
       };
 
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -240,12 +262,16 @@ function addHistoryItem(data) {
 function togglePanel(panelId) {
   const content = document.getElementById(panelId + "Content");
   const toggle = document.getElementById(panelId + "Toggle");
+  
+  console.log(`Toggling panel: ${panelId}`, { content, toggle });
 
-  if (content.classList.contains("collapsed")) {
-    content.classList.remove("collapsed");
-    toggle.classList.remove("collapsed");
-  } else {
-    content.classList.add("collapsed");
-    toggle.classList.add("collapsed");
+  if (content && toggle) {
+    if (content.classList.contains("collapsed")) {
+      content.classList.remove("collapsed");
+      toggle.classList.remove("collapsed");
+    } else {
+      content.classList.add("collapsed");
+      toggle.classList.add("collapsed");
+    }
   }
 }

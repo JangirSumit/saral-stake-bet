@@ -16,6 +16,7 @@ let resumeNextRound = false;
 let currentBetAmount = 0;
 let originalBetAmount = 0;
 let lastBetAmount = 0;
+let totalProfit = 0;
 let ignorePreviousCrash = false;
 
 const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
@@ -307,8 +308,18 @@ function adjustBetAmountBasedOnResult(crash) {
   const oldAmount = currentBetAmount;
 
   if (crash >= parseFloat(currentBet.cashoutAt)) {
-    // Won - check if onWin is 0% to reset to original amount
-    if (onWin === 0) {
+    // Won - calculate profit and update total
+    const profit = (parseFloat(currentBet.betAmount) * parseFloat(currentBet.cashoutAt)) - parseFloat(currentBet.betAmount);
+    totalProfit += profit;
+    console.log(`Profit this round: ${profit.toFixed(2)}, Total profit: ${totalProfit.toFixed(2)}`);
+    
+    // Check if profit crosses threshold
+    if (betConfig.profitTimes > 0 && totalProfit >= (originalBetAmount * betConfig.profitTimes)) {
+      currentBetAmount = originalBetAmount;
+      totalProfit = 0; // Reset profit counter
+      console.log(`Profit threshold reached! Reset to original amount: ${originalBetAmount}`);
+    } else if (onWin === 0) {
+      // Won - check if onWin is 0% to reset to original amount
       currentBetAmount = originalBetAmount;
       console.log(
         `WON: ${oldAmount} -> ${currentBetAmount} (reset to original)`
@@ -321,6 +332,10 @@ function adjustBetAmountBasedOnResult(crash) {
       );
     }
   } else {
+    // Lost - subtract loss from total profit
+    totalProfit -= parseFloat(currentBet.betAmount);
+    console.log(`Loss this round: ${currentBet.betAmount}, Total profit: ${totalProfit.toFixed(2)}`);
+    
     // Lost - adjust by onLoss % (typically positive to increase bet)
     currentBetAmount = adjustBetAmount(currentBetAmount, Math.abs(onLoss));
     console.log(
@@ -408,6 +423,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeAt,
       resumeAdjust,
       resetThreshold,
+      profitTimes,
     } = message.data;
 
     betConfig = {
@@ -420,6 +436,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeAt: parseFloat(resumeAt),
       resumeAdjust: parseFloat(resumeAdjust) || 0,
       resetThreshold: parseFloat(resetThreshold) || 0,
+      profitTimes: parseFloat(profitTimes) || 0,
     };
 
     currentBetAmount = betConfig.amount;
@@ -434,6 +451,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     consecutiveLowCrashes = 0;
     skipBetting = false;
     ignorePreviousCrash = true;
+    totalProfit = 0;
     console.log("Auto-betting started - will ignore next crash");
   }
 

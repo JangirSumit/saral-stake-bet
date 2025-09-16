@@ -293,6 +293,22 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 .toggle-icon.collapsed {
   transform: rotate(-90deg);
 }
+#historyToggle.collapsed {
+  transform: rotate(-90deg) !important;
+}
+.panel-header > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Ensure nested toggle icons also rotate */
+#historyToggle {
+  font-size: 10px;
+  transition: transform 0.3s ease;
+}
+#historyToggle.collapsed {
+  transform: rotate(-90deg);
+}
 .panel-content {
   transition: max-height 0.3s ease;
   overflow: hidden;

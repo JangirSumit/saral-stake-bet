@@ -114,6 +114,15 @@
               placeholder="0.00"
             />
           </div>
+          <div class="form-half">
+            <label>If Profit Crosses (x times)</label>
+            <input
+              type="number"
+              id="profitTimes"
+              step="1"
+              placeholder="0"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -129,12 +138,17 @@
     </div>
 
     <div class="panel mt-2 full-width">
-      <div class="history-header">
-        <h4>📊 Betting History</h4>
-        <button id="fullscreenBtn" class="fullscreen-btn">⛶</button>
+      <div class="panel-header" id="historyHeader">
+        <div>
+          <h4>📊 Betting History</h4>
+          <button id="fullscreenBtn" class="fullscreen-btn">⛶</button>
+        </div>
+        <span class="toggle-icon" id="historyToggle">▼</span>
       </div>
-      <div id="historyList" class="history-list">
-        <!-- History items will be added here -->
+      <div class="panel-content" id="historyContent">
+        <div id="historyList" class="history-list">
+          <!-- History items will be added here -->
+        </div>
       </div>
     </div>
 
