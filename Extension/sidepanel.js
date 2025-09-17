@@ -316,42 +316,47 @@ function updateProfitGraph() {
   document.getElementById('totalLoss').textContent = totalLoss.toFixed(2);
   document.getElementById('netProfit').textContent = (totalProfit - totalLoss).toFixed(2);
   
-  // Draw graph
+  // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-  if (profitHistory.length < 2) return;
+  if (profitHistory.length === 0) return;
   
-  const maxVal = Math.max(...profitHistory, 0);
-  const minVal = Math.min(...profitHistory, 0);
-  const range = maxVal - minVal || 1;
+  // Show last 20 data points for clarity
+  const displayData = profitHistory.slice(-20);
+  const barWidth = canvas.width / displayData.length;
   
-  ctx.strokeStyle = totalProfit - totalLoss >= 0 ? '#22c55e' : '#dc2626';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  
-  profitHistory.forEach((value, index) => {
-    const x = (index / (profitHistory.length - 1)) * canvas.width;
-    const y = canvas.height - ((value - minVal) / range) * canvas.height;
-    
-    if (index === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
-    }
-  });
-  
-  ctx.stroke();
+  const maxVal = Math.max(...displayData, 0);
+  const minVal = Math.min(...displayData, 0);
+  const range = Math.max(maxVal - minVal, 1);
+  const zeroY = canvas.height - ((-minVal) / range) * canvas.height;
   
   // Draw zero line
-  if (minVal < 0 && maxVal > 0) {
-    const zeroY = canvas.height - ((-minVal) / range) * canvas.height;
-    ctx.strokeStyle = '#6b7280';
-    ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.moveTo(0, zeroY);
-    ctx.lineTo(canvas.width, zeroY);
-    ctx.stroke();
-  }
+  ctx.strokeStyle = '#6b7280';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, zeroY);
+  ctx.lineTo(canvas.width, zeroY);
+  ctx.stroke();
+  
+  // Draw bars
+  displayData.forEach((value, index) => {
+    const x = index * barWidth;
+    const barHeight = Math.abs((value / range) * canvas.height * 0.8);
+    const y = value >= 0 ? zeroY - barHeight : zeroY;
+    
+    // Color based on profit/loss
+    ctx.fillStyle = value >= 0 ? '#22c55e' : '#dc2626';
+    ctx.fillRect(x + 1, y, barWidth - 2, barHeight);
+    
+    // Draw value on top of bar (for last 5 bars only)
+    if (index >= displayData.length - 5) {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '8px Arial';
+      ctx.textAlign = 'center';
+      const textY = value >= 0 ? y - 2 : y + barHeight + 10;
+      ctx.fillText(value.toFixed(0), x + barWidth/2, textY);
+    }
+  });
 }
 
 function togglePanel(panelId) {
