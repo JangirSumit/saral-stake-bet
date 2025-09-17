@@ -27,8 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas = document.getElementById('profitChart');
   ctx = canvas.getContext('2d');
 
-  // All panels expanded by default
-
   // Add collapse/expand functionality
   document
     .getElementById("configHeader")
@@ -173,19 +171,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const statusText = document.querySelector(".status-text");
     const statusDot = document.querySelector(".status-dot");
     const startStopBtn = document.getElementById("startStopBtn");
+    const refreshNote = document.getElementById("refreshNote");
 
-    if (statusText && statusDot && startStopBtn) {
+    if (statusText && statusDot && startStopBtn && refreshNote) {
       statusText.textContent = `Status: ${message.data.buttonText}`;
       if (message.data.buttonText === "Ready") {
+        // Ready = Not Connected = Show refresh note
         statusDot.className = "status-dot red";
         statusDot.title = "Not Connected";
         startStopBtn.disabled = true;
         startStopBtn.style.opacity = "0.5";
+        refreshNote.style.display = "block";
       } else {
+        // Connected = Hide refresh note
         statusDot.className = "status-dot green";
         statusDot.title = "Connected";
         startStopBtn.disabled = false;
         startStopBtn.style.opacity = "1";
+        refreshNote.style.display = "none";
       }
     }
   }
