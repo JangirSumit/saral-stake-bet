@@ -27,30 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas = document.getElementById('profitChart');
   ctx = canvas.getContext('2d');
 
-  // Add collapse/expand functionality
-  document
-    .getElementById("configHeader")
-    .addEventListener("click", () => togglePanel("config"));
-  document
-    .getElementById("stopHeader")
-    .addEventListener("click", () => togglePanel("stop"));
-  document
-    .getElementById("resumeHeader")
-    .addEventListener("click", () => togglePanel("resume"));
-  document
-    .getElementById("resetHeader")
-    .addEventListener("click", () => togglePanel("reset"));
-  document
-    .getElementById("historyHeader")
-    .addEventListener("click", (e) => {
-      // Don't toggle if fullscreen button was clicked
-      if (e.target.id !== "fullscreenBtn") {
-        togglePanel("history");
-      }
-    });
-  document
-    .getElementById("graphHeader")
-    .addEventListener("click", () => togglePanel("graph"));
+  // Tab switching functionality
+  document.getElementById("settingsTab").addEventListener("click", () => switchTab("settings"));
+  document.getElementById("historyTab").addEventListener("click", () => switchTab("history"));
 
   saveBtn.addEventListener("click", () => {
     const betData = {
@@ -362,19 +341,12 @@ function updateProfitGraph() {
   });
 }
 
-function togglePanel(panelId) {
-  const content = document.getElementById(panelId + "Content");
-  const toggle = document.getElementById(panelId + "Toggle");
+function switchTab(tabName) {
+  // Remove active class from all tabs and content
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
   
-  console.log(`Toggling panel: ${panelId}`, { content, toggle });
-
-  if (content && toggle) {
-    if (content.classList.contains("collapsed")) {
-      content.classList.remove("collapsed");
-      toggle.classList.remove("collapsed");
-    } else {
-      content.classList.add("collapsed");
-      toggle.classList.add("collapsed");
-    }
-  }
+  // Add active class to selected tab and content
+  document.getElementById(tabName + 'Tab').classList.add('active');
+  document.getElementById(tabName + 'Content').classList.add('active');
 }

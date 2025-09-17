@@ -330,7 +330,7 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 .net-label { color: #fbbf24; }
 .graph-container {
   width: 100%;
-  height: 50px;
+  height: 60px;
   background: #0f172a;
   border-radius: 3px;
   overflow: hidden;
@@ -400,4 +400,90 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 }
 .fullscreen-mode .fullscreen-btn:hover {
   background: #b91c1c !important;
+}
+
+/* Tab Layout */
+.tab-container {
+  display: flex;
+  margin: 8px 0;
+  border-bottom: 1px solid #374151;
+}
+.tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #1e293b;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 11px;
+  border-bottom: 2px solid transparent;
+  margin: 0;
+}
+.tab-btn.active {
+  color: #22c55e;
+  border-bottom-color: #22c55e;
+  background: #0f172a;
+}
+.tab-btn:hover {
+  background: #374151;
+}
+.tab-content {
+  display: none;
+  height: calc(100vh - 180px);
+  overflow-y: auto;
+}
+.tab-content.active {
+  display: block;
+}
+
+/* Settings Tab */
+.config-section {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: #1e293b;
+  border-radius: 4px;
+  border: 1px solid #374151;
+}
+.config-section h4 {
+  color: #22c55e;
+  margin: 0 0 8px 0;
+  font-size: 11px;
+}
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.start-btn {
+  background: #dc2626 !important;
+}
+
+/* History Tab */
+.profit-summary {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: #1e293b;
+  border-radius: 4px;
+  border: 1px solid #374151;
+}
+.profit-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  margin-bottom: 8px;
+}
+.history-section {
+  background: #1e293b;
+  border-radius: 4px;
+  border: 1px solid #374151;
+  padding: 8px;
+}
+.history-section h4 {
+  color: #22c55e;
+  margin: 0 0 8px 0;
+  font-size: 11px;
+}
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
 }
