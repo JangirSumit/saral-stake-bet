@@ -318,6 +318,11 @@ function adjustBetAmountBasedOnResult(crash) {
       currentBetAmount = originalBetAmount;
       totalProfit = 0; // Reset profit counter
       console.log(`Profit threshold reached! Reset to original amount: ${originalBetAmount}`);
+      
+      // Notify sidepanel to reset graph and calculations
+      chrome.runtime.sendMessage({
+        action: "resetProfitTracking"
+      });
     } else if (onWin === 0) {
       // Won - check if onWin is 0% to reset to original amount
       currentBetAmount = originalBetAmount;

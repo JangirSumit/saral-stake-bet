@@ -184,6 +184,17 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   color: #6b7280; 
   font-size: 9px;
 }
+.history-profit {
+  font-size: 10px;
+  font-weight: bold;
+  margin: 2px 0;
+}
+.history-profit.profit {
+  color: #22c55e;
+}
+.history-profit.loss {
+  color: #dc2626;
+}
 .history-item.latest {
   background: #1f2937;
   border-left: 3px solid #fbbf24;
@@ -301,6 +312,33 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   align-items: center;
   gap: 8px;
 }
+.profit-graph {
+  margin-top: 8px;
+  padding: 8px;
+  background: #1f2937;
+  border-radius: 4px;
+  border: 1px solid #374151;
+}
+.graph-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+.profit-label { color: #22c55e; }
+.loss-label { color: #dc2626; }
+.net-label { color: #fbbf24; }
+.graph-container {
+  width: 100%;
+  height: 50px;
+  background: #0f172a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+#profitChart {
+  width: 100%;
+  height: 100%;
+}
 /* Ensure nested toggle icons also rotate */
 #historyToggle {
   font-size: 10px;
@@ -312,6 +350,7 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 .panel-content {
   transition: max-height 0.3s ease;
   overflow: hidden;
+  max-height: none;
 }
 .panel-content.collapsed {
   max-height: 0;

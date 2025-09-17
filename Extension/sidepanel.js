@@ -1,3 +1,11 @@
+// Profit tracking variables (global scope)
+let totalProfit = 0;
+let totalLoss = 0;
+let profitHistory = [];
+let canvas, ctx;
+let skipNextHistoryUpdate = false;
+let autoBettingActive = false;
+
 document.addEventListener("DOMContentLoaded", () => {
   const betAmount = document.getElementById("betAmount");
   const cashoutAt = document.getElementById("cashoutAt");
@@ -14,17 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const startStopBtn = document.getElementById("startStopBtn");
   let isRunning = false;
+  
+  // Initialize canvas and context
+  canvas = document.getElementById('profitChart');
+  ctx = canvas.getContext('2d');
 
-  // Initialize all panels as collapsed
-  const panels = ['config', 'stop', 'resume', 'reset', 'history'];
-  panels.forEach(panelId => {
-    const content = document.getElementById(panelId + "Content");
-    const toggle = document.getElementById(panelId + "Toggle");
-    if (content && toggle) {
-      content.classList.add("collapsed");
-      toggle.classList.add("collapsed");
-    }
-  });
+  // All panels expanded by default
 
   // Add collapse/expand functionality
   document
@@ -47,6 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
         togglePanel("history");
       }
     });
+  document
+    .getElementById("graphHeader")
+    .addEventListener("click", () => togglePanel("graph"));
 
   saveBtn.addEventListener("click", () => {
     const betData = {
@@ -132,6 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
         profitTimes: profitTimes.value,
       };
 
+      autoBettingActive = true;
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "fillBetData",
@@ -145,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
       startStopBtn.textContent = "🎯 Start Betting";
       startStopBtn.className = "btn-stopped";
 
+      autoBettingActive = false;
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "stopAutoBet",
@@ -192,6 +200,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       currentBetElement.textContent = `Next Bet: ₹${message.data.amount}`;
     }
   }
+
+  if (message.action === "resetProfitTracking") {
+    // Only reset if auto betting is active
+    if (autoBettingActive) {
+      totalProfit = 0;
+      totalLoss = 0;
+      profitHistory = [];
+      skipNextHistoryUpdate = true;
+      
+      // Update display
+      updateProfitGraph();
+      console.log("Profit tracking reset - starting fresh cycle");
+    }
+  }
 });
 
 function showBetNotification(data) {
@@ -229,7 +251,7 @@ function addHistoryItem(data) {
   const item = document.createElement("div");
   item.className = "history-item latest";
 
-  let status, details, colorClass;
+  let status, details, colorClass, profitLoss = 0;
   if (data.skipped) {
     status = "Skipped";
     details = "No bet placed";
@@ -240,13 +262,42 @@ function addHistoryItem(data) {
     status = won ? "Won" : "Lost";
     details = `Bet: ₹${data.betAmount} | Cashout: ${data.cashoutAt}x`;
     colorClass = won ? "history-win" : "history-loss";
+    
+    // Calculate profit/loss
+    if (won) {
+      profitLoss = (parseFloat(data.betAmount) * parseFloat(data.cashoutAt)) - parseFloat(data.betAmount);
+    } else {
+      profitLoss = -parseFloat(data.betAmount);
+    }
+    
+    // Only update profit tracking if auto betting is active
+    if (autoBettingActive) {
+      // Skip profit tracking update if we just reset
+      if (skipNextHistoryUpdate) {
+        skipNextHistoryUpdate = false;
+        console.log("Skipping profit calculation for reset bet");
+      } else {
+        if (won) {
+          totalProfit += profitLoss;
+        } else {
+          totalLoss += Math.abs(profitLoss);
+        }
+        
+        // Update profit history for graph
+        profitHistory.push(totalProfit - totalLoss);
+        updateProfitGraph();
+      }
+    }
   }
 
   item.classList.add(colorClass);
 
+  const profitLossText = data.skipped ? '' : `<div class="history-profit ${profitLoss >= 0 ? 'profit' : 'loss'}">${profitLoss >= 0 ? '+' : ''}₹${profitLoss.toFixed(2)}</div>`;
+
   item.innerHTML = `
     <div class="history-title">Crashed at ${data.crashValue}, ${status}</div>
     <div class="history-details">${details}</div>
+    ${profitLossText}
     <div class="history-time">${data.timestamp}</div>
   `;
 
@@ -256,6 +307,50 @@ function addHistoryItem(data) {
   // Keep only last 50 items
   while (historyList.children.length > 50) {
     historyList.removeChild(historyList.lastChild);
+  }
+}
+
+function updateProfitGraph() {
+  // Update profit/loss labels
+  document.getElementById('totalProfit').textContent = totalProfit.toFixed(2);
+  document.getElementById('totalLoss').textContent = totalLoss.toFixed(2);
+  document.getElementById('netProfit').textContent = (totalProfit - totalLoss).toFixed(2);
+  
+  // Draw graph
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  if (profitHistory.length < 2) return;
+  
+  const maxVal = Math.max(...profitHistory, 0);
+  const minVal = Math.min(...profitHistory, 0);
+  const range = maxVal - minVal || 1;
+  
+  ctx.strokeStyle = totalProfit - totalLoss >= 0 ? '#22c55e' : '#dc2626';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  
+  profitHistory.forEach((value, index) => {
+    const x = (index / (profitHistory.length - 1)) * canvas.width;
+    const y = canvas.height - ((value - minVal) / range) * canvas.height;
+    
+    if (index === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+  
+  ctx.stroke();
+  
+  // Draw zero line
+  if (minVal < 0 && maxVal > 0) {
+    const zeroY = canvas.height - ((-minVal) / range) * canvas.height;
+    ctx.strokeStyle = '#6b7280';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(0, zeroY);
+    ctx.lineTo(canvas.width, zeroY);
+    ctx.stroke();
   }
 }
 
