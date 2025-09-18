@@ -32,6 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("historyTab").addEventListener("click", () => switchTab("history"));
 
   saveBtn.addEventListener("click", () => {
+    // Validate all inputs
+    if (!validateInputs()) {
+      return;
+    }
+
     const betData = {
       amount: betAmount.value,
       cashout: cashoutAt.value,
@@ -116,6 +121,10 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       autoBettingActive = true;
+      
+      // Switch to History tab to show betting activity
+      switchTab("history");
+      
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "fillBetData",
@@ -341,7 +350,42 @@ function updateProfitGraph() {
   });
 }
 
+function validateInputs() {
+  const inputs = document.querySelectorAll('#settingsContent input[required]');
+  const validationError = document.getElementById('validationError');
+  let isValid = true;
+  let errorMessages = [];
+  
+  inputs.forEach(input => {
+    input.classList.remove('error');
+    if (!input.value || !input.checkValidity()) {
+      input.classList.add('error');
+      const label = input.previousElementSibling.textContent;
+      errorMessages.push(`${label} is required`);
+      isValid = false;
+    }
+  });
+  
+  if (!isValid) {
+    validationError.innerHTML = `❌ <strong>Validation Errors:</strong><br>• ${errorMessages.join('<br>• ')}`;
+    validationError.classList.remove('hidden');
+    setTimeout(() => {
+      validationError.classList.add('hidden');
+    }, 5000);
+  } else {
+    validationError.classList.add('hidden');
+  }
+  
+  return isValid;
+}
+
 function switchTab(tabName) {
+  // Hide validation error when switching tabs
+  const validationError = document.getElementById('validationError');
+  if (validationError) {
+    validationError.classList.add('hidden');
+  }
+  
   // Remove active class from all tabs and content
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));

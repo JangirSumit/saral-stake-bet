@@ -15,6 +15,9 @@
     </div>
     <div id="currentBetAmount" class="current-bet-amount">Next Bet: ₹0.00</div>
     <div id="betNotification" class="bet-notification hidden"></div>
+    
+    <!-- Start/Stop Button -->
+    <button id="startStopBtn" class="btn-small start-btn" disabled style="opacity: 0.5">🎯 Start</button>
 
     <!-- Tab Navigation -->
     <div class="tab-container">
@@ -24,27 +27,29 @@
 
     <!-- Settings Tab Content -->
     <div id="settingsContent" class="tab-content active">
+      <!-- Validation Error Message -->
+      <div id="validationError" class="validation-error hidden"></div>
       <!-- Basic Configuration -->
       <div class="config-section">
         <h4>💰 Basic Configuration</h4>
         <div class="form-row">
           <div class="form-half">
             <label>Bet Amount</label>
-            <input type="number" id="betAmount" step="0.01" placeholder="0.00" />
+            <input type="number" id="betAmount" step="0.01" min="0.01" max="10000" placeholder="0.00" required />
           </div>
           <div class="form-half">
             <label>Cashout At</label>
-            <input type="number" id="cashoutAt" step="0.01" placeholder="0.00" />
+            <input type="number" id="cashoutAt" step="0.01" min="1.01" max="1000" placeholder="0.00" required />
           </div>
         </div>
         <div class="form-row">
           <div class="form-half">
             <label>On Loss (%)</label>
-            <input type="number" id="onLoss" step="0.01" placeholder="50.00" />
+            <input type="number" id="onLoss" step="0.01" min="0" max="500" placeholder="50.00" required />
           </div>
           <div class="form-half">
             <label>On Win (%)</label>
-            <input type="number" id="onWin" step="0.01" placeholder="25.00" />
+            <input type="number" id="onWin" step="0.01" min="-100" max="100" placeholder="25.00" required />
           </div>
         </div>
       </div>
@@ -55,11 +60,11 @@
         <div class="form-row">
           <div class="form-half">
             <label>Crash At</label>
-            <input type="number" id="crashAt" step="0.01" placeholder="1.00" />
+            <input type="number" id="crashAt" step="0.01" min="1.00" max="10" placeholder="1.00" required />
           </div>
           <div class="form-half">
             <label>Times</label>
-            <input type="number" id="crashTimes" step="1" placeholder="3" />
+            <input type="number" id="crashTimes" step="1" min="1" max="20" placeholder="3" required />
           </div>
         </div>
       </div>
@@ -70,11 +75,11 @@
         <div class="form-row">
           <div class="form-half">
             <label>Resume At</label>
-            <input type="number" id="resumeAt" step="0.01" placeholder="2.00" />
+            <input type="number" id="resumeAt" step="0.01" min="1.01" max="100" placeholder="2.00" required />
           </div>
           <div class="form-half">
             <label>Adjust Bet (%)</label>
-            <input type="number" id="resumeAdjust" step="0.01" placeholder="0.00" />
+            <input type="number" id="resumeAdjust" step="0.01" min="-100" max="500" placeholder="0.00" />
           </div>
         </div>
       </div>
@@ -85,11 +90,11 @@
         <div class="form-row">
           <div class="form-half">
             <label>If Changes (%)</label>
-            <input type="number" id="resetThreshold" step="0.01" placeholder="0.00" />
+            <input type="number" id="resetThreshold" step="0.01" min="0" max="1000" placeholder="0.00" />
           </div>
           <div class="form-half">
             <label>If Profit (x times)</label>
-            <input type="number" id="profitTimes" step="1" placeholder="0" />
+            <input type="number" id="profitTimes" step="1" min="0" max="100" placeholder="0" />
           </div>
         </div>
       </div>
@@ -98,7 +103,6 @@
       <div class="action-buttons">
         <button id="saveBtn" class="save-btn btn-small">💰 Save Config</button>
         <button id="resetBetBtn" class="btn-small">🔄 Reset</button>
-        <button id="startStopBtn" class="btn-small start-btn" disabled style="opacity: 0.5">🎯 Start</button>
       </div>
     </div>
 
@@ -112,7 +116,7 @@
           <span class="net-label">Net: ₹<span id="netProfit">0.00</span></span>
         </div>
         <div class="graph-container">
-          <canvas id="profitChart" width="200" height="60"></canvas>
+          <canvas id="profitChart" width="200" height="100"></canvas>
         </div>
       </div>
 

@@ -19,6 +19,17 @@ input {
   border: 1px solid #22c55e;
   color: #fff;
   border-radius: 4px;
+  transition: border-color 0.3s ease;
+}
+input.error {
+  border-color: #dc2626;
+  box-shadow: 0 0 5px rgba(220, 38, 38, 0.3);
+}
+input:invalid {
+  border-color: #f59e0b;
+}
+input:valid {
+  border-color: #22c55e;
 }
 label {
   display: block;
@@ -210,17 +221,20 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   to { opacity: 1; transform: translateX(0); }
 }
 .button-status {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #e2e8f0;
   text-align: center;
-  padding: 3px;
-  background: #1e293b;
-  border-radius: 3px;
+  padding: 6px;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  border: 1px solid #475569;
+  border-radius: 6px;
   margin-bottom: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 .status-dot {
   width: 8px;
@@ -280,16 +294,35 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   color: #f59e0b;
   border: 1px solid #f59e0b;
 }
+.bet-notification.error {
+  background: #7f1d1d;
+  color: #fca5a5;
+  border: 1px solid #dc2626;
+}
 .current-bet-amount {
   font-size: 11px;
   color: #fbbf24;
   text-align: center;
-  padding: 3px;
-  background: #1e293b;
+  padding: 6px;
+  background: linear-gradient(45deg, #1e293b, #2d3748, #1e293b);
+  background-size: 200% 200%;
   border: 1px solid #fbbf24;
-  border-radius: 3px;
+  border-radius: 6px;
   margin-bottom: 8px;
   font-weight: bold;
+  position: relative;
+  overflow: hidden;
+  animation: subtleGlow 4s ease-in-out infinite;
+  box-shadow: 0 0 5px rgba(251, 191, 36, 0.2);
+  transition: all 0.3s ease;
+}
+.current-bet-amount:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+}
+@keyframes subtleGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(251, 191, 36, 0.2); }
+  50% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
 }
 .panel-header {
   display: flex;
@@ -330,7 +363,7 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 .net-label { color: #fbbf24; }
 .graph-container {
   width: 100%;
-  height: 60px;
+  height: 100px;
   background: #0f172a;
   border-radius: 3px;
   overflow: hidden;
@@ -455,7 +488,26 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   gap: 4px;
 }
 .start-btn {
-  background: #dc2626 !important;
+  background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+  border: 2px solid #dc2626 !important;
+  font-weight: bold !important;
+  font-size: 12px !important;
+  padding: 10px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3) !important;
+  transition: all 0.3s ease !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+.start-btn:hover {
+  background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 12px rgba(220, 38, 38, 0.4) !important;
+}
+.start-btn:disabled {
+  background: #6b7280 !important;
+  border-color: #6b7280 !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 /* History Tab */
@@ -486,4 +538,20 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 .history-list {
   max-height: 300px;
   overflow-y: auto;
+}
+
+/* Validation Error */
+.validation-error {
+  background: #7f1d1d;
+  color: #fca5a5;
+  border: 1px solid #dc2626;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 12px;
+  font-size: 10px;
+  line-height: 1.4;
+  animation: slideIn 0.3s ease-out;
+}
+.validation-error.hidden {
+  display: none;
 }
