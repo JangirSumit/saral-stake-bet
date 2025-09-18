@@ -62,7 +62,7 @@ function betWatcher() {
 
   if (startBetButton && gameSidebar) {
     const buttonObserver = new MutationObserver(() => {
-      const currentButton = gameSidebar.querySelector(":scope > button");
+      const currentButton = gameSidebar.querySelector("[data-testid='bet-button']");
       const currentText = currentButton?.textContent?.trim() || "";
 
       if (currentText !== lastStatus) {
