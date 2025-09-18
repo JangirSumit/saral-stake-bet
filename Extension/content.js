@@ -364,7 +364,7 @@ function setInputValue(input, value) {
 function roundBetAmount(amount, roundOff = true) {
   const num = parseFloat(amount);
   if (roundOff) {
-    return Math.round(num).toFixed(2);
+    return Math.round(num);
   }
   return num.toFixed(2);
 }

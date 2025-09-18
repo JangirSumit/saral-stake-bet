@@ -9,15 +9,18 @@
       ⚠️ Refresh the main page if status is not in sync with Bet Button
     </div>
     <h3>🎲 Stake Crash Automate Betting</h3>
-    <div id="buttonStatus" class="button-status">
+    <div id="buttonStatus" class="button-status disconnected">
       <span class="status-dot red" title="Not Connected"></span>
       <span class="status-text">Status: Ready</span>
     </div>
     <div id="currentBetAmount" class="current-bet-amount">Next Bet: ₹0.00</div>
     <div id="betNotification" class="bet-notification hidden"></div>
     
-    <!-- Start/Stop Button -->
-    <button id="startStopBtn" class="btn-small start-btn" disabled style="opacity: 0.5">🎯 Start</button>
+    <!-- Control Buttons -->
+    <div class="control-buttons">
+      <button id="startStopBtn" class="btn-small start-btn" disabled style="opacity: 0.5">🎯 Start</button>
+      <button id="resetBetBtn" class="btn-small reset-btn">🔄 Reset</button>
+    </div>
 
     <!-- Tab Navigation -->
     <div class="tab-container">
@@ -102,7 +105,6 @@
       <!-- Action Buttons -->
       <div class="action-buttons">
         <button id="saveBtn" class="save-btn btn-small">💰 Save Config</button>
-        <button id="resetBetBtn" class="btn-small">🔄 Reset</button>
       </div>
     </div>
 

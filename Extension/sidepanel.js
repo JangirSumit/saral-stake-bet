@@ -160,23 +160,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const statusDot = document.querySelector(".status-dot");
     const startStopBtn = document.getElementById("startStopBtn");
     const refreshNote = document.getElementById("refreshNote");
+    const buttonStatus = document.getElementById("buttonStatus");
 
-    if (statusText && statusDot && startStopBtn && refreshNote) {
+    if (statusText && statusDot && startStopBtn && refreshNote && buttonStatus) {
       statusText.textContent = `Status: ${message.data.buttonText}`;
       if (message.data.buttonText === "Ready") {
-        // Ready = Not Connected = Show refresh note
+        // Ready = Not Connected = Red border
         statusDot.className = "status-dot red";
         statusDot.title = "Not Connected";
         startStopBtn.disabled = true;
         startStopBtn.style.opacity = "0.5";
         refreshNote.style.display = "block";
+        buttonStatus.className = "button-status disconnected";
       } else {
-        // Connected = Hide refresh note
+        // Connected = Green border
         statusDot.className = "status-dot green";
         statusDot.title = "Connected";
         startStopBtn.disabled = false;
         startStopBtn.style.opacity = "1";
         refreshNote.style.display = "none";
+        buttonStatus.className = "button-status connected";
       }
     }
   }
