@@ -8,7 +8,6 @@
     <div id="refreshNote" class="refresh-note">
       ⚠️ Refresh the main page if status is not in sync with Bet Button
     </div>
-    <h3>🎲 Stake Crash Automate Betting</h3>
     <div id="buttonStatus" class="button-status disconnected">
       <span class="status-dot red" title="Not Connected"></span>
       <span class="status-text">Status: Ready</span>
@@ -21,6 +20,25 @@
       <button id="startStopBtn" class="btn-small start-btn" disabled style="opacity: 0.5">🎯 Start</button>
       <button id="resetBetBtn" class="btn-small reset-btn">🔄 Reset</button>
     </div>
+
+    <!-- Session Timer -->
+      <div class="session-info">
+        <div class="timer-display">
+          <span class="timer-label">⏱️ Session Time:</span>
+          <span id="sessionTimer" class="timer-value">00:00:00</span>
+        </div>
+      </div>
+      
+      <!-- Super Summary -->
+      <div class="super-summary">
+        <h4>📈 Full Session Summary</h4>
+        <div class="super-stats">
+          <span class="super-label">Total Profit: ₹<span id="superProfit">0.00</span></span>
+          <span class="super-label">Total Loss: ₹<span id="superLoss">0.00</span></span>
+          <span class="super-label">Net: ₹<span id="superNet">0.00</span></span>
+          <span class="super-label">Bets: <span id="superBets">0</span></span>
+        </div>
+      </div>
 
     <!-- Tab Navigation -->
     <div class="tab-container">
@@ -93,7 +111,7 @@
         <div class="form-row">
           <div class="form-half">
             <label>If Changes (%)</label>
-            <input type="number" id="resetThreshold" step="0.01" min="0" max="1000" placeholder="0.00" />
+            <input type="number" id="resetThreshold" step="0.01" min="-100" max="1000" placeholder="0.00" />
           </div>
           <div class="form-half">
             <label>If Profit (x times)</label>
@@ -110,8 +128,10 @@
 
     <!-- History Tab Content -->
     <div id="historyContent" class="tab-content">
-      <!-- Profit Summary -->
+           
+      <!-- Current Cycle Profit Summary -->
       <div class="profit-summary">
+        <h4>📊 Current Cycle</h4>
         <div class="profit-stats">
           <span class="profit-label">Profit: ₹<span id="totalProfit">0.00</span></span>
           <span class="loss-label">Loss: ₹<span id="totalLoss">0.00</span></span>

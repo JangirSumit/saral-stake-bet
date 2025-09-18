@@ -17,6 +17,10 @@ let currentBetAmount = 0;
 let originalBetAmount = 0;
 let lastBetAmount = 0;
 let totalProfit = 0;
+let sessionStartTime = null;
+let superTotalProfit = 0;
+let superTotalLoss = 0;
+let superTotalBets = 0;
 let ignorePreviousCrash = false;
 
 const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
@@ -63,7 +67,7 @@ function betWatcher() {
   if (startBetButton && gameSidebar) {
     const buttonObserver = new MutationObserver(() => {
       const currentButton = gameSidebar.querySelector("[data-testid='bet-button']");
-      const currentText = currentButton?.textContent?.trim() || "";
+      const currentText = currentButton?.textContent?.trim() || "Cashout";
 
       if (currentText !== lastStatus) {
         console.log("Button text changed:", currentText);
@@ -311,6 +315,8 @@ function adjustBetAmountBasedOnResult(crash) {
     // Won - calculate profit and update total
     const profit = (parseFloat(currentBet.betAmount) * parseFloat(currentBet.cashoutAt)) - parseFloat(currentBet.betAmount);
     totalProfit += profit;
+    superTotalProfit += profit;
+    superTotalBets++;
     console.log(`Profit this round: ${profit.toFixed(2)}, Total profit: ${totalProfit.toFixed(2)}`);
     
     // Check if profit crosses threshold
@@ -322,6 +328,16 @@ function adjustBetAmountBasedOnResult(crash) {
       // Notify sidepanel to reset graph and calculations
       chrome.runtime.sendMessage({
         action: "resetProfitTracking"
+      });
+      
+      // Send super data update
+      chrome.runtime.sendMessage({
+        action: "updateSuperData",
+        data: {
+          superProfit: superTotalProfit,
+          superLoss: superTotalLoss,
+          superBets: superTotalBets
+        }
       });
     } else if (onWin === 0) {
       // Won - check if onWin is 0% to reset to original amount
@@ -338,8 +354,11 @@ function adjustBetAmountBasedOnResult(crash) {
     }
   } else {
     // Lost - subtract loss from total profit
-    totalProfit -= parseFloat(currentBet.betAmount);
-    console.log(`Loss this round: ${currentBet.betAmount}, Total profit: ${totalProfit.toFixed(2)}`);
+    const loss = parseFloat(currentBet.betAmount);
+    totalProfit -= loss;
+    superTotalLoss += loss;
+    superTotalBets++;
+    console.log(`Loss this round: ${loss}, Total profit: ${totalProfit.toFixed(2)}`);
     
     // Lost - adjust by onLoss % (typically positive to increase bet)
     currentBetAmount = adjustBetAmount(currentBetAmount, Math.abs(onLoss));
@@ -457,7 +476,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     skipBetting = false;
     ignorePreviousCrash = true;
     totalProfit = 0;
+    sessionStartTime = new Date();
+    superTotalProfit = 0;
+    superTotalLoss = 0;
+    superTotalBets = 0;
     console.log("Auto-betting started - will ignore next crash");
+    
+    // Send session start time to sidepanel
+    chrome.runtime.sendMessage({
+      action: "sessionStarted",
+      data: { startTime: sessionStartTime }
+    });
   }
 
   if (message.action === "stopAutoBet") {

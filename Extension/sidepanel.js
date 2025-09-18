@@ -5,6 +5,11 @@ let profitHistory = [];
 let canvas, ctx;
 let skipNextHistoryUpdate = false;
 let autoBettingActive = false;
+let sessionStartTime = null;
+let timerInterval = null;
+let superTotalProfit = 0;
+let superTotalLoss = 0;
+let superTotalBets = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
   const betAmount = document.getElementById("betAmount");
@@ -125,6 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Switch to History tab to show betting activity
       switchTab("history");
       
+      // Start timer
+      startTimer();
+      
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "fillBetData",
@@ -139,6 +147,13 @@ document.addEventListener("DOMContentLoaded", () => {
       startStopBtn.className = "btn-stopped";
 
       autoBettingActive = false;
+      
+      // Stop timer
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "stopAutoBet",
@@ -208,6 +223,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("Profit tracking reset - starting fresh cycle");
     }
   }
+  
+  if (message.action === "sessionStarted") {
+    sessionStartTime = new Date(message.data.startTime);
+    superTotalProfit = 0;
+    superTotalLoss = 0;
+    superTotalBets = 0;
+    totalProfit = 0;
+    totalLoss = 0;
+    profitHistory = [];
+    updateSuperSummary();
+    updateProfitGraph();
+    startTimer();
+  }
+  
+  if (message.action === "updateSuperData") {
+    superTotalProfit = message.data.superProfit;
+    superTotalLoss = message.data.superLoss;
+    superTotalBets = message.data.superBets;
+    updateSuperSummary();
+  }
 });
 
 function showBetNotification(data) {
@@ -273,13 +308,17 @@ function addHistoryItem(data) {
       } else {
         if (won) {
           totalProfit += profitLoss;
+          superTotalProfit += profitLoss;
         } else {
           totalLoss += Math.abs(profitLoss);
+          superTotalLoss += Math.abs(profitLoss);
         }
+        superTotalBets++;
         
         // Update profit history for graph
         profitHistory.push(totalProfit - totalLoss);
         updateProfitGraph();
+        updateSuperSummary();
       }
     }
   }
@@ -380,6 +419,31 @@ function validateInputs() {
   }
   
   return isValid;
+}
+
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  
+  timerInterval = setInterval(() => {
+    if (sessionStartTime) {
+      const elapsed = new Date() - sessionStartTime;
+      const hours = Math.floor(elapsed / 3600000);
+      const minutes = Math.floor((elapsed % 3600000) / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      
+      const timerElement = document.getElementById('sessionTimer');
+      if (timerElement) {
+        timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+    }
+  }, 1000);
+}
+
+function updateSuperSummary() {
+  document.getElementById('superProfit').textContent = superTotalProfit.toFixed(2);
+  document.getElementById('superLoss').textContent = superTotalLoss.toFixed(2);
+  document.getElementById('superNet').textContent = (superTotalProfit - superTotalLoss).toFixed(2);
+  document.getElementById('superBets').textContent = superTotalBets;
 }
 
 function switchTab(tabName) {
