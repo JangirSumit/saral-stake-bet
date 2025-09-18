@@ -126,7 +126,7 @@ function fillProperties() {
     "[data-testid='game-frame'] .game-sidebar"
   );
   startBetButton = document.querySelector(
-    "[data-testid='game-frame'] .game-sidebar > button"
+    "[data-testid='game-frame'] [data-testid='bet-button']"
   );
   betAmountInput = document.querySelector(
     "[data-testid='game-frame'] [data-testid='input-game-amount']"
@@ -143,7 +143,7 @@ function fillProperties() {
     ?.closest("label")
     ?.querySelector("input");
 
-  console.log("Elements found:", { gameSidebar, startBetButton, lastCrashes });
+  //console.log("Elements found:", { gameSidebar, startBetButton, lastCrashes });
 }
 
 function addCrashToHistory(crashValue) {
