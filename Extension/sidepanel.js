@@ -10,6 +10,7 @@ let timerInterval = null;
 let superTotalProfit = 0;
 let superTotalLoss = 0;
 let superTotalBets = 0;
+let decimalPlacesCount = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
   const betAmount = document.getElementById("betAmount");
@@ -22,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resumeAdjust = document.getElementById("resumeAdjust");
   const resetThreshold = document.getElementById("resetThreshold");
   const profitTimes = document.getElementById("profitTimes");
+  const decimalPlaces = document.getElementById("decimalPlaces");
   const saveBtn = document.getElementById("saveBtn");
   const resetBetBtn = document.getElementById("resetBetBtn");
 
@@ -35,6 +37,46 @@ document.addEventListener("DOMContentLoaded", () => {
   // Tab switching functionality
   document.getElementById("settingsTab").addEventListener("click", () => switchTab("settings"));
   document.getElementById("historyTab").addEventListener("click", () => switchTab("history"));
+  
+  // Load saved configuration
+  chrome.storage.local.get(["betData"], (result) => {
+    if (result.betData) {
+      const data = result.betData;
+      
+      // Load all form values
+      if (data.amount) betAmount.value = data.amount;
+      if (data.cashout) cashoutAt.value = data.cashout;
+      if (data.loss) onLoss.value = data.loss;
+      if (data.win) onWin.value = data.win;
+      if (data.stopCrashAt) crashAt.value = data.stopCrashAt;
+      if (data.stopCrashTimes) crashTimes.value = data.stopCrashTimes;
+      if (data.resumeAt) resumeAt.value = data.resumeAt;
+      if (data.resumeAdjust) resumeAdjust.value = data.resumeAdjust;
+      if (data.resetThreshold) resetThreshold.value = data.resetThreshold;
+      if (data.profitTimes) profitTimes.value = data.profitTimes;
+      
+      // Load decimal places setting
+      if (data.decimalPlaces !== undefined) {
+        decimalPlacesCount = parseInt(data.decimalPlaces) || 0;
+        decimalPlaces.value = data.decimalPlaces;
+      }
+    }
+  });
+  
+  // Decimal places input event
+  decimalPlaces.addEventListener("input", (e) => {
+    decimalPlacesCount = parseInt(e.target.value) || 0;
+    // Update displays immediately
+    updateProfitGraph();
+    updateSuperSummary();
+    // Notify content script
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: "updateDecimalPlaces",
+        data: { decimalPlaces: decimalPlacesCount }
+      });
+    });
+  });
 
   saveBtn.addEventListener("click", () => {
     // Validate all inputs
@@ -53,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resumeAdjust: resumeAdjust.value,
       resetThreshold: resetThreshold.value,
       profitTimes: profitTimes.value,
+      decimalPlaces: decimalPlaces.value,
     };
 
     chrome.storage.local.set({ betData });
@@ -123,6 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resumeAdjust: resumeAdjust.value,
         resetThreshold: resetThreshold.value,
         profitTimes: profitTimes.value,
+        decimalPlaces: decimalPlaces.value,
       };
 
       autoBettingActive = true;
@@ -206,8 +250,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "updateCurrentBetAmount") {
     const currentBetElement = document.getElementById("currentBetAmount");
     if (currentBetElement) {
-      currentBetElement.textContent = `Next Bet: ₹${message.data.amount}`;
+      const amount = parseFloat(message.data.amount).toFixed(decimalPlacesCount);
+      currentBetElement.textContent = `Next Bet: ₹${amount}`;
     }
+  }
+  
+  if (message.action === "updateDecimalPlaces") {
+    decimalPlacesCount = message.data.decimalPlaces;
+    // Refresh all displays
+    updateProfitGraph();
+    updateSuperSummary();
   }
 
   if (message.action === "resetProfitTracking") {
@@ -251,7 +303,8 @@ function showBetNotification(data) {
   if (!notification) return;
 
   if (data.type === "placed") {
-    notification.textContent = `💰 Bet Placed: ₹${data.amount} @ ${data.cashout}x`;
+    const amount = parseFloat(data.amount).toFixed(decimalPlacesCount);
+    notification.textContent = `💰 Bet Placed: ₹${amount} @ ${data.cashout}x`;
     notification.className = "bet-notification placed";
   } else {
     notification.textContent = `⏸️ Bet Skipped: ${data.reason}`;
@@ -325,7 +378,7 @@ function addHistoryItem(data) {
 
   item.classList.add(colorClass);
 
-  const profitLossText = data.skipped ? '' : `<div class="history-profit ${profitLoss >= 0 ? 'profit' : 'loss'}">${profitLoss >= 0 ? '+' : ''}₹${profitLoss.toFixed(2)}</div>`;
+  const profitLossText = data.skipped ? '' : `<div class="history-profit ${profitLoss >= 0 ? 'profit' : 'loss'}">${profitLoss >= 0 ? '+' : ''}₹${formatNumber(Math.abs(profitLoss))}</div>`;
 
   item.innerHTML = `
     <div class="history-title">Crashed at ${data.crashValue}, ${status}</div>
@@ -345,9 +398,9 @@ function addHistoryItem(data) {
 
 function updateProfitGraph() {
   // Update profit/loss labels
-  document.getElementById('totalProfit').textContent = totalProfit.toFixed(2);
-  document.getElementById('totalLoss').textContent = totalLoss.toFixed(2);
-  document.getElementById('netProfit').textContent = (totalProfit - totalLoss).toFixed(2);
+  document.getElementById('totalProfit').textContent = formatNumber(totalProfit);
+  document.getElementById('totalLoss').textContent = formatNumber(totalLoss);
+  document.getElementById('netProfit').textContent = formatNumber(totalProfit - totalLoss);
   
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -387,7 +440,7 @@ function updateProfitGraph() {
       ctx.font = '8px Arial';
       ctx.textAlign = 'center';
       const textY = value >= 0 ? y - 2 : y + barHeight + 10;
-      ctx.fillText(value.toFixed(0), x + barWidth/2, textY);
+      ctx.fillText(formatNumber(value), x + barWidth/2, textY);
     }
   });
 }
@@ -439,10 +492,14 @@ function startTimer() {
   }, 1000);
 }
 
+function formatNumber(num) {
+  return num.toFixed(decimalPlacesCount);
+}
+
 function updateSuperSummary() {
-  document.getElementById('superProfit').textContent = superTotalProfit.toFixed(2);
-  document.getElementById('superLoss').textContent = superTotalLoss.toFixed(2);
-  document.getElementById('superNet').textContent = (superTotalProfit - superTotalLoss).toFixed(2);
+  document.getElementById('superProfit').textContent = formatNumber(superTotalProfit);
+  document.getElementById('superLoss').textContent = formatNumber(superTotalLoss);
+  document.getElementById('superNet').textContent = formatNumber(superTotalProfit - superTotalLoss);
   document.getElementById('superBets').textContent = superTotalBets;
 }
 

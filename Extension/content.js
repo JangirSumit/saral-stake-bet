@@ -380,12 +380,10 @@ function setInputValue(input, value) {
   input.blur();
 }
 
-function roundBetAmount(amount, roundOff = true) {
+function roundBetAmount(amount) {
   const num = parseFloat(amount);
-  if (roundOff) {
-    return Math.round(num);
-  }
-  return num.toFixed(2);
+  const decimals = betConfig.decimalPlaces || 0;
+  return parseFloat(num.toFixed(decimals));
 }
 
 function checkResetThreshold() {
@@ -448,6 +446,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeAdjust,
       resetThreshold,
       profitTimes,
+      decimalPlaces,
     } = message.data;
 
     betConfig = {
@@ -461,6 +460,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeAdjust: parseFloat(resumeAdjust) || 0,
       resetThreshold: parseFloat(resetThreshold) || 0,
       profitTimes: parseFloat(profitTimes) || 0,
+      decimalPlaces: parseInt(decimalPlaces) || 0,
     };
 
     currentBetAmount = betConfig.amount;
@@ -468,6 +468,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     setInputValue(betAmountInput, amount);
     setInputValue(cashoutInput, cashout);
+  }
+  
+  if (message.action === "updateDecimalPlaces") {
+    if (betConfig) {
+      betConfig.decimalPlaces = message.data.decimalPlaces;
+    }
   }
 
   if (message.action === "startAutoBet") {
