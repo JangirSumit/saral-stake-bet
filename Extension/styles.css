@@ -172,7 +172,6 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 .mt-2.full-width { display: block; }
 .mt-2.full-width button { width: 100%; }
 .fullscreen-btn { width: auto !important; }
-.button-status { margin-bottom: 8px; }
 
 /* History list */
 .history-list { max-height: 250px; overflow-y: auto; }
@@ -220,6 +219,11 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   from { opacity: 0; transform: translateX(-10px); }
   to { opacity: 1; transform: translateX(0); }
 }
+.status-bet-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
 .button-status {
   font-size: 12px;
   color: #e2e8f0;
@@ -228,7 +232,6 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   background: linear-gradient(135deg, #1e293b, #334155);
   border: 2px solid #475569;
   border-radius: 6px;
-  margin-bottom: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,6 +239,7 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   font-weight: 600;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   transition: border-color 0.3s ease;
+  flex: 1;
 }
 .button-status.disconnected {
   border-color: #dc2626;
@@ -317,13 +321,13 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   background-size: 200% 200%;
   border: 1px solid #fbbf24;
   border-radius: 6px;
-  margin-bottom: 8px;
   font-weight: bold;
   position: relative;
   overflow: hidden;
   animation: subtleGlow 4s ease-in-out infinite;
   box-shadow: 0 0 5px rgba(251, 191, 36, 0.2);
   transition: all 0.3s ease;
+  flex: 1;
 }
 .current-bet-amount:hover {
   transform: scale(1.02);
@@ -501,7 +505,7 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   border: 2px solid #dc2626 !important;
   font-weight: bold !important;
   font-size: 12px !important;
-  padding: 10px !important;
+  padding: 6px 10px !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3) !important;
   transition: all 0.3s ease !important;
@@ -533,7 +537,7 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   border: 2px solid #6b7280 !important;
   font-weight: bold !important;
   font-size: 12px !important;
-  padding: 10px !important;
+  padding: 6px 10px !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3) !important;
   transition: all 0.3s ease !important;
@@ -558,7 +562,7 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 .profit-stats {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 13px;
   margin-bottom: 8px;
 }
 .history-section {
@@ -595,8 +599,8 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
 
 /* Session Timer */
 .session-info {
-  margin-bottom: 12px;
-  padding: 8px;
+  margin-bottom: 8px;
+  padding: 4px 8px;
   background: #1e293b;
   border-radius: 4px;
   border: 1px solid #374151;

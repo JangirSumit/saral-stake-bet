@@ -222,7 +222,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const buttonStatus = document.getElementById("buttonStatus");
 
     if (statusText && statusDot && startStopBtn && refreshNote && buttonStatus) {
-      statusText.textContent = `Status: ${message.data.buttonText}`;
+      statusText.textContent = message.data.buttonText;
       if (message.data.buttonText === "Ready") {
         // Ready = Not Connected = Red border
         statusDot.className = "status-dot red";
