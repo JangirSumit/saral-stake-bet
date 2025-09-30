@@ -25,6 +25,8 @@ let ignorePreviousCrash = false;
 let walletObserver = null;
 let currentWalletBalance = 0;
 let currentCurrency = '$';
+let initialWalletBalance = 0;
+let walletProtectionTriggered = false;
 
 const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
 
@@ -434,13 +436,19 @@ function walletWatcher() {
   const coinToggle = document.querySelector('.coin-toggle');
   if (coinToggle) {
     walletObserver = new MutationObserver(() => {
-      const balanceElement = coinToggle.querySelector('[data-testid="coin-toggle"] .content span');
-      const currencyElement = coinToggle.querySelector('[data-testid="coin-toggle"] span[title]');
+      // Find balance element - look for the span with currency symbol and amount
+      const balanceElement = coinToggle.querySelector('.content span[data-ds-text="true"]');
+      // Find currency element - look for span with title attribute
+      const currencyElement = coinToggle.querySelector('span[title]');
       
       if (balanceElement && currencyElement) {
-        const balance = parseFloat(balanceElement.textContent) || 0;
+        const balanceText = balanceElement.textContent.trim();
+        // Extract numeric value from text like "₹598.21"
+        const balance = parseFloat(balanceText.replace(/[^\d.]/g, '')) || 0;
         const currency = currencyElement.getAttribute('title')?.toUpperCase() || 'USDT';
         const symbol = currency === 'USDT' ? '$' : currency === 'INR' ? '₹' : currency;
+        
+        console.log('Wallet detected:', { balance, currency, symbol, balanceText });
         
         if (balance !== currentWalletBalance || symbol !== currentCurrency) {
           currentWalletBalance = balance;
@@ -449,28 +457,64 @@ function walletWatcher() {
             action: "updateWalletBalance",
             data: { balance: currentWalletBalance, currency: currentCurrency }
           });
+          
+          // Check wallet protection
+          checkWalletProtection();
         }
       }
     });
+    
     walletObserver.observe(coinToggle, {
       childList: true,
       subtree: true,
       characterData: true
     });
     
-    // Initial balance and currency check
-    const balanceElement = coinToggle.querySelector('[data-testid="coin-toggle"] .content span');
-    const currencyElement = coinToggle.querySelector('[data-testid="coin-toggle"] span[title]');
+    // Initial check
+    const balanceElement = coinToggle.querySelector('.content span[data-ds-text="true"]');
+    const currencyElement = coinToggle.querySelector('span[title]');
     
     if (balanceElement && currencyElement) {
-      currentWalletBalance = parseFloat(balanceElement.textContent) || 0;
+      const balanceText = balanceElement.textContent.trim();
+      currentWalletBalance = parseFloat(balanceText.replace(/[^\d.]/g, '')) || 0;
       const currency = currencyElement.getAttribute('title')?.toUpperCase() || 'USDT';
       currentCurrency = currency === 'USDT' ? '$' : currency === 'INR' ? '₹' : currency;
+      
+      console.log('Initial wallet:', { balance: currentWalletBalance, currency, symbol: currentCurrency, balanceText });
       chrome.runtime.sendMessage({
         action: "updateWalletBalance",
         data: { balance: currentWalletBalance, currency: currentCurrency }
       });
     }
+    
+    console.log('Wallet watcher initialized');
+  } else {
+    console.log('Coin toggle not found');
+  }
+}
+
+function checkWalletProtection() {
+  if (!autoBetRunning || walletProtectionTriggered || !betConfig.walletStopLoss || initialWalletBalance === 0) {
+    return;
+  }
+  
+  const lossPercentage = ((initialWalletBalance - currentWalletBalance) / initialWalletBalance) * 100;
+  
+  if (lossPercentage >= betConfig.walletStopLoss) {
+    console.log(`Wallet protection triggered! Loss: ${lossPercentage.toFixed(2)}% >= ${betConfig.walletStopLoss}%`);
+    
+    walletProtectionTriggered = true;
+    autoBetRunning = false;
+    
+    chrome.runtime.sendMessage({
+      action: "walletProtectionTriggered",
+      data: { 
+        lossPercentage: lossPercentage.toFixed(2),
+        threshold: betConfig.walletStopLoss,
+        initialBalance: initialWalletBalance,
+        currentBalance: currentWalletBalance
+      }
+    });
   }
 }
 
@@ -495,6 +539,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeAdjust,
       resetThreshold,
       profitTimes,
+      walletStopLoss,
       decimalPlaces,
     } = message.data;
 
@@ -509,6 +554,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeAdjust: parseFloat(resumeAdjust) || 0,
       resetThreshold: parseFloat(resetThreshold) || 0,
       profitTimes: parseFloat(profitTimes) || 0,
+      walletStopLoss: parseFloat(walletStopLoss) || 0,
       decimalPlaces: parseInt(decimalPlaces) || 0,
     };
 
@@ -535,6 +581,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     superTotalProfit = 0;
     superTotalLoss = 0;
     superTotalBets = 0;
+    initialWalletBalance = currentWalletBalance;
+    walletProtectionTriggered = false;
     console.log("Auto-betting started - will ignore next crash");
     
     // Send session start time to sidepanel

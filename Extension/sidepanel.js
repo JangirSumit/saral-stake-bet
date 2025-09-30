@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resumeAdjust = document.getElementById("resumeAdjust");
   const resetThreshold = document.getElementById("resetThreshold");
   const profitTimes = document.getElementById("profitTimes");
+  const walletStopLoss = document.getElementById("walletStopLoss");
   const decimalPlaces = document.getElementById("decimalPlaces");
   const saveBtn = document.getElementById("saveBtn");
   const resetBetBtn = document.getElementById("resetBetBtn");
@@ -55,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.resumeAdjust) resumeAdjust.value = data.resumeAdjust;
       if (data.resetThreshold) resetThreshold.value = data.resetThreshold;
       if (data.profitTimes) profitTimes.value = data.profitTimes;
+      if (data.walletStopLoss) walletStopLoss.value = data.walletStopLoss;
       
       // Load decimal places setting
       if (data.decimalPlaces !== undefined) {
@@ -96,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resumeAdjust: resumeAdjust.value,
       resetThreshold: resetThreshold.value,
       profitTimes: profitTimes.value,
+      walletStopLoss: walletStopLoss.value,
       decimalPlaces: decimalPlaces.value,
     };
 
@@ -167,6 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resumeAdjust: resumeAdjust.value,
         resetThreshold: resetThreshold.value,
         profitTimes: profitTimes.value,
+        walletStopLoss: walletStopLoss.value,
         decimalPlaces: decimalPlaces.value,
       };
 
@@ -308,6 +312,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     superTotalLoss = message.data.superLoss;
     superTotalBets = message.data.superBets;
     updateSuperSummary();
+  }
+  
+  if (message.action === "walletProtectionTriggered") {
+    const notification = document.getElementById("betNotification");
+    if (notification) {
+      notification.textContent = `🛡️ Wallet Protection: ${message.data.lossPercentage}% loss reached!`;
+      notification.className = "bet-notification error";
+      notification.classList.remove("hidden");
+    }
+    
+    // Stop the betting interface
+    const startStopBtn = document.getElementById("startStopBtn");
+    if (startStopBtn) {
+      startStopBtn.textContent = "🎯 Start Betting";
+      startStopBtn.className = "btn-stopped";
+    }
+    autoBettingActive = false;
   }
 });
 
