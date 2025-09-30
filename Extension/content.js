@@ -22,6 +22,9 @@ let superTotalProfit = 0;
 let superTotalLoss = 0;
 let superTotalBets = 0;
 let ignorePreviousCrash = false;
+let walletObserver = null;
+let currentWalletBalance = 0;
+let currentCurrency = '$';
 
 const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
 
@@ -34,6 +37,7 @@ function initializeElements() {
   } else {
     betWatcher();
     crashWatcher();
+    walletWatcher();
   }
 }
 
@@ -294,13 +298,14 @@ function placeBet() {
             type: "placed",
             amount: currentBetAmount,
             cashout: betConfig.cashout,
+            currency: currentCurrency,
           },
         });
 
         // Update current bet amount display
         chrome.runtime.sendMessage({
           action: "updateCurrentBetAmount",
-          data: { amount: currentBetAmount },
+          data: { amount: currentBetAmount, currency: currentCurrency },
         });
       }, 50);
     }, 50);
@@ -423,6 +428,50 @@ function adjustBetAmount(amount, percentage) {
   const multiplier = 1 + percent / 100;
   const adjustedAmount = amount * multiplier;
   return roundBetAmount(adjustedAmount);
+}
+
+function walletWatcher() {
+  const coinToggle = document.querySelector('.coin-toggle');
+  if (coinToggle) {
+    walletObserver = new MutationObserver(() => {
+      const balanceElement = coinToggle.querySelector('[data-testid="coin-toggle"] .content span');
+      const currencyElement = coinToggle.querySelector('[data-testid="coin-toggle"] span[title]');
+      
+      if (balanceElement && currencyElement) {
+        const balance = parseFloat(balanceElement.textContent) || 0;
+        const currency = currencyElement.getAttribute('title')?.toUpperCase() || 'USDT';
+        const symbol = currency === 'USDT' ? '$' : currency === 'INR' ? '₹' : currency;
+        
+        if (balance !== currentWalletBalance || symbol !== currentCurrency) {
+          currentWalletBalance = balance;
+          currentCurrency = symbol;
+          chrome.runtime.sendMessage({
+            action: "updateWalletBalance",
+            data: { balance: currentWalletBalance, currency: currentCurrency }
+          });
+        }
+      }
+    });
+    walletObserver.observe(coinToggle, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+    
+    // Initial balance and currency check
+    const balanceElement = coinToggle.querySelector('[data-testid="coin-toggle"] .content span');
+    const currencyElement = coinToggle.querySelector('[data-testid="coin-toggle"] span[title]');
+    
+    if (balanceElement && currencyElement) {
+      currentWalletBalance = parseFloat(balanceElement.textContent) || 0;
+      const currency = currencyElement.getAttribute('title')?.toUpperCase() || 'USDT';
+      currentCurrency = currency === 'USDT' ? '$' : currency === 'INR' ? '₹' : currency;
+      chrome.runtime.sendMessage({
+        action: "updateWalletBalance",
+        data: { balance: currentWalletBalance, currency: currentCurrency }
+      });
+    }
+  }
 }
 
 // Initialize on load

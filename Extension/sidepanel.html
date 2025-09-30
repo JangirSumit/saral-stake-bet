@@ -13,7 +13,9 @@
         <span class="status-dot red" title="Not Connected"></span>
         <span class="status-text">Ready</span>
       </div>
-      <div id="currentBetAmount" class="current-bet-amount">Next Bet: ₹0.00</div>
+      <div id="currentBetAmount" class="current-bet-amount">Next Bet: $0.00</div>
+    </div>
+    <div id="walletBalance" class="wallet-balance">Balance: $0.00</div>
     </div>
     <div id="betNotification" class="bet-notification hidden"></div>
     
@@ -35,9 +37,9 @@
       <div class="super-summary">
         <h4>📈 Full Session Summary</h4>
         <div class="super-stats">
-          <span class="super-label">Total Profit: ₹<span id="superProfit">0.00</span></span>
-          <span class="super-label">Total Loss: ₹<span id="superLoss">0.00</span></span>
-          <span class="super-label">Net: ₹<span id="superNet">0.00</span></span>
+          <span class="super-label">Total Profit: <span id="superProfitCurrency">$</span><span id="superProfit">0.00</span></span>
+          <span class="super-label">Total Loss: <span id="superLossCurrency">$</span><span id="superLoss">0.00</span></span>
+          <span class="super-label">Net: <span id="superNetCurrency">$</span><span id="superNet">0.00</span></span>
           <span class="super-label">Bets: <span id="superBets">0</span></span>
         </div>
       </div>
@@ -146,9 +148,9 @@
       <div class="profit-summary">
         <h4>📊 Current Cycle</h4>
         <div class="profit-stats">
-          <span class="profit-label">Profit: ₹<span id="totalProfit">0.00</span></span>
-          <span class="loss-label">Loss: ₹<span id="totalLoss">0.00</span></span>
-          <span class="net-label">Net: ₹<span id="netProfit">0.00</span></span>
+          <span class="profit-label">Profit: <span id="totalProfitCurrency">$</span><span id="totalProfit">0.00</span></span>
+          <span class="loss-label">Loss: <span id="totalLossCurrency">$</span><span id="totalLoss">0.00</span></span>
+          <span class="net-label">Net: <span id="netProfitCurrency">$</span><span id="netProfit">0.00</span></span>
         </div>
         <div class="graph-container">
           <canvas id="profitChart" width="200" height="100"></canvas>

@@ -11,6 +11,7 @@ let superTotalProfit = 0;
 let superTotalLoss = 0;
 let superTotalBets = 0;
 let decimalPlacesCount = 0;
+let currentCurrency = '$';
 
 document.addEventListener("DOMContentLoaded", () => {
   const betAmount = document.getElementById("betAmount");
@@ -251,7 +252,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const currentBetElement = document.getElementById("currentBetAmount");
     if (currentBetElement) {
       const amount = parseFloat(message.data.amount).toFixed(decimalPlacesCount);
-      currentBetElement.textContent = `Next Bet: ₹${amount}`;
+      const currency = message.data.currency || '$';
+      currentBetElement.textContent = `Next Bet: ${currency}${amount}`;
     }
   }
   
@@ -260,6 +262,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Refresh all displays
     updateProfitGraph();
     updateSuperSummary();
+  }
+  
+  if (message.action === "updateWalletBalance") {
+    const walletElement = document.getElementById("walletBalance");
+    if (walletElement) {
+      const balance = parseFloat(message.data.balance).toFixed(decimalPlacesCount);
+      currentCurrency = message.data.currency || '$';
+      walletElement.textContent = `Balance: ${currentCurrency}${balance}`;
+      // Update all displays with new currency
+      updateSuperSummary();
+      updateProfitGraph();
+    }
   }
 
   if (message.action === "resetProfitTracking") {
@@ -304,7 +318,8 @@ function showBetNotification(data) {
 
   if (data.type === "placed") {
     const amount = parseFloat(data.amount).toFixed(decimalPlacesCount);
-    notification.textContent = `💰 Bet Placed: ₹${amount} @ ${data.cashout}x`;
+    const currency = data.currency || '$';
+    notification.textContent = `💰 Bet Placed: ${currency}${amount} @ ${data.cashout}x`;
     notification.className = "bet-notification placed";
   } else {
     notification.textContent = `⏸️ Bet Skipped: ${data.reason}`;
@@ -401,6 +416,11 @@ function updateProfitGraph() {
   document.getElementById('totalProfit').textContent = formatNumber(totalProfit);
   document.getElementById('totalLoss').textContent = formatNumber(totalLoss);
   document.getElementById('netProfit').textContent = formatNumber(totalProfit - totalLoss);
+  
+  // Update currency symbols
+  document.getElementById('totalProfitCurrency').textContent = currentCurrency;
+  document.getElementById('totalLossCurrency').textContent = currentCurrency;
+  document.getElementById('netProfitCurrency').textContent = currentCurrency;
   
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -501,6 +521,11 @@ function updateSuperSummary() {
   document.getElementById('superLoss').textContent = formatNumber(superTotalLoss);
   document.getElementById('superNet').textContent = formatNumber(superTotalProfit - superTotalLoss);
   document.getElementById('superBets').textContent = superTotalBets;
+  
+  // Update currency symbols
+  document.getElementById('superProfitCurrency').textContent = currentCurrency;
+  document.getElementById('superLossCurrency').textContent = currentCurrency;
+  document.getElementById('superNetCurrency').textContent = currentCurrency;
 }
 
 function switchTab(tabName) {
