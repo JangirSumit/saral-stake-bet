@@ -494,7 +494,7 @@ function walletWatcher() {
 }
 
 function checkWalletProtection() {
-  if (!autoBetRunning || walletProtectionTriggered || !betConfig.walletStopLoss || initialWalletBalance === 0) {
+  if (!autoBetRunning || walletProtectionTriggered || !betConfig.walletStopLoss || initialWalletBalance === 0 || currentWalletBalance === 0) {
     return;
   }
   

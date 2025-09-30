@@ -10,6 +10,7 @@ let timerInterval = null;
 let superTotalProfit = 0;
 let superTotalLoss = 0;
 let superTotalBets = 0;
+let maxSubSessionLoss = 0;
 let decimalPlacesCount = 0;
 let currentCurrency = '$';
 
@@ -299,6 +300,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     superTotalProfit = 0;
     superTotalLoss = 0;
     superTotalBets = 0;
+    maxSubSessionLoss = 0;
     totalProfit = 0;
     totalLoss = 0;
     profitHistory = [];
@@ -412,6 +414,13 @@ function addHistoryItem(data) {
         
         // Update profit history for graph
         profitHistory.push(totalProfit - totalLoss);
+        
+        // Track max loss across sub-sessions
+        const currentNet = totalProfit - totalLoss;
+        if (currentNet < maxSubSessionLoss) {
+          maxSubSessionLoss = currentNet;
+        }
+        
         updateProfitGraph();
         updateSuperSummary();
       }
@@ -546,12 +555,14 @@ function formatNumber(num) {
 function updateSuperSummary() {
   document.getElementById('superProfit').textContent = formatNumber(superTotalProfit);
   document.getElementById('superLoss').textContent = formatNumber(superTotalLoss);
+  document.getElementById('maxLoss').textContent = formatNumber(Math.abs(maxSubSessionLoss));
   document.getElementById('superNet').textContent = formatNumber(superTotalProfit - superTotalLoss);
   document.getElementById('superBets').textContent = superTotalBets;
   
   // Update currency symbols
   document.getElementById('superProfitCurrency').textContent = currentCurrency;
   document.getElementById('superLossCurrency').textContent = currentCurrency;
+  document.getElementById('maxLossCurrency').textContent = currentCurrency;
   document.getElementById('superNetCurrency').textContent = currentCurrency;
 }
 
