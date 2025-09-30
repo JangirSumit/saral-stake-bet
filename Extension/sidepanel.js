@@ -329,6 +329,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       startStopBtn.className = "btn-stopped";
     }
     autoBettingActive = false;
+    
+    // Stop timer
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
   }
 });
 
