@@ -386,7 +386,7 @@ function addHistoryItem(data) {
     const won =
       data.isWin || parseFloat(data.crashValue) >= parseFloat(data.cashoutAt);
     status = won ? "Won" : "Lost";
-    details = `Bet: ₹${data.betAmount} | Cashout: ${data.cashoutAt}x`;
+    details = `Bet: ${currentCurrency}${data.betAmount} | Cashout: ${data.cashoutAt}x`;
     colorClass = won ? "history-win" : "history-loss";
     
     // Calculate profit/loss
@@ -429,7 +429,7 @@ function addHistoryItem(data) {
 
   item.classList.add(colorClass);
 
-  const profitLossText = data.skipped ? '' : `<div class="history-profit ${profitLoss >= 0 ? 'profit' : 'loss'}">${profitLoss >= 0 ? '+' : ''}₹${formatNumber(Math.abs(profitLoss))}</div>`;
+  const profitLossText = data.skipped ? '' : `<div class="history-profit ${profitLoss >= 0 ? 'profit' : 'loss'}">${profitLoss >= 0 ? '+' : ''}${currentCurrency}${formatNumber(Math.abs(profitLoss))}</div>`;
 
   item.innerHTML = `
     <div class="history-title">Crashed at ${data.crashValue}, ${status}</div>
