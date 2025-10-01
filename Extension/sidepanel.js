@@ -28,7 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const walletStopLoss = document.getElementById("walletStopLoss");
   const decimalPlaces = document.getElementById("decimalPlaces");
   const saveBtn = document.getElementById("saveBtn");
-  const resetBetBtn = document.getElementById("resetBetBtn");
+  // const resetBetBtn = document.getElementById("resetBetBtn");
+  const screenshotBtn = document.getElementById("screenshotBtn");
 
   const startStopBtn = document.getElementById("startStopBtn");
   let isRunning = false;
@@ -115,6 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1500);
   });
 
+  /*
   resetBetBtn.addEventListener("click", () => {
     const betData = {
       resetBetAmount: betAmount.value,
@@ -136,6 +138,13 @@ document.addEventListener("DOMContentLoaded", () => {
       resetBetBtn.style.background = "";
     }, 1500);
   });
+  */
+
+  screenshotBtn.addEventListener("click", () => {
+    takeSidepanelScreenshot();
+  });
+  
+
 
   const fullscreenBtn = document.getElementById("fullscreenBtn");
   const historyList = document.getElementById("historyList");
@@ -564,6 +573,82 @@ function updateSuperSummary() {
   document.getElementById('superLossCurrency').textContent = currentCurrency;
   document.getElementById('maxLossCurrency').textContent = currentCurrency;
   document.getElementById('superNetCurrency').textContent = currentCurrency;
+}
+
+function takeSidepanelScreenshot() {
+  showScreenshotFallback();
+}
+
+function showScreenshotFallback() {
+  let csvContent = 'BETTING SESSION REPORT\n';
+  csvContent += `Export Date,${new Date().toLocaleString()}\n\n`;
+  
+  // Session Summary
+  csvContent += 'SESSION SUMMARY\n';
+  csvContent += `Session Time,${document.getElementById('sessionTimer')?.textContent || '00:00:00'}\n`;
+  csvContent += `Wallet Balance,${document.getElementById('walletBalance')?.textContent || 'Balance: $0.00'}\n`;
+  csvContent += `Total Profit,${document.getElementById('superProfitCurrency')?.textContent || '$'}${document.getElementById('superProfit')?.textContent || '0.00'}\n`;
+  csvContent += `Total Loss,${document.getElementById('superLossCurrency')?.textContent || '$'}${document.getElementById('superLoss')?.textContent || '0.00'}\n`;
+  csvContent += `Net Profit/Loss,${document.getElementById('superNetCurrency')?.textContent || '$'}${document.getElementById('superNet')?.textContent || '0.00'}\n`;
+  csvContent += `Max Loss Reached,${document.getElementById('maxLossCurrency')?.textContent || '$'}${document.getElementById('maxLoss')?.textContent || '0.00'}\n`;
+  csvContent += `Total Bets Placed,${document.getElementById('superBets')?.textContent || '0'}\n\n`;
+  
+  // Current Settings
+  csvContent += 'CURRENT SETTINGS\n';
+  csvContent += `Bet Amount,${document.getElementById('betAmount')?.value || 'Not Set'}\n`;
+  csvContent += `Cashout At,${document.getElementById('cashoutAt')?.value || 'Not Set'}x\n`;
+  csvContent += `On Loss Increase,${document.getElementById('onLoss')?.value || 'Not Set'}%\n`;
+  csvContent += `On Win Decrease,${document.getElementById('onWin')?.value || 'Not Set'}%\n`;
+  csvContent += `Stop After Crash At,${document.getElementById('crashAt')?.value || 'Not Set'}x\n`;
+  csvContent += `Stop After Times,${document.getElementById('crashTimes')?.value || 'Not Set'}\n`;
+  csvContent += `Resume At Crash,${document.getElementById('resumeAt')?.value || 'Not Set'}x\n`;
+  csvContent += `Resume Bet Adjust,${document.getElementById('resumeAdjust')?.value || 'Not Set'}%\n`;
+  csvContent += `Reset Threshold,${document.getElementById('resetThreshold')?.value || 'Not Set'}%\n`;
+  csvContent += `Profit Reset Times,${document.getElementById('profitTimes')?.value || 'Not Set'}\n`;
+  csvContent += `Wallet Stop Loss,${document.getElementById('walletStopLoss')?.value || 'Not Set'}%\n`;
+  csvContent += `Decimal Places,${document.getElementById('decimalPlaces')?.value || 'Not Set'}\n\n`;
+  
+  // Betting History
+  csvContent += 'BETTING HISTORY\n';
+  csvContent += 'Time,Status,Crash Value,Bet Amount,Cashout Target,Profit/Loss,Details\n';
+  
+  const historyItems = document.querySelectorAll('.history-item');
+  historyItems.forEach(item => {
+    const time = item.querySelector('.history-time')?.textContent || '';
+    const title = item.querySelector('.history-title')?.textContent || '';
+    const details = item.querySelector('.history-details')?.textContent || '';
+    const profitLoss = item.querySelector('.history-profit')?.textContent || '0.00';
+    
+    // Parse crash value and status from title
+    const crashMatch = title.match(/Crashed at ([\d.]+)/);
+    const crashValue = crashMatch ? crashMatch[1] : '';
+    const status = title.includes('Won') ? 'Won' : title.includes('Lost') ? 'Lost' : 'Skipped';
+    
+    // Parse bet details
+    const betMatch = details.match(/Bet: ([\$₹]?[\d.]+)/);
+    const cashoutMatch = details.match(/Cashout: ([\d.]+)x/);
+    const betAmount = betMatch ? betMatch[1] : '';
+    const cashoutTarget = cashoutMatch ? cashoutMatch[1] + 'x' : '';
+    
+    csvContent += `${time},${status},${crashValue}x,${betAmount},${cashoutTarget},${profitLoss},"${details}"\n`;
+  });
+  
+  // Download CSV
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const link = document.createElement('a');
+  link.download = `betting-report-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.csv`;
+  link.href = URL.createObjectURL(blob);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  const notification = document.getElementById("betNotification");
+  if (notification) {
+    notification.textContent = "📄 Complete report exported!";
+    notification.className = "bet-notification placed";
+    notification.classList.remove("hidden");
+    setTimeout(() => notification.classList.add("hidden"), 3000);
+  }
 }
 
 function switchTab(tabName) {
