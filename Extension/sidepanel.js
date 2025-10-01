@@ -7,6 +7,9 @@ let skipNextHistoryUpdate = false;
 let autoBettingActive = false;
 let sessionStartTime = null;
 let timerInterval = null;
+let cycleStartTime = null;
+let cycleTimerInterval = null;
+let cycleBets = 0;
 let superTotalProfit = 0;
 let superTotalLoss = 0;
 let superTotalBets = 0;
@@ -298,8 +301,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       profitHistory = [];
       skipNextHistoryUpdate = true;
       
+      // Reset cycle tracking
+      cycleBets = 0;
+      cycleStartTime = new Date();
+      startCycleTimer();
+      
       // Update display
       updateProfitGraph();
+      updateCycleDisplay();
       console.log("Profit tracking reset - starting fresh cycle");
     }
   }
@@ -420,6 +429,7 @@ function addHistoryItem(data) {
           superTotalLoss += Math.abs(profitLoss);
         }
         superTotalBets++;
+        cycleBets++;
         
         // Update profit history for graph
         profitHistory.push(totalProfit - totalLoss);
@@ -432,6 +442,7 @@ function addHistoryItem(data) {
         
         updateProfitGraph();
         updateSuperSummary();
+        updateCycleDisplay();
       }
     }
   }
@@ -648,6 +659,31 @@ function showScreenshotFallback() {
     notification.className = "bet-notification placed";
     notification.classList.remove("hidden");
     setTimeout(() => notification.classList.add("hidden"), 3000);
+  }
+}
+
+function startCycleTimer() {
+  if (cycleTimerInterval) clearInterval(cycleTimerInterval);
+  
+  cycleTimerInterval = setInterval(() => {
+    if (cycleStartTime) {
+      const elapsed = new Date() - cycleStartTime;
+      const hours = Math.floor(elapsed / 3600000);
+      const minutes = Math.floor((elapsed % 3600000) / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      
+      const timerElement = document.getElementById('cycleTimer');
+      if (timerElement) {
+        timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+    }
+  }, 1000);
+}
+
+function updateCycleDisplay() {
+  const cycleBetsElement = document.getElementById('cycleBets');
+  if (cycleBetsElement) {
+    cycleBetsElement.textContent = cycleBets;
   }
 }
 

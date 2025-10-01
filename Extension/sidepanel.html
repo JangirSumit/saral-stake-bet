@@ -16,7 +16,6 @@
       </div>
       <div id="currentBetAmount" class="current-bet-amount">Next Bet: $0.00</div>
     </div>
-    <div id="walletBalance" class="wallet-balance">Balance: $0.00</div>
     </div>
     <div id="betNotification" class="bet-notification hidden"></div>
     
@@ -24,16 +23,17 @@
     <div class="control-buttons">
       <button id="startStopBtn" class="btn-small start-btn" disabled style="opacity: 0.5">🎯 Start</button>
       <!-- <button id="resetBetBtn" class="btn-small reset-btn">🔄 Reset</button> -->
-      <button id="screenshotBtn" class="btn-small reset-btn">📄 Export CSV</button>
+      <button id="screenshotBtn" class="btn-small reset-btn">📄 Export Session</button>
     </div>
 
-    <!-- Session Timer -->
-      <div class="session-info">
-        <div class="timer-display">
-          <span class="timer-label">⏱️ Session Time:</span>
-          <span id="sessionTimer" class="timer-value">00:00:00</span>
-        </div>
+    <!-- Session Info Combined -->
+    <div class="session-combined">
+      <div class="session-left">
+        <span class="timer-label">⏱️ Session:</span>
+        <span id="sessionTimer" class="timer-value">00:00:00</span>
       </div>
+      <div class="session-right" id="walletBalance">Balance: $0.00</div>
+    </div>
       
       <!-- Super Summary -->
       <div class="super-summary">
@@ -146,6 +146,16 @@
       <!-- Current Cycle Profit Summary -->
       <div class="profit-summary">
         <h4>📊 Current Cycle</h4>
+        <div class="cycle-info">
+          <div class="cycle-stat">
+            <span class="cycle-label">Time:</span>
+            <span id="cycleTimer" class="cycle-value">00:00:00</span>
+          </div>
+          <div class="cycle-stat">
+            <span class="cycle-label">Bets:</span>
+            <span id="cycleBets" class="cycle-value">0</span>
+          </div>
+        </div>
         <div class="profit-stats">
           <span class="profit-label">Profit: <span id="totalProfitCurrency">$</span><span id="totalProfit">0.00</span></span>
           <span class="loss-label">Loss: <span id="totalLossCurrency">$</span><span id="totalLoss">0.00</span></span>
@@ -168,6 +178,7 @@
       </div>
     </div>
 
+    <div class="bottom-spacer"></div>
     <script src="sidepanel.js"></script>
   </body>
 </html>
