@@ -592,7 +592,8 @@ function takeSidepanelScreenshot() {
 
 function showScreenshotFallback() {
   let csvContent = 'BETTING SESSION REPORT\n';
-  csvContent += `Export Date,${new Date().toLocaleString()}\n\n`;
+  csvContent += `Session Started,${sessionStartTime ? sessionStartTime.toLocaleString() : 'Not Available'}\n`;
+  csvContent += `Report Downloaded,${new Date().toLocaleString()}\n\n`;
   
   // Session Summary
   csvContent += 'SESSION SUMMARY\n';
