@@ -10,6 +10,7 @@ let currentBet = null;
 let betConfig = {};
 let crashHistory = [];
 let consecutiveLowCrashes = 0;
+let consecutiveHighCrashes = 0;
 let skipBetting = false;
 let resumeTriggered = false;
 let resumeNextRound = false;
@@ -205,17 +206,24 @@ function addCrashToHistory(crashValue) {
 }
 
 function handleStopResumeLogic(crash) {
-  const { crashAt, crashTimes, resumeAt } = betConfig;
-
   console.log(
-    `Crash: ${crash}, skipBetting: ${skipBetting}, consecutiveLowCrashes: ${consecutiveLowCrashes}, currentBet: ${!!currentBet}`
+    `Crash: ${crash}, skipBetting: ${skipBetting}, consecutiveLowCrashes: ${consecutiveLowCrashes}, consecutiveHighCrashes: ${consecutiveHighCrashes}, currentBet: ${!!currentBet}`
   );
 
-  // Resume betting immediately when any crash crosses resumeAt threshold (check all crashes during skip)
-  if (skipBetting && crash >= resumeAt) {
-    console.log(`Resume triggered! Crash ${crash} >= resumeAt ${resumeAt}`);
+  // Check resume logic first
+  if (checkResumeLogic(crash)) return;
 
-    // Apply resume adjustment to last bet amount
+  // Check crash patterns for betting decisions
+  if (currentBet) {
+    checkHighCrashPattern(crash);
+    checkLowCrashPattern(crash);
+  }
+}
+
+function checkResumeLogic(crash) {
+  if (skipBetting && crash >= betConfig.resumeAt) {
+    console.log(`Resume triggered! Crash ${crash} >= resumeAt ${betConfig.resumeAt}`);
+
     if (betConfig.resumeAdjust !== 0) {
       const oldAmount = currentBetAmount;
       currentBetAmount = adjustBetAmount(lastBetAmount, betConfig.resumeAdjust);
@@ -223,12 +231,10 @@ function handleStopResumeLogic(crash) {
         `Resume bet adjustment: ${oldAmount} -> ${currentBetAmount} (${betConfig.resumeAdjust}% from last bet ${lastBetAmount})`
       );
     } else {
-      // Use last bet amount if no adjustment
       currentBetAmount = lastBetAmount;
       console.log(`Resume: Using last bet amount ${lastBetAmount}`);
     }
 
-    // Update current bet amount display
     chrome.runtime.sendMessage({
       action: "updateCurrentBetAmount",
       data: { amount: currentBetAmount },
@@ -236,36 +242,49 @@ function handleStopResumeLogic(crash) {
 
     skipBetting = false;
     consecutiveLowCrashes = 0;
-    return;
+    consecutiveHighCrashes = 0;
+    return true;
   }
+  return false;
+}
 
-  // Count consecutive bet losses on low crashes (crash <= crashAt) - only when we had a bet
-  if (currentBet) {
-    if (crash < parseFloat(currentBet.cashoutAt)) {
-      // Bet lost - check if it's a low crash
-      if (crash <= crashAt) {
+function checkHighCrashPattern(crash) {
+  if (betConfig.highCrashAt > 0 && betConfig.highCrashTimes > 0) {
+    if (crash >= betConfig.highCrashAt) {
+      consecutiveHighCrashes++;
+      console.log(`High crash detected: ${crash} >= ${betConfig.highCrashAt}. Count: ${consecutiveHighCrashes}`);
+      
+      if (consecutiveHighCrashes >= betConfig.highCrashTimes) {
+        console.log(`Will skip betting after ${consecutiveHighCrashes} consecutive high crashes`);
+        skipBetting = true;
+      }
+    } else {
+      consecutiveHighCrashes = 0;
+    }
+  }
+}
+
+function checkLowCrashPattern(crash) {
+  if (crash < currentBet.cashoutAt) {
+    // Bet lost - only check if rules are enabled
+    if (betConfig.crashAt > 0 && betConfig.crashTimes > 0) {
+      if (crash <= betConfig.crashAt) {
         consecutiveLowCrashes++;
-        console.log(
-          `Low crash bet loss detected. Count: ${consecutiveLowCrashes}`
-        );
+        console.log(`Low crash bet loss detected. Count: ${consecutiveLowCrashes}`);
 
-        // Skip betting if reached crashTimes
-        if (consecutiveLowCrashes >= crashTimes) {
-          console.log(
-            `Will skip betting after ${consecutiveLowCrashes} consecutive low crash losses`
-          );
+        if (consecutiveLowCrashes >= betConfig.crashTimes) {
+          console.log(`Will skip betting after ${consecutiveLowCrashes} consecutive low crash losses`);
           skipBetting = true;
         }
       } else {
-        // High crash loss - reset counter
         consecutiveLowCrashes = 0;
         console.log(`High crash loss - reset consecutive count`);
       }
-    } else {
-      // Bet won - reset counter
-      consecutiveLowCrashes = 0;
-      console.log(`Bet won - reset consecutive loss count`);
     }
+  } else {
+    // Bet won
+    consecutiveLowCrashes = 0;
+    console.log(`Bet won - reset consecutive loss count`);
   }
 }
 
@@ -541,6 +560,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       profitTimes,
       walletStopLoss,
       decimalPlaces,
+      highCrashAt,
+      highCrashTimes,
     } = message.data;
 
     betConfig = {
@@ -556,6 +577,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       profitTimes: parseFloat(profitTimes) || 0,
       walletStopLoss: parseFloat(walletStopLoss) || 0,
       decimalPlaces: parseInt(decimalPlaces) || 0,
+      highCrashAt: parseFloat(highCrashAt) || 0,
+      highCrashTimes: parseInt(highCrashTimes) || 0,
     };
 
     currentBetAmount = betConfig.amount;
@@ -574,6 +597,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "startAutoBet") {
     autoBetRunning = true;
     consecutiveLowCrashes = 0;
+    consecutiveHighCrashes = 0;
     skipBetting = false;
     ignorePreviousCrash = true;
     totalProfit = 0;

@@ -84,12 +84,22 @@
         <h4>🛑 Stop Betting Rules</h4>
         <div class="form-row">
           <div class="form-half">
-            <label>Crash At</label>
+            <label>Low Crash At</label>
             <input type="number" id="crashAt" step="0.01" min="1.00" max="10" placeholder="1.00" required />
           </div>
           <div class="form-half">
             <label>Times</label>
             <input type="number" id="crashTimes" step="1" min="1" max="20" placeholder="3" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-half">
+            <label>High Crash At</label>
+            <input type="number" id="highCrashAt" step="0.01" min="1.00" max="100" placeholder="0.00" />
+          </div>
+          <div class="form-half">
+            <label>Times</label>
+            <input type="number" id="highCrashTimes" step="1" min="1" max="20" placeholder="0" />
           </div>
         </div>
         

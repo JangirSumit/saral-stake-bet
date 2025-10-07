@@ -30,6 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const profitTimes = document.getElementById("profitTimes");
   const walletStopLoss = document.getElementById("walletStopLoss");
   const decimalPlaces = document.getElementById("decimalPlaces");
+  const highCrashAt = document.getElementById("highCrashAt");
+  const highCrashTimes = document.getElementById("highCrashTimes");
   const saveBtn = document.getElementById("saveBtn");
   // const resetBetBtn = document.getElementById("resetBetBtn");
   const screenshotBtn = document.getElementById("screenshotBtn");
@@ -68,6 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
         decimalPlacesCount = parseInt(data.decimalPlaces) || 0;
         decimalPlaces.value = data.decimalPlaces;
       }
+      
+      // Load high crash settings
+      if (data.highCrashAt) highCrashAt.value = data.highCrashAt;
+      if (data.highCrashTimes) highCrashTimes.value = data.highCrashTimes;
     }
   });
   
@@ -105,6 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
       profitTimes: profitTimes.value,
       walletStopLoss: walletStopLoss.value,
       decimalPlaces: decimalPlaces.value,
+      highCrashAt: highCrashAt.value,
+      highCrashTimes: highCrashTimes.value,
     };
 
     chrome.storage.local.set({ betData });
@@ -185,6 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
         profitTimes: profitTimes.value,
         walletStopLoss: walletStopLoss.value,
         decimalPlaces: decimalPlaces.value,
+        highCrashAt: highCrashAt.value,
+        highCrashTimes: highCrashTimes.value,
       };
 
       autoBettingActive = true;
