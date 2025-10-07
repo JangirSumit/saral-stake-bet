@@ -96,23 +96,31 @@ function betWatcher() {
               consecutiveLowCrashes
             );
 
-            // Check if we should skip due to consecutive losses
-            if (consecutiveLowCrashes >= betConfig.crashTimes) {
+            // Check if we should skip due to consecutive losses (only if low crash rules are enabled)
+            if (betConfig.crashAt > 0 && betConfig.crashTimes > 0 && consecutiveLowCrashes >= betConfig.crashTimes) {
               skipBetting = true;
               console.log(
-                `Pre-bet check: Skipping due to ${consecutiveLowCrashes} consecutive losses`
+                `Pre-bet check: Skipping due to ${consecutiveLowCrashes} consecutive low crashes`
+              );
+            }
+            
+            // Check if we should skip due to consecutive high crashes (only if high crash rules are enabled)
+            if (betConfig.highCrashAt > 0 && betConfig.highCrashTimes > 0 && consecutiveHighCrashes >= betConfig.highCrashTimes) {
+              skipBetting = true;
+              console.log(
+                `Pre-bet check: Skipping due to ${consecutiveHighCrashes} consecutive high crashes`
               );
             }
 
             if (!skipBetting) {
               placeBet();
             } else {
-              console.log("Bet skipped due to consecutive low crashes");
+              console.log("Bet skipped due to consecutive crashes");
               currentBet = null; // Ensure no bet is tracked
               // Notify bet skipped
               chrome.runtime.sendMessage({
                 action: "showBetStatus",
-                data: { type: "skipped", reason: "Consecutive low crashes" },
+                data: { type: "skipped", reason: "Consecutive crashes" },
               });
             }
           }, 50);
