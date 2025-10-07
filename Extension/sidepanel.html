@@ -51,6 +51,7 @@
     <div class="tab-container">
       <button class="tab-btn active" id="settingsTab">⚙️ Settings</button>
       <button class="tab-btn" id="historyTab">📊 History</button>
+      <button class="tab-btn" id="helpTab">❓ Help</button>
     </div>
 
     <!-- Settings Tab Content -->
@@ -184,6 +185,100 @@
         </div>
         <div id="historyList" class="history-list">
           <!-- History items will be added here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Tab Content -->
+    <div id="helpContent" class="tab-content">
+      <div class="help-section">
+        <div class="panel-header" data-panel="usage">
+          <h4>📚 How to Use</h4>
+          <span class="toggle-icon" id="usageToggle">▼</span>
+        </div>
+        <div class="panel-content" id="usageContent">
+          <div class="help-text">
+            <p><strong>1. Configure Settings:</strong> Set your betting parameters in the Settings tab</p>
+            <p><strong>2. Save Config:</strong> Click "Save Config" to store your settings</p>
+            <p><strong>3. Start Betting:</strong> Click "Start" when status shows connected (green dot)</p>
+            <p><strong>4. Monitor:</strong> Watch real-time activity in the History tab</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="panel-header" data-panel="config">
+          <h4>⚙️ Configuration Guide</h4>
+          <span class="toggle-icon" id="configToggle">▼</span>
+        </div>
+        <div class="panel-content" id="configContent">
+          <div class="help-text">
+            <p><strong>Bet Amount:</strong> Initial betting amount</p>
+            <p><strong>Cashout At:</strong> Target multiplier to cash out (e.g., 2.5x)</p>
+            <p><strong>On Loss (%):</strong> Increase bet by this % after loss (e.g., 30%)</p>
+            <p><strong>On Win (%):</strong> Decrease bet by this % after win (e.g., -25%)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="panel-header" data-panel="stop">
+          <h4>🛑 Stop Betting Rules</h4>
+          <span class="toggle-icon collapsed" id="stopToggle">▼</span>
+        </div>
+        <div class="panel-content collapsed" id="stopContent">
+          <div class="help-text">
+            <p><strong>Low Crash At:</strong> Crash threshold for "low" crashes (0 = disabled)</p>
+            <p><strong>Times:</strong> Skip betting after N consecutive low crash losses</p>
+            <p><strong>High Crash At:</strong> Skip after consecutive high crashes (0 = disabled)</p>
+            <p><em>Low Example: Skip after 3 losses at crashes ≤ 2.0x</em></p>
+            <p><em>High Example: Skip after 2 crashes ≥ 10.0x</em></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="panel-header" data-panel="resume">
+          <h4>🔄 Resume & Reset Rules</h4>
+          <span class="toggle-icon collapsed" id="resumeToggle">▼</span>
+        </div>
+        <div class="panel-content collapsed" id="resumeContent">
+          <div class="help-text">
+            <p><strong>Resume At:</strong> Resume betting when crash ≥ this value (e.g., 5.0x)</p>
+            <p><strong>Adjust Bet (%):</strong> Modify bet amount when resuming (0 = no change)</p>
+            <p><strong>Reset Threshold:</strong> Reset to original bet if change exceeds % (0 = disabled)</p>
+            <p><strong>Profit Reset:</strong> Reset bet after profit reaches X times original (0 = disabled)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="panel-header" data-panel="safety">
+          <h4>🛡️ Safety Features</h4>
+          <span class="toggle-icon collapsed" id="safetyToggle">▼</span>
+        </div>
+        <div class="panel-content collapsed" id="safetyContent">
+          <div class="help-text">
+            <p><strong>Wallet Protection:</strong> Stop if wallet drops by % (0 = disabled)</p>
+            <p><strong>Auto-refresh:</strong> Page refreshes on connection loss</p>
+            <p><strong>Decimal Places:</strong> Number format precision (0-5)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="panel-header" data-panel="notes">
+          <h4>⚠️ Important Notes</h4>
+          <span class="toggle-icon collapsed" id="notesToggle">▼</span>
+        </div>
+        <div class="panel-content collapsed" id="notesContent">
+          <div class="help-text">
+            <p><strong>•</strong> Only works on stake.bet crash game page</p>
+            <p><strong>•</strong> Green dot = Connected, Red dot = Disconnected</p>
+            <p><strong>•</strong> Set values to 0 to disable specific rules</p>
+            <p><strong>•</strong> Always test with small amounts first</p>
+            <p><strong>•</strong> Gambling involves risk - bet responsibly</p>
+          </div>
         </div>
       </div>
     </div>

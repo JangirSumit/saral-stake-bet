@@ -46,6 +46,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // Tab switching functionality
   document.getElementById("settingsTab").addEventListener("click", () => switchTab("settings"));
   document.getElementById("historyTab").addEventListener("click", () => switchTab("history"));
+  document.getElementById("helpTab").addEventListener("click", () => switchTab("help"));
+  
+  // Help panel toggle functionality
+  document.querySelectorAll('.panel-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const panelName = header.getAttribute('data-panel');
+      if (panelName) {
+        togglePanel(panelName);
+      }
+    });
+  });
   
   // Load saved configuration
   chrome.storage.local.get(["betData"], (result) => {
@@ -712,4 +723,15 @@ function switchTab(tabName) {
   // Add active class to selected tab and content
   document.getElementById(tabName + 'Tab').classList.add('active');
   document.getElementById(tabName + 'Content').classList.add('active');
+}
+
+// Global function for HTML onclick handlers
+function togglePanel(panelName) {
+  const content = document.getElementById(panelName + 'Content');
+  const toggle = document.getElementById(panelName + 'Toggle');
+  
+  if (content && toggle) {
+    content.classList.toggle('collapsed');
+    toggle.classList.toggle('collapsed');
+  }
 }
