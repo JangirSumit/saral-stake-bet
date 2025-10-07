@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resumeAdjust = document.getElementById("resumeAdjust");
   const resetThreshold = document.getElementById("resetThreshold");
   const profitTimes = document.getElementById("profitTimes");
+  const lossResetAmount = document.getElementById("lossResetAmount");
   const walletStopLoss = document.getElementById("walletStopLoss");
   const decimalPlaces = document.getElementById("decimalPlaces");
   const highCrashAt = document.getElementById("highCrashAt");
@@ -74,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.resumeAdjust) resumeAdjust.value = data.resumeAdjust;
       if (data.resetThreshold) resetThreshold.value = data.resetThreshold;
       if (data.profitTimes) profitTimes.value = data.profitTimes;
+      if (data.lossResetAmount) lossResetAmount.value = data.lossResetAmount;
       if (data.walletStopLoss) walletStopLoss.value = data.walletStopLoss;
       
       // Load decimal places setting
@@ -120,6 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resumeAdjust: resumeAdjust.value,
       resetThreshold: resetThreshold.value,
       profitTimes: profitTimes.value,
+      lossResetAmount: lossResetAmount.value,
       walletStopLoss: walletStopLoss.value,
       decimalPlaces: decimalPlaces.value,
       highCrashAt: highCrashAt.value,
@@ -202,6 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resumeAdjust: resumeAdjust.value,
         resetThreshold: resetThreshold.value,
         profitTimes: profitTimes.value,
+        lossResetAmount: lossResetAmount.value,
         walletStopLoss: walletStopLoss.value,
         decimalPlaces: decimalPlaces.value,
         highCrashAt: highCrashAt.value,

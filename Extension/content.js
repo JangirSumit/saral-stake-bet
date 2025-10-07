@@ -395,6 +395,9 @@ function adjustBetAmountBasedOnResult(crash) {
 
   // Check if reset threshold is exceeded
   checkResetThreshold();
+  
+  // Check if loss reset amount is reached
+  checkLossResetAmount();
 }
 
 function setInputValue(input, value) {
@@ -438,6 +441,36 @@ function checkResetThreshold() {
         data: { amount: currentBetAmount },
       });
 
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkLossResetAmount() {
+  if (betConfig.lossResetAmount > 0 && totalProfit < 0) {
+    const currentLoss = Math.abs(totalProfit);
+    
+    if (currentLoss >= betConfig.lossResetAmount) {
+      console.log(`Loss reset triggered! Loss: ${currentLoss} >= ${betConfig.lossResetAmount}`);
+      
+      // Reset sub session
+      currentBetAmount = originalBetAmount;
+      totalProfit = 0;
+      
+      console.log(`Sub session reset - bet amount: ${originalBetAmount}, profit reset to 0`);
+      
+      // Notify sidepanel to reset graph and calculations
+      chrome.runtime.sendMessage({
+        action: "resetProfitTracking"
+      });
+      
+      // Update current bet amount display
+      chrome.runtime.sendMessage({
+        action: "updateCurrentBetAmount",
+        data: { amount: currentBetAmount, currency: currentCurrency },
+      });
+      
       return true;
     }
   }
@@ -558,6 +591,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeAdjust,
       resetThreshold,
       profitTimes,
+      lossResetAmount,
       walletStopLoss,
       decimalPlaces,
       highCrashAt,
@@ -575,6 +609,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeAdjust: parseFloat(resumeAdjust) || 0,
       resetThreshold: parseFloat(resetThreshold) || 0,
       profitTimes: parseFloat(profitTimes) || 0,
+      lossResetAmount: parseFloat(lossResetAmount) || 0,
       walletStopLoss: parseFloat(walletStopLoss) || 0,
       decimalPlaces: parseInt(decimalPlaces) || 0,
       highCrashAt: parseFloat(highCrashAt) || 0,
