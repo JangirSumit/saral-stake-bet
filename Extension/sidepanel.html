@@ -85,22 +85,12 @@
         <h4>🛑 Stop Betting Rules</h4>
         <div class="form-row">
           <div class="form-half">
-            <label>Low Crash At</label>
-            <input type="number" id="crashAt" step="0.01" min="0" max="10000" placeholder="1.00" required />
+            <label>Crash At</label>
+            <input type="number" id="crashAt" step="0.01" min="0" max="10000" placeholder="2.90" required />
           </div>
           <div class="form-half">
             <label>Times</label>
-            <input type="number" id="crashTimes" step="1" min="0" max="100" placeholder="3" required />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-half">
-            <label>High Crash At</label>
-            <input type="number" id="highCrashAt" step="0.01" min="0" max="1000" placeholder="0.00" />
-          </div>
-          <div class="form-half">
-            <label>Times</label>
-            <input type="number" id="highCrashTimes" step="1" min="0" max="100" placeholder="0" />
+            <input type="number" id="crashTimes" step="1" min="0" max="100" placeholder="5" required />
           </div>
         </div>
         
@@ -234,11 +224,10 @@
         </div>
         <div class="panel-content collapsed" id="stopContent">
           <div class="help-text">
-            <p><strong>Low Crash At:</strong> Crash threshold for "low" crashes (0 = disabled)</p>
-            <p><strong>Times:</strong> Skip betting after N consecutive low crash losses</p>
-            <p><strong>High Crash At:</strong> Skip after consecutive high crashes (0 = disabled)</p>
-            <p><em>Low Example: Skip after 3 losses at crashes ≤ 2.0x</em></p>
-            <p><em>High Example: Skip after 2 crashes ≥ 10.0x</em></p>
+            <p><strong>Crash At:</strong> Skip when consecutive crashes don't reach threshold (0 = disabled)</p>
+            <p><strong>Times:</strong> Number of consecutive low crashes to trigger skip</p>
+            <p><em>Example: Skip after 5 bet crashes < 2.9x (regardless of win/loss)</em></p>
+            <p><em>Logic: If crashes consistently stay below threshold, pause betting</em></p>
           </div>
         </div>
       </div>

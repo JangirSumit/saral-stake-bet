@@ -96,19 +96,11 @@ function betWatcher() {
               consecutiveLowCrashes
             );
 
-            // Check if we should skip due to consecutive losses (only if low crash rules are enabled)
+            // Check if we should skip due to consecutive low crashes
             if (betConfig.crashAt > 0 && betConfig.crashTimes > 0 && consecutiveLowCrashes >= betConfig.crashTimes) {
               skipBetting = true;
               console.log(
                 `Pre-bet check: Skipping due to ${consecutiveLowCrashes} consecutive low crashes`
-              );
-            }
-            
-            // Check if we should skip due to consecutive high crashes (only if high crash rules are enabled)
-            if (betConfig.highCrashAt > 0 && betConfig.highCrashTimes > 0 && consecutiveHighCrashes >= betConfig.highCrashTimes) {
-              skipBetting = true;
-              console.log(
-                `Pre-bet check: Skipping due to ${consecutiveHighCrashes} consecutive high crashes`
               );
             }
 
@@ -223,8 +215,7 @@ function handleStopResumeLogic(crash) {
 
   // Check crash patterns for betting decisions
   if (currentBet) {
-    checkHighCrashPattern(crash);
-    checkLowCrashPattern(crash);
+    checkCrashPattern(crash);
   }
 }
 
@@ -256,43 +247,21 @@ function checkResumeLogic(crash) {
   return false;
 }
 
-function checkHighCrashPattern(crash) {
-  if (betConfig.highCrashAt > 0 && betConfig.highCrashTimes > 0) {
-    if (crash >= betConfig.highCrashAt) {
-      consecutiveHighCrashes++;
-      console.log(`High crash detected: ${crash} >= ${betConfig.highCrashAt}. Count: ${consecutiveHighCrashes}`);
+function checkCrashPattern(crash) {
+  // Check crash pattern (all bet outcomes)
+  if (betConfig.crashAt > 0 && betConfig.crashTimes > 0) {
+    if (crash < betConfig.crashAt) {
+      consecutiveLowCrashes++;
+      console.log(`Bet crash below threshold: ${crash} < ${betConfig.crashAt}. Count: ${consecutiveLowCrashes}`);
       
-      if (consecutiveHighCrashes >= betConfig.highCrashTimes) {
-        console.log(`Will skip betting after ${consecutiveHighCrashes} consecutive high crashes`);
+      if (consecutiveLowCrashes >= betConfig.crashTimes) {
+        console.log(`Will skip betting after ${consecutiveLowCrashes} consecutive crashes below ${betConfig.crashAt}`);
         skipBetting = true;
       }
     } else {
-      consecutiveHighCrashes = 0;
+      consecutiveLowCrashes = 0;
+      console.log(`Crash reached threshold: ${crash} >= ${betConfig.crashAt}, reset count`);
     }
-  }
-}
-
-function checkLowCrashPattern(crash) {
-  if (crash < currentBet.cashoutAt) {
-    // Bet lost - only check if rules are enabled
-    if (betConfig.crashAt > 0 && betConfig.crashTimes > 0) {
-      if (crash <= betConfig.crashAt) {
-        consecutiveLowCrashes++;
-        console.log(`Low crash bet loss detected. Count: ${consecutiveLowCrashes}`);
-
-        if (consecutiveLowCrashes >= betConfig.crashTimes) {
-          console.log(`Will skip betting after ${consecutiveLowCrashes} consecutive low crash losses`);
-          skipBetting = true;
-        }
-      } else {
-        consecutiveLowCrashes = 0;
-        console.log(`High crash loss - reset consecutive count`);
-      }
-    }
-  } else {
-    // Bet won
-    consecutiveLowCrashes = 0;
-    console.log(`Bet won - reset consecutive loss count`);
   }
 }
 
@@ -602,8 +571,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       lossResetAmount,
       walletStopLoss,
       decimalPlaces,
-      highCrashAt,
-      highCrashTimes,
     } = message.data;
 
     betConfig = {
@@ -620,8 +587,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       lossResetAmount: parseFloat(lossResetAmount) || 0,
       walletStopLoss: parseFloat(walletStopLoss) || 0,
       decimalPlaces: parseInt(decimalPlaces) || 0,
-      highCrashAt: parseFloat(highCrashAt) || 0,
-      highCrashTimes: parseInt(highCrashTimes) || 0,
     };
 
     currentBetAmount = betConfig.amount;
