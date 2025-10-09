@@ -57,6 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
   
+  // Initialize dialog functionality
+  initializeDialog();
+  
   // Load saved configuration
   chrome.storage.local.get(["betData"], (result) => {
     if (result.betData) {
@@ -351,6 +354,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     updateSuperSummary();
   }
   
+  if (message.action === "updateSubSessionData") {
+    document.getElementById('subResets').textContent = message.data.resets;
+    updateResetsList(message.data.lossDetails);
+  }
+  
   if (message.action === "walletProtectionTriggered") {
     const notification = document.getElementById("betNotification");
     if (notification) {
@@ -620,7 +628,8 @@ function showScreenshotFallback() {
   csvContent += `Total Loss,${document.getElementById('superLossCurrency')?.textContent || '$'}${document.getElementById('superLoss')?.textContent || '0.00'}\n`;
   csvContent += `Net Profit/Loss,${document.getElementById('superNetCurrency')?.textContent || '$'}${document.getElementById('superNet')?.textContent || '0.00'}\n`;
   csvContent += `Max Loss Reached,${document.getElementById('maxLossCurrency')?.textContent || '$'}${document.getElementById('maxLoss')?.textContent || '0.00'}\n`;
-  csvContent += `Total Bets Placed,${document.getElementById('superBets')?.textContent || '0'}\n\n`;
+  csvContent += `Total Bets Placed,${document.getElementById('superBets')?.textContent || '0'}\n`;
+  csvContent += `Sub-Session Resets,${document.getElementById('subResets')?.textContent || '0'}\n\n`;
   
   // Current Settings
   csvContent += 'CURRENT SETTINGS\n';
@@ -636,6 +645,36 @@ function showScreenshotFallback() {
   csvContent += `Profit Reset Times,${document.getElementById('profitTimes')?.value || 'Not Set'}\n`;
   csvContent += `Wallet Stop Loss,${document.getElementById('walletStopLoss')?.value || 'Not Set'}%\n`;
   csvContent += `Decimal Places,${document.getElementById('decimalPlaces')?.value || 'Not Set'}\n\n`;
+  
+  // Sub-Session Resets
+  csvContent += 'SUB-SESSION RESETS\n';
+  const subResets = document.getElementById('subResets')?.textContent || '0';
+  csvContent += `Total Resets,${subResets}\n`;
+  
+  // Get reset details from dialog if available
+  const lossDetailsList = document.getElementById('lossDetailsList');
+  if (lossDetailsList && lossDetailsList.children.length > 0) {
+    csvContent += 'Reset #,Time,Loss Amount,Bet Before,Bet After\n';
+    Array.from(lossDetailsList.children).forEach(item => {
+      const header = item.querySelector('.reset-header')?.textContent || '';
+      const details = item.querySelector('.reset-details')?.textContent || '';
+      
+      // Parse reset number and time
+      const resetMatch = header.match(/Reset #(\d+) - (.+)/);
+      const resetNum = resetMatch ? resetMatch[1] : '';
+      const resetTime = resetMatch ? resetMatch[2] : '';
+      
+      // Parse loss and bet amounts
+      const lossMatch = details.match(/Loss: [\$₹]?([\d.]+)/);
+      const betMatch = details.match(/Bet: [\$₹]?([\d.]+) → [\$₹]?([\d.]+)/);
+      const lossAmount = lossMatch ? lossMatch[1] : '';
+      const betBefore = betMatch ? betMatch[1] : '';
+      const betAfter = betMatch ? betMatch[2] : '';
+      
+      csvContent += `${resetNum},${resetTime},${lossAmount},${betBefore},${betAfter}\n`;
+    });
+  }
+  csvContent += '\n';
   
   // Betting History
   csvContent += 'BETTING HISTORY\n';
@@ -729,5 +768,56 @@ function togglePanel(panelName) {
   if (content && toggle) {
     content.classList.toggle('collapsed');
     toggle.classList.toggle('collapsed');
+  }
+}
+
+function updateResetsList(lossDetails) {
+  const lossDetailsList = document.getElementById('lossDetailsList');
+  if (!lossDetailsList) return;
+  
+  lossDetailsList.innerHTML = '';
+  
+  if (lossDetails && lossDetails.length > 0) {
+    lossDetails.forEach(reset => {
+      const resetItem = document.createElement('div');
+      resetItem.className = 'reset-item';
+      resetItem.innerHTML = `
+        <div class="reset-header">Reset #${reset.resetNumber} - ${reset.timestamp}</div>
+        <div class="reset-details">Loss: ${currentCurrency}${formatNumber(reset.lossAmount)} | Bet: ${currentCurrency}${formatNumber(reset.betAmountBefore)} → ${currentCurrency}${formatNumber(reset.betAmountAfter)}</div>
+      `;
+      lossDetailsList.appendChild(resetItem);
+    });
+  } else {
+    lossDetailsList.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 20px;">No loss resets yet</div>';
+  }
+}
+
+function initializeDialog() {
+  const subResets = document.getElementById('subResets');
+  const dialog = document.getElementById('lossDetailsDialog');
+  const closeBtn = document.getElementById('closeLossDialog');
+  
+  if (subResets) {
+    subResets.addEventListener('click', () => {
+      if (dialog) {
+        dialog.style.display = 'block';
+      }
+    });
+  }
+  
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      if (dialog) {
+        dialog.style.display = 'none';
+      }
+    });
+  }
+  
+  if (dialog) {
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) {
+        dialog.style.display = 'none';
+      }
+    });
   }
 }

@@ -22,6 +22,8 @@ let sessionStartTime = null;
 let superTotalProfit = 0;
 let superTotalLoss = 0;
 let superTotalBets = 0;
+let subSessionResets = 0;
+let subSessionLossDetails = [];
 let ignorePreviousCrash = false;
 let walletObserver = null;
 let currentWalletBalance = 0;
@@ -431,15 +433,36 @@ function checkLossResetAmount() {
     if (currentLoss >= betConfig.lossResetAmount) {
       console.log(`Loss reset triggered! Loss: ${currentLoss} >= ${betConfig.lossResetAmount}`);
       
+      // Track sub-session reset details
+      subSessionResets++;
+      const resetDetails = {
+        resetNumber: subSessionResets,
+        lossAmount: currentLoss,
+        timestamp: new Date().toLocaleTimeString(),
+        betAmountBefore: currentBetAmount,
+        betAmountAfter: originalBetAmount
+      };
+      subSessionLossDetails.push(resetDetails);
+      
       // Reset sub session
       currentBetAmount = originalBetAmount;
+      lastBetAmount = originalBetAmount; // Fix: Update lastBetAmount for resume logic
       totalProfit = 0;
       
-      console.log(`Sub session reset - bet amount: ${originalBetAmount}, profit reset to 0`);
+      console.log(`Sub session reset #${subSessionResets} - loss: ${currentLoss}, bet amount: ${originalBetAmount}`);
       
       // Notify sidepanel to reset graph and calculations
       chrome.runtime.sendMessage({
         action: "resetProfitTracking"
+      });
+      
+      // Send updated sub-session data
+      chrome.runtime.sendMessage({
+        action: "updateSubSessionData",
+        data: {
+          resets: subSessionResets,
+          lossDetails: subSessionLossDetails
+        }
       });
       
       // Update current bet amount display
@@ -613,6 +636,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     superTotalProfit = 0;
     superTotalLoss = 0;
     superTotalBets = 0;
+    subSessionResets = 0;
+    subSessionLossDetails = [];
     initialWalletBalance = currentWalletBalance;
     walletProtectionTriggered = false;
     console.log("Auto-betting started - will ignore next crash");

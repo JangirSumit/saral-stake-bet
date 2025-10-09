@@ -44,6 +44,7 @@
           <span class="super-label">Max Loss: <span id="maxLossCurrency">$</span><span id="maxLoss">0.00</span></span>
           <span class="super-label">Net: <span id="superNetCurrency">$</span><span id="superNet">0.00</span></span>
           <span class="super-label">Bets: <span id="superBets">0</span></span>
+          <span class="super-label">Loss Resets: <span id="subResets" class="clickable-count" title="Click to view reset details">0</span></span>
         </div>
       </div>
 
@@ -243,7 +244,8 @@
             <p><strong>Adjust Bet (%):</strong> Modify bet amount when resuming (0 = no change)</p>
             <p><strong>Reset Threshold:</strong> Reset to original bet if change exceeds % (0 = disabled)</p>
             <p><strong>Profit Reset:</strong> Reset bet after profit reaches X times original (0 = disabled)</p>
-            <p><strong>Loss Reset:</strong> Reset sub session when loss reaches amount (0 = disabled)</p>
+            <p><strong>Loss Reset:</strong> Reset sub-session when loss reaches amount (0 = disabled)</p>
+            <p><em>Sub-session resets: Click reset count in summary to view detailed history</em></p>
           </div>
         </div>
       </div>
@@ -280,6 +282,18 @@
     </div>
 
     <div class="bottom-spacer"></div>
+
+    <!-- Loss Details Dialog -->
+    <div id="lossDetailsDialog" class="dialog-overlay">
+      <div class="dialog-content">
+        <div class="dialog-header">
+          <h3>Loss Reset Details</h3>
+          <button id="closeLossDialog" class="close-btn">&times;</button>
+        </div>
+        <div id="lossDetailsList" class="dialog-body"></div>
+      </div>
+    </div>
+
     <script src="sidepanel.js"></script>
   </body>
 </html>
