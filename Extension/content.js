@@ -335,15 +335,7 @@ function adjustBetAmountBasedOnResult(crash) {
         action: "resetProfitTracking"
       });
       
-      // Send super data update
-      chrome.runtime.sendMessage({
-        action: "updateSuperData",
-        data: {
-          superProfit: superTotalProfit,
-          superLoss: superTotalLoss,
-          superBets: superTotalBets
-        }
-      });
+
     } else if (onWin === 0) {
       // Won - check if onWin is 0% to reset to original amount
       currentBetAmount = originalBetAmount;
@@ -374,9 +366,19 @@ function adjustBetAmountBasedOnResult(crash) {
 
   // Check if reset threshold is exceeded
   checkResetThreshold();
-  
   // Check if loss reset amount is reached
   checkLossResetAmount();
+
+  // Send super data update after win or loss
+  console.log("Sending super data update:", { superTotalProfit, superTotalLoss, superTotalBets });
+  chrome.runtime.sendMessage({
+    action: "updateSuperData",
+    data: {
+      superProfit: superTotalProfit,
+      superLoss: superTotalLoss,
+      superBets: superTotalBets
+    }
+  });
 }
 
 function setInputValue(input, value) {

@@ -296,9 +296,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   if (message.action === "updateDecimalPlaces") {
     decimalPlacesCount = message.data.decimalPlaces;
-    // Refresh all displays
-    updateProfitGraph();
-    updateSuperSummary();
   }
   
   if (message.action === "updateWalletBalance") {
@@ -308,8 +305,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       currentCurrency = message.data.currency || '$';
       walletElement.textContent = `Balance: ${currentCurrency}${balance}`;
       // Update all displays with new currency
-      updateSuperSummary();
-      updateProfitGraph();
     }
   }
 
@@ -348,6 +343,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   
   if (message.action === "updateSuperData") {
+    console.log("Received super data update:", message.data);
     superTotalProfit = message.data.superProfit;
     superTotalLoss = message.data.superLoss;
     superTotalBets = message.data.superBets;
@@ -439,8 +435,8 @@ function addHistoryItem(data) {
       profitLoss = -parseFloat(data.betAmount);
     }
     
-    // Only update profit tracking if auto betting is active
-    if (autoBettingActive) {
+    // Only update cycle tracking if auto betting is active
+    if (autoBettingActive && !data.skipped) {
       // Skip profit tracking update if we just reset
       if (skipNextHistoryUpdate) {
         skipNextHistoryUpdate = false;
@@ -448,12 +444,9 @@ function addHistoryItem(data) {
       } else {
         if (won) {
           totalProfit += profitLoss;
-          superTotalProfit += profitLoss;
         } else {
           totalLoss += Math.abs(profitLoss);
-          superTotalLoss += Math.abs(profitLoss);
         }
-        superTotalBets++;
         cycleBets++;
         
         // Update profit history for graph
@@ -466,7 +459,6 @@ function addHistoryItem(data) {
         }
         
         updateProfitGraph();
-        updateSuperSummary();
         updateCycleDisplay();
       }
     }
@@ -598,6 +590,8 @@ function formatNumber(num) {
 }
 
 function updateSuperSummary() {
+  console.log("updating super summary", superTotalProfit, superTotalLoss, superTotalBets);
+
   document.getElementById('superProfit').textContent = formatNumber(superTotalProfit);
   document.getElementById('superLoss').textContent = formatNumber(superTotalLoss);
   document.getElementById('maxLoss').textContent = formatNumber(Math.abs(maxSubSessionLoss));
