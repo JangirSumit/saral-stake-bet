@@ -4,12 +4,27 @@ PowerShell script to launch Chrome or Edge with optimized performance flags to p
 
 ## 🚀 Quick Start
 
+### Method 1: Right-Click (Easiest)
+1. **Right-click** `launch-chrome.ps1`
+2. **Select** "Run with PowerShell"
+3. **Done!** Chrome launches automatically
+
+### Method 2: Command Line
 ```powershell
 # Launch Chrome (default)
 .\launch-chrome.ps1
 
 # Launch Edge
 .\launch-chrome.ps1 -Browser edge
+```
+
+### Method 3: One-Line Command
+```cmd
+# From Command Prompt (cmd)
+powershell -ExecutionPolicy Bypass -File "launch-chrome.ps1"
+
+# From PowerShell
+powershell -ExecutionPolicy Bypass .\launch-chrome.ps1
 ```
 
 ## 📋 Usage
@@ -59,14 +74,37 @@ The script automatically applies these optimization flags:
 - Maintains extension connectivity
 - Ensures uninterrupted betting sessions
 
-## 🛠️ Installation
+## 🛠️ Installation & Running
 
-1. **Download** the `launch-chrome.ps1` script
-2. **Right-click** → "Run with PowerShell"
-3. **Or run in PowerShell:**
-   ```powershell
-   .\launch-chrome.ps1
-   ```
+### Option 1: Simple Right-Click (Recommended)
+1. **Download** `launch-chrome.ps1` to any folder
+2. **Right-click** the file
+3. **Select** "Run with PowerShell"
+4. **Chrome launches** with optimized settings
+
+### Option 2: Command Line
+```powershell
+# Navigate to script folder
+cd "C:\path\to\script"
+
+# Run script
+.\launch-chrome.ps1
+```
+
+### Option 3: From Any Location
+```cmd
+# Run from anywhere (replace path)
+powershell -ExecutionPolicy Bypass -File "C:\path\to\launch-chrome.ps1"
+```
+
+### Option 4: Create Batch File
+Create `launch-betting-chrome.bat`:
+```batch
+@echo off
+powershell -ExecutionPolicy Bypass -File "%~dp0launch-chrome.ps1"
+pause
+```
+Double-click the `.bat` file to run.
 
 ## 🔒 Security Note
 
@@ -90,7 +128,10 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 ### Script Won't Run
-**Solution**: Right-click script → Properties → Unblock → OK
+**Solutions**:
+- Right-click script → Properties → Unblock → OK
+- Use bypass command: `powershell -ExecutionPolicy Bypass -File "launch-chrome.ps1"`
+- Run as Administrator if needed
 
 ## 📝 Examples
 
@@ -110,10 +151,25 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ## ⚡ Pro Tips
 
-1. **Create Desktop Shortcut**: Right-click script → Send to → Desktop
-2. **Pin to Taskbar**: Create shortcut, then pin to taskbar
-3. **Always Use**: Launch browser with this script for betting sessions
-4. **Combine with Extension**: Use together with "Keep Tab Active" extension for maximum reliability
+### Easy Access Methods
+1. **Desktop Shortcut**: Right-click script → Send to → Desktop
+2. **Taskbar Pin**: Create shortcut, then pin to taskbar  
+3. **Start Menu**: Copy to `%APPDATA%\Microsoft\Windows\Start Menu\Programs`
+
+### Quick Commands
+```powershell
+# Create alias for easy access
+Set-Alias betting "C:\path\to\launch-chrome.ps1"
+betting  # Now just type 'betting'
+
+# Add to PowerShell profile for permanent alias
+echo 'Set-Alias betting "C:\path\to\launch-chrome.ps1"' >> $PROFILE
+```
+
+### Best Practices
+4. **Always Use**: Launch browser with this script for betting sessions
+5. **Combine with Extension**: Use together with "Keep Tab Active" extension for maximum reliability
+6. **Keep Script Handy**: Save in easily accessible location like Desktop or Documents
 
 ---
 
