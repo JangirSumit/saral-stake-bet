@@ -26,6 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const crashTimes = document.getElementById("crashTimes");
   const resumeAt = document.getElementById("resumeAt");
   const resumeAdjust = document.getElementById("resumeAdjust");
+  const resumeBelowAt = document.getElementById("resumeBelowAt");
+  const resumeBelowTimes = document.getElementById("resumeBelowTimes");
   const resetThreshold = document.getElementById("resetThreshold");
   const profitTimes = document.getElementById("profitTimes");
   const lossResetAmount = document.getElementById("lossResetAmount");
@@ -74,6 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.stopCrashTimes) crashTimes.value = data.stopCrashTimes;
       if (data.resumeAt) resumeAt.value = data.resumeAt;
       if (data.resumeAdjust) resumeAdjust.value = data.resumeAdjust;
+      if (data.resumeBelowAt) resumeBelowAt.value = data.resumeBelowAt;
+      if (data.resumeBelowTimes) resumeBelowTimes.value = data.resumeBelowTimes;
       if (data.resetThreshold) resetThreshold.value = data.resetThreshold;
       if (data.profitTimes) profitTimes.value = data.profitTimes;
       if (data.lossResetAmount) lossResetAmount.value = data.lossResetAmount;
@@ -119,6 +123,8 @@ document.addEventListener("DOMContentLoaded", () => {
       stopCrashTimes: crashTimes.value,
       resumeAt: resumeAt.value,
       resumeAdjust: resumeAdjust.value,
+      resumeBelowAt: resumeBelowAt.value,
+      resumeBelowTimes: resumeBelowTimes.value,
       resetThreshold: resetThreshold.value,
       profitTimes: profitTimes.value,
       lossResetAmount: lossResetAmount.value,
@@ -198,6 +204,8 @@ document.addEventListener("DOMContentLoaded", () => {
         stopCrashTimes: crashTimes.value,
         resumeAt: resumeAt.value,
         resumeAdjust: resumeAdjust.value,
+        resumeBelowAt: resumeBelowAt.value,
+        resumeBelowTimes: resumeBelowTimes.value,
         resetThreshold: resetThreshold.value,
         profitTimes: profitTimes.value,
         lossResetAmount: lossResetAmount.value,

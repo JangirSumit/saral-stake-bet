@@ -11,6 +11,7 @@ let betConfig = {};
 let crashHistory = [];
 let consecutiveLowCrashes = 0;
 let consecutiveHighCrashes = 0;
+let consecutiveResumeBelowCrashes = 0;
 let skipBetting = false;
 let resumeTriggered = false;
 let resumeNextRound = false;
@@ -222,31 +223,69 @@ function handleStopResumeLogic(crash) {
 }
 
 function checkResumeLogic(crash) {
-  if (skipBetting && crash >= betConfig.resumeAt) {
-    console.log(`Resume triggered! Crash ${crash} >= resumeAt ${betConfig.resumeAt}`);
-
-    if (betConfig.resumeAdjust !== 0) {
-      const oldAmount = currentBetAmount;
-      currentBetAmount = adjustBetAmount(lastBetAmount, betConfig.resumeAdjust);
-      console.log(
-        `Resume bet adjustment: ${oldAmount} -> ${currentBetAmount} (${betConfig.resumeAdjust}% from last bet ${lastBetAmount})`
-      );
-    } else {
-      currentBetAmount = lastBetAmount;
-      console.log(`Resume: Using last bet amount ${lastBetAmount}`);
+  if (skipBetting) {
+    // Check high crash resume (original logic)
+    if (betConfig.resumeAt > 0 && crash >= betConfig.resumeAt) {
+      console.log(`Resume triggered! Crash ${crash} >= resumeAt ${betConfig.resumeAt}`);
+      resumeBetting();
+      return true;
     }
-
-    chrome.runtime.sendMessage({
-      action: "updateCurrentBetAmount",
-      data: { amount: currentBetAmount },
-    });
-
-    skipBetting = false;
-    consecutiveLowCrashes = 0;
-    consecutiveHighCrashes = 0;
-    return true;
+    
+    // Check alternative resume logic (new logic)
+    if (betConfig.resumeBelowAt !== 0 && betConfig.resumeBelowTimes > 0) {
+      let conditionMet = false;
+      
+      if (betConfig.resumeBelowAt > 0) {
+        // Positive value: resume when crashes are below this value
+        conditionMet = crash < betConfig.resumeBelowAt;
+      } else {
+        // Negative value: resume when crashes are above this value (use absolute)
+        conditionMet = crash > Math.abs(betConfig.resumeBelowAt);
+      }
+      
+      if (conditionMet) {
+        consecutiveResumeBelowCrashes++;
+        const operator = betConfig.resumeBelowAt > 0 ? '<' : '>';
+        const threshold = Math.abs(betConfig.resumeBelowAt);
+        console.log(`Resume condition: ${crash} ${operator} ${threshold}. Count: ${consecutiveResumeBelowCrashes}`);
+        
+        if (consecutiveResumeBelowCrashes >= betConfig.resumeBelowTimes) {
+          console.log(`Resume triggered! ${consecutiveResumeBelowCrashes} consecutive crashes ${operator} ${threshold}`);
+          resumeBetting();
+          return true;
+        }
+      } else {
+        consecutiveResumeBelowCrashes = 0;
+        const operator = betConfig.resumeBelowAt > 0 ? '>=' : '<=';
+        const threshold = Math.abs(betConfig.resumeBelowAt);
+        console.log(`Resume condition reset: ${crash} ${operator} ${threshold}`);
+      }
+    }
   }
   return false;
+}
+
+function resumeBetting() {
+  if (betConfig.resumeAdjust !== 0) {
+    const oldAmount = currentBetAmount;
+    currentBetAmount = adjustBetAmount(lastBetAmount, betConfig.resumeAdjust);
+    console.log(
+      `Resume bet adjustment: ${oldAmount} -> ${currentBetAmount} (${betConfig.resumeAdjust}% from last bet ${lastBetAmount})`
+    );
+  } else {
+    currentBetAmount = lastBetAmount;
+    console.log(`Resume: Using last bet amount ${lastBetAmount}`);
+  }
+
+  chrome.runtime.sendMessage({
+    action: "updateCurrentBetAmount",
+    data: { amount: currentBetAmount },
+  });
+
+  skipBetting = false;
+  consecutiveLowCrashes = 0;
+  consecutiveHighCrashes = 0;
+  consecutiveResumeBelowCrashes = 0;
 }
 
 function checkCrashPattern(crash) {
@@ -594,6 +633,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       win,
       resumeAt,
       resumeAdjust,
+      resumeBelowAt,
+      resumeBelowTimes,
       resetThreshold,
       profitTimes,
       lossResetAmount,
@@ -610,6 +651,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       onWin: parseFloat(win),
       resumeAt: parseFloat(resumeAt),
       resumeAdjust: parseFloat(resumeAdjust) || 0,
+      resumeBelowAt: parseFloat(resumeBelowAt) || 0,
+      resumeBelowTimes: parseInt(resumeBelowTimes) || 0,
       resetThreshold: parseFloat(resetThreshold) || 0,
       profitTimes: parseFloat(profitTimes) || 0,
       lossResetAmount: parseFloat(lossResetAmount) || 0,
@@ -634,6 +677,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     autoBetRunning = true;
     consecutiveLowCrashes = 0;
     consecutiveHighCrashes = 0;
+    consecutiveResumeBelowCrashes = 0;
     skipBetting = false;
     ignorePreviousCrash = true;
     totalProfit = 0;

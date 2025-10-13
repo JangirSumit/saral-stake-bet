@@ -99,11 +99,21 @@
         <div class="form-row">
           <div class="form-half">
             <label>Resume At</label>
-            <input type="number" id="resumeAt" step="0.01" min="1.01" max="100" placeholder="2.00" required />
+            <input type="number" id="resumeAt" step="0.01" min="0" max="100" placeholder="2.00" required />
           </div>
           <div class="form-half">
             <label>Adjust Bet (%)</label>
             <input type="number" id="resumeAdjust" step="0.01" min="-100" max="500" placeholder="0.00" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-half">
+            <label>Resume Below At</label>
+            <input type="number" id="resumeBelowAt" step="0.01" min="-100" max="100" placeholder="0.00" />
+          </div>
+          <div class="form-half">
+            <label>Below Times</label>
+            <input type="number" id="resumeBelowTimes" step="1" min="0" max="100" placeholder="0" />
           </div>
         </div>
         
@@ -240,8 +250,13 @@
         </div>
         <div class="panel-content collapsed" id="resumeContent">
           <div class="help-text">
-            <p><strong>Resume At:</strong> Resume betting when crash ≥ this value (e.g., 5.0x)</p>
+            <p><strong>Resume At:</strong> Resume betting when crash ≥ this value (e.g., 5.0x, 0 = disabled)</p>
             <p><strong>Adjust Bet (%):</strong> Modify bet amount when resuming (0 = no change)</p>
+            <p><strong>Resume Below At:</strong> Alternative resume condition (0 = disabled)</p>
+            <p><strong>• Positive value:</strong> Resume when crashes < value (e.g., 1.5)</p>
+            <p><strong>• Negative value:</strong> Resume when crashes > |value| (e.g., -3.0)</p>
+            <p><strong>Below Times:</strong> Number of consecutive crashes meeting condition</p>
+            <p><em>Examples: +1.5 = resume after 3 crashes < 1.5x, -3.0 = resume after 3 crashes > 3.0x</em></p>
             <p><strong>Reset Threshold:</strong> Reset to original bet if change exceeds % (0 = disabled)</p>
             <p><strong>Profit Reset:</strong> Reset bet after profit reaches X times original (0 = disabled)</p>
             <p><strong>Loss Reset:</strong> Reset sub-session when loss reaches amount (0 = disabled)</p>
