@@ -269,7 +269,10 @@ function checkCrashPattern(crash) {
 
 function placeBet() {
   if (betAmountInput && cashoutInput) {
-    console.log(`Setting bet amount to: ${currentBetAmount}`);
+    console.log(`=== PLACING BET ===`);
+    console.log(`Current bet amount: ${currentBetAmount}`);
+    console.log(`Last bet amount: ${lastBetAmount}`);
+    console.log(`Original bet amount: ${originalBetAmount}`);
 
     // Clear and set values with small delays
     betAmountInput.value = "";

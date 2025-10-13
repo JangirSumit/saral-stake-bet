@@ -166,8 +166,6 @@ document.addEventListener("DOMContentLoaded", () => {
     takeSidepanelScreenshot();
   });
   
-
-
   const fullscreenBtn = document.getElementById("fullscreenBtn");
   const historyList = document.getElementById("historyList");
 
