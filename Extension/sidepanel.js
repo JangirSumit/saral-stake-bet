@@ -397,6 +397,29 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       timerInterval = null;
     }
   }
+  
+  if (message.action === "connectionLost") {
+    const notification = document.getElementById("betNotification");
+    if (notification) {
+      notification.textContent = "⚠️ Connection lost - Auto betting stopped";
+      notification.className = "bet-notification error";
+      notification.classList.remove("hidden");
+    }
+    
+    // Stop the betting interface
+    const startStopBtn = document.getElementById("startStopBtn");
+    if (startStopBtn) {
+      startStopBtn.textContent = "▶️ Start";
+      startStopBtn.className = "btn-stopped";
+    }
+    autoBettingActive = false;
+    
+    // Stop timer
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
 });
 
 function showBetNotification(data) {

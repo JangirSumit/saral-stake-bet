@@ -55,6 +55,30 @@ function initializeElements() {
     betWatcher();
     crashWatcher();
     walletWatcher();
+    startPeriodicCheck();
+  }
+}
+
+function startPeriodicCheck() {
+  setInterval(() => {
+    fillProperties();
+    checkConnection();
+  }, 5000);
+}
+
+function checkConnection() {
+  const gameFrame = document.querySelector("[data-testid='game-frame']");
+  const betButton = document.querySelector("[data-testid='game-frame'] [data-testid='bet-button']");
+  
+  if (!gameFrame || !betButton) {
+    console.log("Connection lost - game elements missing");
+    if (autoBetRunning) {
+      console.log("Stopping auto betting due to connection loss");
+      autoBetRunning = false;
+      chrome.runtime.sendMessage({
+        action: "connectionLost"
+      });
+    }
   }
 }
 
@@ -147,28 +171,43 @@ function betWatcher() {
 }
 
 function fillProperties() {
-  gameSidebar = document.querySelector(
+  const newGameSidebar = document.querySelector(
     "[data-testid='game-frame'] .game-sidebar"
   );
-  startBetButton = document.querySelector(
+  const newStartBetButton = document.querySelector(
     "[data-testid='game-frame'] [data-testid='bet-button']"
   );
-  betAmountInput = document.querySelector(
+  const newBetAmountInput = document.querySelector(
     "[data-testid='game-frame'] [data-testid='input-game-amount']"
   );
-  profitInput = document.querySelector(
+  const newProfitInput = document.querySelector(
     "[data-testid='game-frame'] [data-testid='profit-input']"
   );
-  lastCrashes = document.querySelector(".past-bets");
+  const newLastCrashes = document.querySelector(".past-bets");
 
-  cashoutInput = [
-    ...(gameSidebar?.querySelectorAll("label span[slot='label']") || []),
+  const newCashoutInput = [
+    ...(newGameSidebar?.querySelectorAll("label span[slot='label']") || []),
   ]
     .find((el) => el.textContent.trim() === "Cashout At")
     ?.closest("label")
     ?.querySelector("input");
 
-  //console.log("Elements found:", { gameSidebar, startBetButton, lastCrashes });
+  console.log("Elements found:", {
+    gameSidebar: !!newGameSidebar,
+    startBetButton: !!newStartBetButton,
+    betAmountInput: !!newBetAmountInput,
+    profitInput: !!newProfitInput,
+    lastCrashes: !!newLastCrashes,
+    cashoutInput: !!newCashoutInput
+  });
+
+  // Update global variables if elements found
+  if (newGameSidebar) gameSidebar = newGameSidebar;
+  if (newStartBetButton) startBetButton = newStartBetButton;
+  if (newBetAmountInput) betAmountInput = newBetAmountInput;
+  if (newProfitInput) profitInput = newProfitInput;
+  if (newLastCrashes) lastCrashes = newLastCrashes;
+  if (newCashoutInput) cashoutInput = newCashoutInput;
 }
 
 function addCrashToHistory(crashValue) {
