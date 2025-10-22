@@ -18,6 +18,15 @@ let decimalPlacesCount = 0;
 let currentCurrency = '$';
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Auto-navigate to crash game when sidepanel opens
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const currentTab = tabs[0];
+    if (currentTab && !currentTab.url.includes('stake.bet/casino/games/crash')) {
+      chrome.tabs.update(currentTab.id, {
+        url: 'https://stake.bet/casino/games/crash'
+      });
+    }
+  });
   const betAmount = document.getElementById("betAmount");
   const cashoutAt = document.getElementById("cashoutAt");
   const onLoss = document.getElementById("onLoss");
@@ -36,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveBtn = document.getElementById("saveBtn");
   // const resetBetBtn = document.getElementById("resetBetBtn");
   const screenshotBtn = document.getElementById("screenshotBtn");
+  const downloadLogsBtn = document.getElementById("downloadLogsBtn");
 
   const startStopBtn = document.getElementById("startStopBtn");
   let isRunning = false;
@@ -171,6 +181,10 @@ document.addEventListener("DOMContentLoaded", () => {
   screenshotBtn.addEventListener("click", () => {
     takeSidepanelScreenshot();
   });
+
+  downloadLogsBtn.addEventListener("click", () => {
+    downloadConsoleLogs();
+  });
   
   const fullscreenBtn = document.getElementById("fullscreenBtn");
   const historyList = document.getElementById("historyList");
@@ -191,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
     isRunning = !isRunning;
 
     if (isRunning) {
-      startStopBtn.textContent = "🛑 Stop Betting";
+      startStopBtn.textContent = "⏹️ Stop";
       startStopBtn.className = "btn-running";
 
       // Send config and start betting
@@ -231,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
     } else {
-      startStopBtn.textContent = "🎯 Start Betting";
+      startStopBtn.textContent = "▶️ Start";
       startStopBtn.className = "btn-stopped";
 
       autoBettingActive = false;
@@ -372,7 +386,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Stop the betting interface
     const startStopBtn = document.getElementById("startStopBtn");
     if (startStopBtn) {
-      startStopBtn.textContent = "🎯 Start Betting";
+      startStopBtn.textContent = "▶️ Start";
       startStopBtn.className = "btn-stopped";
     }
     autoBettingActive = false;
@@ -790,6 +804,33 @@ function updateResetsList(lossDetails) {
   } else {
     lossDetailsList.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 20px;">No loss resets yet</div>';
   }
+}
+
+function downloadConsoleLogs() {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      action: "getConsoleLogs"
+    }, (response) => {
+      if (response && response.logs) {
+        const logContent = response.logs.join('\n');
+        const blob = new Blob([logContent], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.download = `console-logs-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.txt`;
+        link.href = URL.createObjectURL(blob);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        const notification = document.getElementById("betNotification");
+        if (notification) {
+          notification.textContent = "📋 Console logs downloaded!";
+          notification.className = "bet-notification placed";
+          notification.classList.remove("hidden");
+          setTimeout(() => notification.classList.add("hidden"), 3000);
+        }
+      }
+    });
+  });
 }
 
 function initializeDialog() {

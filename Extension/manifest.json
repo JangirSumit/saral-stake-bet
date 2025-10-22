@@ -3,7 +3,7 @@
   "name": "🎲Saral - Stake Crash",
   "version": "7.0.0",
   "description": "Track your betting stakes and manage your gambling activities",
-  "permissions": ["storage", "sidePanel", "activeTab"],
+  "permissions": ["storage", "sidePanel", "activeTab", "tabs"],
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",

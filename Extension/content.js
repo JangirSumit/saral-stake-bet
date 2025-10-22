@@ -32,6 +32,17 @@ let currentCurrency = '$';
 let initialWalletBalance = 0;
 let walletProtectionTriggered = false;
 
+// Console log recording
+let consoleLogs = [];
+const originalConsoleLog = console.log;
+console.log = function(...args) {
+  const timestamp = new Date().toISOString();
+  const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+  consoleLogs.push(`[${timestamp}] ${message}`);
+  if (consoleLogs.length > 1000) consoleLogs.shift(); // Keep last 1000 logs
+  originalConsoleLog.apply(console, args);
+};
+
 const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
 
 function initializeElements() {
@@ -721,5 +732,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       action: "updateCurrentBetAmount",
       data: { amount: currentBetAmount },
     });
+  }
+
+  if (message.action === "getConsoleLogs") {
+    sendResponse({ logs: consoleLogs });
   }
 });
