@@ -676,6 +676,13 @@ label { font-size: 10px; margin-bottom: 2px; margin-top: 6px; }
   gap: 4px;
   font-size: 10px;
 }
+.super-stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 10px;
+}
 .super-label {
   color: #94a3b8;
 }

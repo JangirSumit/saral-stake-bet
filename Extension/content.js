@@ -25,6 +25,9 @@ let superTotalLoss = 0;
 let superTotalBets = 0;
 let subSessionResets = 0;
 let subSessionLossDetails = [];
+let totalRefreshes = 0;
+let refreshDetails = [];
+let refreshInProgress = false;
 let ignorePreviousCrash = false;
 let walletObserver = null;
 let currentWalletBalance = 0;
@@ -45,40 +48,103 @@ console.log = function(...args) {
 
 const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
 
+function saveState() {
+  const state = {
+    autoBetRunning,
+    betConfig,
+    currentBetAmount,
+    originalBetAmount,
+    lastBetAmount,
+    totalProfit,
+    consecutiveLowCrashes,
+    consecutiveHighCrashes,
+    consecutiveResumeBelowCrashes,
+    skipBetting,
+    superTotalProfit,
+    superTotalLoss,
+    superTotalBets,
+    subSessionResets,
+    subSessionLossDetails,
+    totalRefreshes,
+    refreshDetails,
+    sessionStartTime: sessionStartTime?.getTime(),
+    refreshedFromDisabled: true
+  };
+  localStorage.setItem('autoBetState', JSON.stringify(state));
+}
+
+function restoreState() {
+  const savedState = localStorage.getItem('autoBetState');
+  if (savedState) {
+    const state = JSON.parse(savedState);
+    if (state.refreshedFromDisabled) {
+      autoBetRunning = state.autoBetRunning;
+      betConfig = state.betConfig || {};
+      currentBetAmount = state.currentBetAmount || 0;
+      originalBetAmount = state.originalBetAmount || 0;
+      lastBetAmount = state.lastBetAmount || 0;
+      totalProfit = state.totalProfit || 0;
+      consecutiveLowCrashes = state.consecutiveLowCrashes || 0;
+      consecutiveHighCrashes = state.consecutiveHighCrashes || 0;
+      consecutiveResumeBelowCrashes = state.consecutiveResumeBelowCrashes || 0;
+      skipBetting = state.skipBetting || false;
+      superTotalProfit = state.superTotalProfit || 0;
+      superTotalLoss = state.superTotalLoss || 0;
+      superTotalBets = state.superTotalBets || 0;
+      subSessionResets = state.subSessionResets || 0;
+      subSessionLossDetails = state.subSessionLossDetails || [];
+      totalRefreshes = state.totalRefreshes || 0;
+      refreshDetails = state.refreshDetails || [];
+      if (state.sessionStartTime) {
+        sessionStartTime = new Date(state.sessionStartTime);
+      }
+      console.log("State restored after disabled button refresh");
+      localStorage.removeItem('autoBetState');
+      return true;
+    }
+  }
+  return false;
+}
+
 function initializeElements() {
+  // Reset refresh flag on initialization
+  refreshInProgress = false;
+  
   fillProperties();
 
   if (!gameSidebar || !startBetButton) {
-    console.log("Elements not ready, retrying in 1 second...");
+    console.log("Elements not ready, retrying in 500ms...");
     setTimeout(initializeElements, 500);
   } else {
-    betWatcher();
-    crashWatcher();
-    walletWatcher();
-    startPeriodicCheck();
-  }
-}
-
-function startPeriodicCheck() {
-  setInterval(() => {
-    fillProperties();
-    checkConnection();
-  }, 5000);
-}
-
-function checkConnection() {
-  const gameFrame = document.querySelector("[data-testid='game-frame']");
-  const betButton = document.querySelector("[data-testid='game-frame'] [data-testid='bet-button']");
-  
-  if (!gameFrame || !betButton) {
-    console.log("Connection lost - game elements missing");
-    if (autoBetRunning) {
-      console.log("Stopping auto betting due to connection loss");
-      autoBetRunning = false;
-      chrome.runtime.sendMessage({
-        action: "connectionLost"
-      });
-    }
+    console.log("Elements ready, initializing watchers");
+    const wasRestored = restoreState();
+    
+    // Add small delay to ensure DOM is stable
+    setTimeout(() => {
+      betWatcher();
+      crashWatcher();
+      walletWatcher();
+      
+      if (wasRestored && autoBetRunning) {
+        chrome.runtime.sendMessage({
+          action: "sessionRestored",
+          data: { 
+            startTime: sessionStartTime,
+            currentBetAmount,
+            skipBetting
+          }
+        });
+        
+        // Send refresh data after restoration
+        chrome.runtime.sendMessage({
+          action: "updateRefreshData",
+          data: {
+            refreshes: totalRefreshes,
+            refreshDetails: refreshDetails
+          }
+        });
+      }
+    }, 200);
   }
 }
 
@@ -117,6 +183,9 @@ function betWatcher() {
       if (currentText !== lastStatus) {
         console.log("Button text changed:", currentText);
         startBetButton = currentButton;
+        
+        // Update input references when button changes
+        fillProperties();
 
         chrome.runtime.sendMessage({
           action: "updateButtonStatus",
@@ -124,6 +193,39 @@ function betWatcher() {
         });
 
         if (currentText === "Bet" && autoBetRunning) {
+          // Check if button is disabled and prevent multiple refreshes
+          if ((currentButton?.disabled || currentButton?.getAttribute('data-test-action-enabled') === 'false') && !refreshInProgress) {
+            console.log("Bet button is disabled - saving state and refreshing page");
+            refreshInProgress = true;
+            
+            // Track refresh
+            totalRefreshes++;
+            const refreshInfo = {
+              refreshNumber: totalRefreshes,
+              timestamp: new Date().toLocaleTimeString(),
+              reason: "Bet button disabled",
+              snapshot: {
+                superProfit: superTotalProfit,
+                superLoss: superTotalLoss,
+                superBets: superTotalBets,
+                currentBetAmount: currentBetAmount,
+                sessionTime: sessionStartTime ? Math.floor((new Date() - sessionStartTime) / 1000) : 0
+              }
+            };
+            refreshDetails.push(refreshInfo);
+            
+            saveState();
+            chrome.runtime.sendMessage({
+              action: "refreshRequired",
+              data: { reason: "Bet button disabled" }
+            });
+            
+            setTimeout(() => {
+              location.reload();
+            }, 100);
+            return;
+          }
+
           setTimeout(() => {
             console.log(
               "Button ready - currentBet:",
@@ -142,16 +244,18 @@ function betWatcher() {
               );
             }
 
-            if (!skipBetting) {
+            if (!skipBetting && !refreshInProgress) {
               placeBet();
             } else {
-              console.log("Bet skipped due to consecutive crashes");
+              console.log("Bet skipped due to consecutive crashes or refresh in progress");
               currentBet = null; // Ensure no bet is tracked
               // Notify bet skipped
-              chrome.runtime.sendMessage({
-                action: "showBetStatus",
-                data: { type: "skipped", reason: "Consecutive crashes" },
-              });
+              if (!refreshInProgress) {
+                chrome.runtime.sendMessage({
+                  action: "showBetStatus",
+                  data: { type: "skipped", reason: "Consecutive crashes" },
+                });
+              }
             }
           }, 50);
         }
@@ -211,6 +315,11 @@ function fillProperties() {
 }
 
 function addCrashToHistory(crashValue) {
+  if (refreshInProgress) {
+    console.log("Crash processing blocked - refresh in progress");
+    return;
+  }
+  
   // Handle win case (e.g., "3.68× 2.50×")
   const isWin = crashValue.includes("×") && crashValue.split("×").length > 2;
   const crash = parseFloat(crashValue);
@@ -357,6 +466,11 @@ function checkCrashPattern(crash) {
 }
 
 function placeBet() {
+  if (refreshInProgress) {
+    console.log("Bet placement blocked - refresh in progress");
+    return;
+  }
+  
   if (betAmountInput && cashoutInput) {
     console.log(`=== PLACING BET ===`);
     console.log(`Current bet amount: ${currentBetAmount}`);
@@ -405,6 +519,11 @@ function placeBet() {
 }
 
 function adjustBetAmountBasedOnResult(crash) {
+  if (refreshInProgress) {
+    console.log("Bet adjustment blocked - refresh in progress");
+    return;
+  }
+  
   const { onWin, onLoss } = betConfig;
   const oldAmount = currentBetAmount;
 
@@ -556,6 +675,15 @@ function checkLossResetAmount() {
         data: {
           resets: subSessionResets,
           lossDetails: subSessionLossDetails
+        }
+      });
+      
+      // Send updated refresh data
+      chrome.runtime.sendMessage({
+        action: "updateRefreshData",
+        data: {
+          refreshes: totalRefreshes,
+          refreshDetails: refreshDetails
         }
       });
       
@@ -737,6 +865,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     superTotalBets = 0;
     subSessionResets = 0;
     subSessionLossDetails = [];
+    totalRefreshes = 0;
+    refreshDetails = [];
     initialWalletBalance = currentWalletBalance;
     walletProtectionTriggered = false;
     console.log("Auto-betting started - will ignore next crash");
@@ -745,6 +875,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.runtime.sendMessage({
       action: "sessionStarted",
       data: { startTime: sessionStartTime }
+    });
+    
+    // Send initial refresh data
+    chrome.runtime.sendMessage({
+      action: "updateRefreshData",
+      data: {
+        refreshes: totalRefreshes,
+        refreshDetails: refreshDetails
+      }
     });
   }
 

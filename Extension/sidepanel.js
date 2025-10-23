@@ -420,6 +420,41 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       timerInterval = null;
     }
   }
+  
+  if (message.action === "refreshRequired") {
+    const notification = document.getElementById("betNotification");
+    if (notification) {
+      notification.textContent = "🔄 Page refreshing - Bet button disabled";
+      notification.className = "bet-notification error";
+      notification.classList.remove("hidden");
+    }
+  }
+  
+  if (message.action === "sessionRestored") {
+    const notification = document.getElementById("betNotification");
+    if (notification) {
+      notification.textContent = "⚙️ Session restored - Auto betting resumed";
+      notification.className = "bet-notification placed";
+      notification.classList.remove("hidden");
+      setTimeout(() => notification.classList.add("hidden"), 3000);
+    }
+    
+    // Update UI with restored state
+    if (message.data.startTime) {
+      sessionStartTime = new Date(message.data.startTime);
+      startTimer();
+    }
+    
+    const currentBetElement = document.getElementById("currentBetAmount");
+    if (currentBetElement && message.data.currentBetAmount) {
+      currentBetElement.textContent = `Next Bet: $${message.data.currentBetAmount}`;
+    }
+  }
+  
+  if (message.action === "updateRefreshData") {
+    document.getElementById('totalRefreshes').textContent = message.data.refreshes;
+    updateRefreshList(message.data.refreshDetails);
+  }
 });
 
 function showBetNotification(data) {
@@ -829,6 +864,45 @@ function updateResetsList(lossDetails) {
   }
 }
 
+function updateRefreshList(refreshDetails) {
+  const refreshDetailsList = document.getElementById('refreshDetailsList');
+  if (!refreshDetailsList) return;
+  
+  refreshDetailsList.innerHTML = '';
+  
+  if (refreshDetails && refreshDetails.length > 0) {
+    refreshDetails.forEach(refresh => {
+      const refreshItem = document.createElement('div');
+      refreshItem.className = 'reset-item';
+      
+      let snapshotHtml = '';
+      if (refresh.snapshot) {
+        const sessionHours = Math.floor(refresh.snapshot.sessionTime / 3600);
+        const sessionMins = Math.floor((refresh.snapshot.sessionTime % 3600) / 60);
+        const sessionSecs = refresh.snapshot.sessionTime % 60;
+        const sessionTimeStr = `${sessionHours.toString().padStart(2, '0')}:${sessionMins.toString().padStart(2, '0')}:${sessionSecs.toString().padStart(2, '0')}`;
+        
+        snapshotHtml = `
+          <div class="reset-details">Reason: ${refresh.reason}</div>
+          <div class="reset-details" style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+            Session: ${sessionTimeStr} | Profit: ${currentCurrency}${formatNumber(refresh.snapshot.superProfit)} | Loss: ${currentCurrency}${formatNumber(refresh.snapshot.superLoss)} | Bets: ${refresh.snapshot.superBets} | Next Bet: ${currentCurrency}${formatNumber(refresh.snapshot.currentBetAmount)}
+          </div>
+        `;
+      } else {
+        snapshotHtml = `<div class="reset-details">Reason: ${refresh.reason}</div>`;
+      }
+      
+      refreshItem.innerHTML = `
+        <div class="reset-header">Refresh #${refresh.refreshNumber} - ${refresh.timestamp}</div>
+        ${snapshotHtml}
+      `;
+      refreshDetailsList.appendChild(refreshItem);
+    });
+  } else {
+    refreshDetailsList.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 20px;">No page refreshes yet</div>';
+  }
+}
+
 function downloadConsoleLogs() {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, {
@@ -858,29 +932,57 @@ function downloadConsoleLogs() {
 
 function initializeDialog() {
   const subResets = document.getElementById('subResets');
-  const dialog = document.getElementById('lossDetailsDialog');
-  const closeBtn = document.getElementById('closeLossDialog');
+  const lossDialog = document.getElementById('lossDetailsDialog');
+  const closeLossBtn = document.getElementById('closeLossDialog');
+  
+  const totalRefreshes = document.getElementById('totalRefreshes');
+  const refreshDialog = document.getElementById('refreshDetailsDialog');
+  const closeRefreshBtn = document.getElementById('closeRefreshDialog');
   
   if (subResets) {
     subResets.addEventListener('click', () => {
-      if (dialog) {
-        dialog.style.display = 'block';
+      if (lossDialog) {
+        lossDialog.style.display = 'block';
       }
     });
   }
   
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      if (dialog) {
-        dialog.style.display = 'none';
+  if (totalRefreshes) {
+    totalRefreshes.addEventListener('click', () => {
+      if (refreshDialog) {
+        refreshDialog.style.display = 'block';
       }
     });
   }
   
-  if (dialog) {
-    dialog.addEventListener('click', (e) => {
-      if (e.target === dialog) {
-        dialog.style.display = 'none';
+  if (closeLossBtn) {
+    closeLossBtn.addEventListener('click', () => {
+      if (lossDialog) {
+        lossDialog.style.display = 'none';
+      }
+    });
+  }
+  
+  if (closeRefreshBtn) {
+    closeRefreshBtn.addEventListener('click', () => {
+      if (refreshDialog) {
+        refreshDialog.style.display = 'none';
+      }
+    });
+  }
+  
+  if (lossDialog) {
+    lossDialog.addEventListener('click', (e) => {
+      if (e.target === lossDialog) {
+        lossDialog.style.display = 'none';
+      }
+    });
+  }
+  
+  if (refreshDialog) {
+    refreshDialog.addEventListener('click', (e) => {
+      if (e.target === refreshDialog) {
+        refreshDialog.style.display = 'none';
       }
     });
   }

@@ -44,8 +44,11 @@
           <span class="super-label">Total Loss: <span id="superLossCurrency">$</span><span id="superLoss">0.00</span></span>
           <span class="super-label">Max Loss: <span id="maxLossCurrency">$</span><span id="maxLoss">0.00</span></span>
           <span class="super-label">Net: <span id="superNetCurrency">$</span><span id="superNet">0.00</span></span>
-          <span class="super-label">Bets: <span id="superBets">0</span></span>
-          <span class="super-label">Loss Resets: <span id="subResets" class="clickable-count" title="Click to view reset details">0</span></span>
+          <div class="super-stats-row">
+            <span class="super-label">Bets: <span id="superBets">0</span></span>
+            <span class="super-label">Resets: <span id="subResets" class="clickable-count" title="Click to view reset details">0</span></span>
+            <span class="super-label">Refreshes: <span id="totalRefreshes" class="clickable-count" title="Click to view refresh details">0</span></span>
+          </div>
         </div>
       </div>
 
@@ -307,6 +310,17 @@
           <button id="closeLossDialog" class="close-btn">&times;</button>
         </div>
         <div id="lossDetailsList" class="dialog-body"></div>
+      </div>
+    </div>
+
+    <!-- Refresh Details Dialog -->
+    <div id="refreshDetailsDialog" class="dialog-overlay">
+      <div class="dialog-content">
+        <div class="dialog-header">
+          <h3>Page Refresh Details</h3>
+          <button id="closeRefreshDialog" class="close-btn">&times;</button>
+        </div>
+        <div id="refreshDetailsList" class="dialog-body"></div>
       </div>
     </div>
 
