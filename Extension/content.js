@@ -68,7 +68,7 @@ function saveState() {
     subSessionLossDetails,
     totalRefreshes,
     refreshDetails,
-    consoleLogs: consoleLogs.slice(-100), // Save last 100 console logs
+    consoleLogs: consoleLogs, // Save last 100 console logs
     sessionStartTime: sessionStartTime?.getTime(),
     refreshedFromDisabled: true,
   };
@@ -200,53 +200,9 @@ function betWatcher() {
         });
 
         if (currentText === "Bet" && autoBetRunning) {
-          // Check if button is disabled and prevent multiple refreshes
-          if (
-            (currentButton?.disabled ||
-              currentButton?.getAttribute("data-test-action-enabled") ===
-                "false") &&
-            !refreshInProgress
-          ) {
-            // Check if bet amount input has invalid class (zero balance scenario)
-            if (betAmountInput?.classList.contains("invalid")) {
-              console.log(
-                "Bet amount input invalid (zero balance) - skipping refresh"
-              );
-            } else {
-              console.log(
-                "Bet button is disabled - saving state and refreshing page"
-              );
-              refreshInProgress = true;
-
-              // Track refresh
-              totalRefreshes++;
-              const refreshInfo = {
-                refreshNumber: totalRefreshes,
-                timestamp: new Date().toLocaleTimeString(),
-                reason: "Bet button disabled",
-                snapshot: {
-                  superProfit: superTotalProfit,
-                  superLoss: superTotalLoss,
-                  superBets: superTotalBets,
-                  currentBetAmount: currentBetAmount,
-                  sessionTime: sessionStartTime
-                    ? Math.floor((new Date() - sessionStartTime) / 1000)
-                    : 0,
-                },
-              };
-              refreshDetails.push(refreshInfo);
-
-              saveState();
-              chrome.runtime.sendMessage({
-                action: "refreshRequired",
-                data: { reason: "Bet button disabled" },
-              });
-
-              setTimeout(() => {
-                location.reload();
-              }, 100);
-              return;
-            }
+          // Check if button is disabled and handle refresh
+          if (handleDisabledButton(currentButton)) {
+            return;
           }
 
           setTimeout(() => {
@@ -301,6 +257,53 @@ function betWatcher() {
 
     console.log("Button text monitoring started automatically");
   }
+}
+
+function handleDisabledButton(currentButton) {
+  if (
+    (currentButton?.disabled ||
+      currentButton?.getAttribute("data-test-action-enabled") === "false") &&
+    !refreshInProgress
+  ) {
+    // Check if bet amount input has invalid class (zero balance scenario)
+    if (betAmountInput?.classList.contains("invalid")) {
+      console.log("Bet amount input invalid (zero balance) - skipping refresh");
+      return false;
+    }
+
+    console.log("Bet button is disabled - saving state and refreshing page");
+    refreshInProgress = true;
+
+    // Track refresh
+    totalRefreshes++;
+    const refreshInfo = {
+      refreshNumber: totalRefreshes,
+      timestamp: new Date().toLocaleTimeString(),
+      reason: "Bet button disabled",
+      snapshot: {
+        superProfit: superTotalProfit,
+        superLoss: superTotalLoss,
+        superBets: superTotalBets,
+        currentBetAmount: currentBetAmount,
+        sessionTime: sessionStartTime
+          ? Math.floor((new Date() - sessionStartTime) / 1000)
+          : 0,
+      },
+    };
+    refreshDetails.push(refreshInfo);
+
+    saveState();
+    chrome.runtime.sendMessage({
+      action: "refreshRequired",
+      data: { reason: "Bet button disabled" },
+    });
+
+    setTimeout(() => {
+      location.reload();
+    }, 100);
+    return true;
+  }
+  return false;
 }
 
 function fillProperties() {
