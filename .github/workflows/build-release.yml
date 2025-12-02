@@ -34,11 +34,14 @@ jobs:
         path: ./publish/*
     
     - name: Sign executable
+      if: env.SIGNING_CERT != ''
       run: |
-        echo "${{ secrets.SIGNING_CERT }}" | base64 -d > cert.p12
-        signtool sign /f cert.p12 /p "${{ secrets.CERT_PASSWORD }}" /t http://timestamp.digicert.com ./publish/CrashAnalyzer.exe
-        rm cert.p12
-      shell: bash
+        [System.Convert]::FromBase64String("${{ secrets.SIGNING_CERT }}") | Set-Content -Path cert.p12 -Encoding Byte
+        & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe" sign /f cert.p12 /p "${{ secrets.CERT_PASSWORD }}" /t http://timestamp.digicert.com ./publish/CrashAnalyzer.exe
+        Remove-Item cert.p12
+      shell: powershell
+      env:
+        SIGNING_CERT: ${{ secrets.SIGNING_CERT }}
     
     - name: Create Release
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
