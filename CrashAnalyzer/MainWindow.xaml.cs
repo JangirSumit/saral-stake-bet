@@ -370,7 +370,7 @@ namespace CrashAnalyzer
     
     public class BettingConfig
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         public double BetAmount { get; set; }
         public double CashoutAt { get; set; }
         public double OnLoss { get; set; }
@@ -402,7 +402,7 @@ namespace CrashAnalyzer
     
     public class OriginalBet
     {
-        public string Status { get; set; }
+        public string Status { get; set; } = "";
         public double BetAmount { get; set; }
         public double Profit { get; set; }
     }
