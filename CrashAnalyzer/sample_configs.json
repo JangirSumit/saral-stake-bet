@@ -1,0 +1,52 @@
+[
+  {
+    "Name": "Conservative",
+    "BetAmount": 1.0,
+    "CashoutAt": 2.0,
+    "OnLoss": 30,
+    "OnWin": -25,
+    "CrashAt": 2.0,
+    "CrashTimes": 3,
+    "ResumeAt": 5.0
+  },
+  {
+    "Name": "Moderate",
+    "BetAmount": 1.0,
+    "CashoutAt": 2.5,
+    "OnLoss": 50,
+    "OnWin": -30,
+    "CrashAt": 2.5,
+    "CrashTimes": 4,
+    "ResumeAt": 6.0
+  },
+  {
+    "Name": "Aggressive",
+    "BetAmount": 1.0,
+    "CashoutAt": 3.0,
+    "OnLoss": 75,
+    "OnWin": -35,
+    "CrashAt": 3.0,
+    "CrashTimes": 5,
+    "ResumeAt": 7.0
+  },
+  {
+    "Name": "High Risk",
+    "BetAmount": 1.0,
+    "CashoutAt": 4.0,
+    "OnLoss": 100,
+    "OnWin": -40,
+    "CrashAt": 2.0,
+    "CrashTimes": 2,
+    "ResumeAt": 8.0
+  },
+  {
+    "Name": "Safe Play",
+    "BetAmount": 1.0,
+    "CashoutAt": 1.5,
+    "OnLoss": 20,
+    "OnWin": -15,
+    "CrashAt": 1.8,
+    "CrashTimes": 5,
+    "ResumeAt": 4.0
+  }
+]
