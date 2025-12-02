@@ -34,7 +34,6 @@ jobs:
         path: ./publish/*
     
     - name: Sign executable
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
       run: |
         echo "${{ secrets.SIGNING_CERT }}" | base64 -d > cert.p12
         signtool sign /f cert.p12 /p "${{ secrets.CERT_PASSWORD }}" /t http://timestamp.digicert.com ./publish/CrashAnalyzer.exe
