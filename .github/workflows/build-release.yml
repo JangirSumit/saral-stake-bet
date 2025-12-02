@@ -18,11 +18,19 @@ jobs:
       with:
         dotnet-version: '8.0.x'
     
+    - name: Set version
+      run: |
+        $version = "1.0.${{ github.run_number }}.0"
+        $fileVersion = "1.0.${{ github.run_number }}.$(Get-Date -Format 'yyMMdd')"
+        echo "VERSION=$version" >> $env:GITHUB_ENV
+        echo "FILE_VERSION=$fileVersion" >> $env:GITHUB_ENV
+      shell: powershell
+    
     - name: Restore dependencies
       run: dotnet restore CrashAnalyzer/CrashAnalyzer.csproj
     
     - name: Build and publish
-      run: dotnet publish CrashAnalyzer/CrashAnalyzer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
+      run: dotnet publish CrashAnalyzer/CrashAnalyzer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:Version=${{ env.VERSION }} -p:FileVersion=${{ env.FILE_VERSION }} -p:AssemblyVersion=${{ env.VERSION }} -o ./publish
     
     - name: List publish contents
       run: dir ./publish
@@ -34,14 +42,12 @@ jobs:
         path: ./publish/*
     
     - name: Sign executable
-      if: env.SIGNING_CERT != ''
+      if: secrets.SIGNING_CERT != ''
       run: |
         [System.Convert]::FromBase64String("${{ secrets.SIGNING_CERT }}") | Set-Content -Path cert.p12 -Encoding Byte
         & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe" sign /f cert.p12 /p "${{ secrets.CERT_PASSWORD }}" /t http://timestamp.digicert.com ./publish/CrashAnalyzer.exe
         Remove-Item cert.p12
       shell: powershell
-      env:
-        SIGNING_CERT: ${{ secrets.SIGNING_CERT }}
     
     - name: Create Release
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
