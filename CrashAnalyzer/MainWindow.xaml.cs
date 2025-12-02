@@ -34,6 +34,7 @@ namespace CrashAnalyzer
                 btnLoadLog.IsEnabled = false;
                 
                 crashes = LoadCrashesFromLog(openFileDialog.FileName);
+                var originalBets = LoadOriginalBetsFromLog(openFileDialog.FileName);
                 
                 btnLoadLog.Content = $"📁 Loaded {crashes.Count} crashes";
                 btnLoadLog.IsEnabled = true;
@@ -41,7 +42,11 @@ namespace CrashAnalyzer
                 if (crashes.Count == 0)
                 {
                     MessageBox.Show("No crash data found in the selected file.", "No Data", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
                 }
+                
+                // Show original log data
+                ShowOriginalData(originalBets);
             }
         }
         
@@ -90,8 +95,8 @@ namespace CrashAnalyzer
                 lblNetProfit.Text = $"Net Profit: ${netProfit:F2}";
                 lblTotalBets.Text = $"Total Bets: {totalBets}";
                 
-                // Update grid
-                UpdateResultsGrid();
+                // Show comparison data
+                ShowComparisonData(betResults);
                 
                 btnAnalyze.Content = "⚡ Analyze";
                 btnAnalyze.IsEnabled = true;
@@ -109,20 +114,31 @@ namespace CrashAnalyzer
             // Config changed - analysis will happen on Analyze button click
         }
         
-        private void UpdateResultsGrid()
+        private void ShowOriginalData(List<OriginalBet> originalBets)
         {
-            var gridData = betResults.Select(r => new
+            var originalData = crashes.Select((crash, index) => new
             {
-                Crash = $"{r.CrashValue:F2}x",
-                Status = r.BetPlaced ? (r.Won ? "Won" : "Lost") : "Skipped",
-                BetAmount = r.BetPlaced ? $"${r.BetAmount:F2}" : "-",
-                Profit = r.BetPlaced ? $"${r.Profit:F2}" : "-",
-                RunningTotal = $"${r.RunningTotal:F2}",
-                ConsecutiveLow = r.ConsecutiveLowCrashes,
-                SkipMode = r.SkipBetting ? "Yes" : "No"
+                Crash = $"{crash:F2}x",
+                Status = index < originalBets.Count ? originalBets[index].Status : "No Bet",
+                BetAmount = index < originalBets.Count ? $"${originalBets[index].BetAmount:F2}" : "-",
+                Profit = index < originalBets.Count ? $"${originalBets[index].Profit:F2}" : "-"
             }).ToList();
             
-            dgvResults.ItemsSource = gridData;
+            dgvOriginal.ItemsSource = originalData;
+            dgvAnalyzed.ItemsSource = null;
+        }
+        
+        private void ShowComparisonData(List<BetResult> newResults)
+        {
+            var analyzedData = crashes.Select((crash, index) => new
+            {
+                Crash = $"{crash:F2}x",
+                Status = index < newResults.Count ? (newResults[index].BetPlaced ? (newResults[index].Won ? "Won" : "Lost") : "Skipped") : "-",
+                BetAmount = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].BetAmount:F2}" : "-",
+                Profit = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].Profit:F2}" : "-"
+            }).ToList();
+            
+            dgvAnalyzed.ItemsSource = analyzedData;
         }
         
         private void BtnExport_Click(object sender, RoutedEventArgs e)
@@ -175,6 +191,44 @@ namespace CrashAnalyzer
             }
             
             return crashes;
+        }
+        
+        private List<OriginalBet> LoadOriginalBetsFromLog(string logPath)
+        {
+            var bets = new List<OriginalBet>();
+            var lines = File.ReadAllLines(logPath);
+            
+            foreach (var line in lines)
+            {
+                if (line.Contains("WON:") || line.Contains("LOST:"))
+                {
+                    var isWon = line.Contains("WON:");
+                    var parts = line.Split(' ');
+                    
+                    for (int i = 0; i < parts.Length - 1; i++)
+                    {
+                        if (double.TryParse(parts[i], out double betAmount))
+                        {
+                            var profit = isWon ? betAmount * 1.5 - betAmount : -betAmount; // Simplified calculation
+                            bets.Add(new OriginalBet
+                            {
+                                Status = isWon ? "Won" : "Lost",
+                                BetAmount = betAmount,
+                                Profit = profit
+                            });
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            return bets;
+        }
+        
+        private List<OriginalBet> LoadOriginalBetsFromLog(List<double> crashes)
+        {
+            // This method is for when we only have crashes and need to create dummy original data
+            return new List<OriginalBet>();
         }
         
         private List<BetResult> AnalyzeConfigurationDetailed(List<double> crashes, BettingConfig config)
@@ -296,5 +350,12 @@ namespace CrashAnalyzer
         public double RunningTotal { get; set; }
         public int ConsecutiveLowCrashes { get; set; }
         public bool SkipBetting { get; set; }
+    }
+    
+    public class OriginalBet
+    {
+        public string Status { get; set; }
+        public double BetAmount { get; set; }
+        public double Profit { get; set; }
     }
 }
