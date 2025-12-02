@@ -6,6 +6,18 @@
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.0</Version>
+    <AssemblyTitle>Crash Game Analyzer</AssemblyTitle>
+    <AssemblyDescription>Analyze crash game betting strategies</AssemblyDescription>
+    <AssemblyCompany>Saral Stake Bet</AssemblyCompany>
+    <AssemblyProduct>Crash Analyzer</AssemblyProduct>
+    <Copyright>Copyright © 2024</Copyright>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
 
 </Project>
