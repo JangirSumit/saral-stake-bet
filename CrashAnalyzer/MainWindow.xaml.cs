@@ -200,11 +200,30 @@ namespace CrashAnalyzer
             btnExport.Content = "⏳ Exporting...";
             btnExport.IsEnabled = false;
             
+            var config = new BettingConfig
+            {
+                BetAmount = double.Parse(txtBetAmount.Text),
+                CashoutAt = double.Parse(txtCashoutAt.Text),
+                OnLoss = double.Parse(txtOnLoss.Text),
+                OnWin = double.Parse(txtOnWin.Text),
+                CrashAt = double.Parse(txtCrashAt.Text),
+                CrashTimes = int.Parse(txtCrashTimes.Text),
+                ResumeAt = double.Parse(txtResumeAt.Text),
+                ResumeAdjust = double.Parse(txtResumeAdjust.Text),
+                ResumeBelowAt = double.Parse(txtResumeBelowAt.Text),
+                ResumeBelowTimes = int.Parse(txtResumeBelowTimes.Text),
+                ResetThreshold = double.Parse(txtResetThreshold.Text),
+                ProfitTimes = int.Parse(txtProfitTimes.Text),
+                LossResetAmount = double.Parse(txtLossResetAmount.Text),
+                WalletStopLoss = double.Parse(txtWalletStopLoss.Text),
+                DecimalPlaces = int.Parse(txtDecimalPlaces.Text)
+            };
+            
             var fileName = $"crash_analysis_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
             var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             var fullPath = Path.Combine(desktopPath, fileName);
             
-            ExportDetailedResults(betResults, fullPath);
+            ExportDetailedResults(betResults, config, fullPath);
             
             btnExport.Content = "💾 Export CSV";
             btnExport.IsEnabled = true;
@@ -348,9 +367,31 @@ namespace CrashAnalyzer
             return results;
         }
         
-        private void ExportDetailedResults(List<BetResult> results, string fileName)
+        private void ExportDetailedResults(List<BetResult> results, BettingConfig config, string fileName)
         {
             var csv = new StringBuilder();
+            
+            // Add configuration settings
+            csv.AppendLine("Configuration Settings");
+            csv.AppendLine($"Bet Amount,{config.BetAmount}");
+            csv.AppendLine($"Cashout At,{config.CashoutAt}");
+            csv.AppendLine($"On Loss %,{config.OnLoss}");
+            csv.AppendLine($"On Win %,{config.OnWin}");
+            csv.AppendLine($"Crash At,{config.CrashAt}");
+            csv.AppendLine($"Crash Times,{config.CrashTimes}");
+            csv.AppendLine($"Resume At,{config.ResumeAt}");
+            csv.AppendLine($"Resume Adjust %,{config.ResumeAdjust}");
+            csv.AppendLine($"Resume Below At,{config.ResumeBelowAt}");
+            csv.AppendLine($"Resume Below Times,{config.ResumeBelowTimes}");
+            csv.AppendLine($"Reset Threshold %,{config.ResetThreshold}");
+            csv.AppendLine($"Profit Times,{config.ProfitTimes}");
+            csv.AppendLine($"Loss Reset Amount,{config.LossResetAmount}");
+            csv.AppendLine($"Wallet Stop Loss %,{config.WalletStopLoss}");
+            csv.AppendLine($"Decimal Places,{config.DecimalPlaces}");
+            csv.AppendLine();
+            
+            // Add results data
+            csv.AppendLine("Analysis Results");
             csv.AppendLine("Crash,Status,Bet Amount,Profit,Running Total,Consecutive Low,Skip Mode");
             
             foreach (var result in results)
