@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Crash Game Analyzer" Height="700" Width="1000"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Background="#0F172A">
     
     <Grid>
@@ -173,20 +174,7 @@
                             Background="#FBBF24" Foreground="Black" BorderThickness="0"
                             Click="BtnAnalyze_Click"/>
                     
-                    <!-- Results Summary -->
-                    <TextBlock Text="📊 Results" Foreground="#22C55E" FontWeight="Bold" 
-                               FontSize="12" Margin="0,0,0,10"/>
-                    
-                    <StackPanel Margin="0,0,0,20">
-                        <TextBlock Name="lblTotalProfit" Text="Total Profit: $0.00" Foreground="#22C55E" 
-                                   FontWeight="Bold" Margin="0,2"/>
-                        <TextBlock Name="lblTotalLoss" Text="Total Loss: $0.00" Foreground="#DC2626" 
-                                   FontWeight="Bold" Margin="0,2"/>
-                        <TextBlock Name="lblNetProfit" Text="Net Profit: $0.00" Foreground="#FBBF24" 
-                                   FontWeight="Bold" Margin="0,2"/>
-                        <TextBlock Name="lblTotalBets" Text="Total Bets: 0" Foreground="White" 
-                                   FontWeight="Bold" Margin="0,2"/>
-                    </StackPanel>
+
                     
                     <!-- Export Button -->
                     <Button Name="btnExport" Content="💾 Export CSV" Height="35"
@@ -216,16 +204,34 @@
                                   Foreground="White"
                                   GridLinesVisibility="None"
                                   HeadersVisibility="Column"
-                                  AutoGenerateColumns="True"
+                                  AutoGenerateColumns="False"
                                   IsReadOnly="True"
                                   SelectionMode="Single"
+                                  SelectionUnit="FullRow"
+                                  SelectionChanged="DgvOriginal_SelectionChanged"
                                   CanUserAddRows="False"
                                   CanUserDeleteRows="False"
                                   CanUserReorderColumns="False"
                                   CanUserResizeRows="False"
+                                  CanUserSortColumns="False"
                                   AlternatingRowBackground="#334155"
                                   FontSize="12"
                                   RowHeight="30">
+                            
+                            <DataGrid.Resources>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#475569"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#475569"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="White"/>
+                            </DataGrid.Resources>
+                            
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="No" Binding="{Binding No}" Width="50"/>
+                                <DataGridTextColumn Header="Crash" Binding="{Binding Crash}" Width="80"/>
+                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="80"/>
+                                <DataGridTextColumn Header="Bet Amount" Binding="{Binding BetAmount}" Width="100"/>
+                                <DataGridTextColumn Header="Profit" Binding="{Binding Profit}" Width="100"/>
+                            </DataGrid.Columns>
                             
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader">
@@ -244,7 +250,6 @@
                             
                             <DataGrid.CellStyle>
                                 <Style TargetType="DataGridCell">
-                                    <Setter Property="Background" Value="Transparent"/>
                                     <Setter Property="Foreground" Value="White"/>
                                     <Setter Property="BorderThickness" Value="0"/>
                                     <Setter Property="Padding" Value="8,4"/>
@@ -257,6 +262,15 @@
                                 <Style TargetType="DataGridRow">
                                     <Setter Property="Background" Value="#1E293B"/>
                                     <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#475569"/>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding No}" Value="NET">
+                                            <Setter Property="Background" Value="#374151"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="BorderBrush" Value="#22C55E"/>
+                                            <Setter Property="BorderThickness" Value="0,2,0,0"/>
+                                        </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Won">
                                             <Setter Property="Background" Value="#16A34A"/>
                                         </DataTrigger>
@@ -283,16 +297,34 @@
                                   Foreground="White"
                                   GridLinesVisibility="None"
                                   HeadersVisibility="Column"
-                                  AutoGenerateColumns="True"
+                                  AutoGenerateColumns="False"
                                   IsReadOnly="True"
                                   SelectionMode="Single"
+                                  SelectionUnit="FullRow"
+                                  SelectionChanged="DgvAnalyzed_SelectionChanged"
                                   CanUserAddRows="False"
                                   CanUserDeleteRows="False"
                                   CanUserReorderColumns="False"
                                   CanUserResizeRows="False"
+                                  CanUserSortColumns="False"
                                   AlternatingRowBackground="#334155"
                                   FontSize="12"
                                   RowHeight="30">
+                            
+                            <DataGrid.Resources>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#475569"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#475569"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="White"/>
+                            </DataGrid.Resources>
+                            
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="No" Binding="{Binding No}" Width="50"/>
+                                <DataGridTextColumn Header="Crash" Binding="{Binding Crash}" Width="80"/>
+                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="80"/>
+                                <DataGridTextColumn Header="Bet Amount" Binding="{Binding BetAmount}" Width="100"/>
+                                <DataGridTextColumn Header="Profit" Binding="{Binding Profit}" Width="100"/>
+                            </DataGrid.Columns>
                             
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="DataGridColumnHeader">
@@ -311,7 +343,6 @@
                             
                             <DataGrid.CellStyle>
                                 <Style TargetType="DataGridCell">
-                                    <Setter Property="Background" Value="Transparent"/>
                                     <Setter Property="Foreground" Value="White"/>
                                     <Setter Property="BorderThickness" Value="0"/>
                                     <Setter Property="Padding" Value="8,4"/>
@@ -324,6 +355,15 @@
                                 <Style TargetType="DataGridRow">
                                     <Setter Property="Background" Value="#1E293B"/>
                                     <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#475569"/>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding No}" Value="NET">
+                                            <Setter Property="Background" Value="#374151"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="BorderBrush" Value="#FBBF24"/>
+                                            <Setter Property="BorderThickness" Value="0,2,0,0"/>
+                                        </DataTrigger>
                                         <DataTrigger Binding="{Binding Status}" Value="Won">
                                             <Setter Property="Background" Value="#16A34A"/>
                                         </DataTrigger>

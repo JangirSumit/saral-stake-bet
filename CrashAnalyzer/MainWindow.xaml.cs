@@ -20,7 +20,7 @@ namespace CrashAnalyzer
         
 
         
-        private void BtnLoadLog_Click(object sender, RoutedEventArgs e)
+        private async void BtnLoadLog_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog
             {
@@ -33,24 +33,31 @@ namespace CrashAnalyzer
                 btnLoadLog.Content = "⏳ Loading...";
                 btnLoadLog.IsEnabled = false;
                 
-                crashes = LoadCrashesFromLog(openFileDialog.FileName);
-                var originalBets = LoadOriginalBetsFromLog(openFileDialog.FileName);
+                var filePath = openFileDialog.FileName;
                 
-                btnLoadLog.Content = $"📁 Loaded {crashes.Count} crashes";
-                btnLoadLog.IsEnabled = true;
-                
-                if (crashes.Count == 0)
+                await System.Threading.Tasks.Task.Run(() =>
                 {
-                    MessageBox.Show("No crash data found in the selected file.", "No Data", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                
-                // Show original log data
-                ShowOriginalData(originalBets);
+                    crashes = LoadCrashesFromLog(filePath);
+                    var originalBets = LoadOriginalBetsFromLog(filePath);
+                    
+                    Dispatcher.Invoke(() =>
+                    {
+                        btnLoadLog.Content = $"📁 Loaded {crashes.Count} crashes";
+                        btnLoadLog.IsEnabled = true;
+                        
+                        if (crashes.Count == 0)
+                        {
+                            MessageBox.Show("No crash data found in the selected file.", "No Data", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+                        
+                        ShowOriginalData(originalBets);
+                    });
+                });
             }
         }
         
-        private void BtnAnalyze_Click(object sender, RoutedEventArgs e)
+        private async void BtnAnalyze_Click(object sender, RoutedEventArgs e)
         {
             if (crashes.Count == 0)
             {
@@ -82,24 +89,17 @@ namespace CrashAnalyzer
                     DecimalPlaces = int.Parse(txtDecimalPlaces.Text)
                 };
                 
-                betResults = AnalyzeConfigurationDetailed(crashes, config);
-                
-                // Update summary
-                var totalProfit = betResults.Where(r => r.Won).Sum(r => r.Profit);
-                var totalLoss = betResults.Where(r => !r.Won && r.BetPlaced).Sum(r => r.BetAmount);
-                var netProfit = totalProfit - totalLoss;
-                var totalBets = betResults.Count(r => r.BetPlaced);
-                
-                lblTotalProfit.Text = $"Total Profit: ${totalProfit:F2}";
-                lblTotalLoss.Text = $"Total Loss: ${totalLoss:F2}";
-                lblNetProfit.Text = $"Net Profit: ${netProfit:F2}";
-                lblTotalBets.Text = $"Total Bets: {totalBets}";
-                
-                // Show comparison data
-                ShowComparisonData(betResults);
-                
-                btnAnalyze.Content = "⚡ Analyze";
-                btnAnalyze.IsEnabled = true;
+                await System.Threading.Tasks.Task.Run(() =>
+                {
+                    betResults = AnalyzeConfigurationDetailed(crashes, config);
+                    
+                    Dispatcher.Invoke(() =>
+                    {
+                        ShowComparisonData(betResults);
+                        btnAnalyze.Content = "⚡ Analyze";
+                        btnAnalyze.IsEnabled = true;
+                    });
+                });
             }
             catch (Exception ex)
             {
@@ -114,15 +114,51 @@ namespace CrashAnalyzer
             // Config changed - analysis will happen on Analyze button click
         }
         
+        private bool _isUpdatingSelection = false;
+        
+        private void DgvOriginal_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (!_isUpdatingSelection && dgvOriginal.SelectedIndex >= 0 && dgvAnalyzed.Items.Count > dgvOriginal.SelectedIndex)
+            {
+                _isUpdatingSelection = true;
+                dgvAnalyzed.SelectedIndex = dgvOriginal.SelectedIndex;
+                dgvAnalyzed.ScrollIntoView(dgvAnalyzed.SelectedItem);
+                _isUpdatingSelection = false;
+            }
+        }
+        
+        private void DgvAnalyzed_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (!_isUpdatingSelection && dgvAnalyzed.SelectedIndex >= 0 && dgvOriginal.Items.Count > dgvAnalyzed.SelectedIndex)
+            {
+                _isUpdatingSelection = true;
+                dgvOriginal.SelectedIndex = dgvAnalyzed.SelectedIndex;
+                dgvOriginal.ScrollIntoView(dgvOriginal.SelectedItem);
+                _isUpdatingSelection = false;
+            }
+        }
+        
         private void ShowOriginalData(List<OriginalBet> originalBets)
         {
             var originalData = crashes.Select((crash, index) => new
             {
+                No = (object)(index + 1),
                 Crash = $"{crash:F2}x",
                 Status = index < originalBets.Count ? originalBets[index].Status : "No Bet",
                 BetAmount = index < originalBets.Count ? $"${originalBets[index].BetAmount:F2}" : "-",
                 Profit = index < originalBets.Count ? $"${originalBets[index].Profit:F2}" : "-"
             }).ToList();
+            
+            // Add net profit row
+            var totalProfit = originalBets.Sum(b => b.Profit);
+            originalData.Add(new
+            {
+                No = (object)"NET",
+                Crash = "-",
+                Status = totalProfit >= 0 ? "PROFIT" : "LOSS",
+                BetAmount = "-",
+                Profit = $"${totalProfit:F2}"
+            });
             
             dgvOriginal.ItemsSource = originalData;
             dgvAnalyzed.ItemsSource = null;
@@ -132,11 +168,23 @@ namespace CrashAnalyzer
         {
             var analyzedData = crashes.Select((crash, index) => new
             {
+                No = (object)(index + 1),
                 Crash = $"{crash:F2}x",
                 Status = index < newResults.Count ? (newResults[index].BetPlaced ? (newResults[index].Won ? "Won" : "Lost") : "Skipped") : "-",
                 BetAmount = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].BetAmount:F2}" : "-",
                 Profit = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].Profit:F2}" : "-"
             }).ToList();
+            
+            // Add net profit row
+            var totalProfit = newResults.Where(r => r.BetPlaced).Sum(r => r.Profit);
+            analyzedData.Add(new
+            {
+                No = (object)"NET",
+                Crash = "-",
+                Status = totalProfit >= 0 ? "PROFIT" : "LOSS",
+                BetAmount = "-",
+                Profit = $"${totalProfit:F2}"
+            });
             
             dgvAnalyzed.ItemsSource = analyzedData;
         }
