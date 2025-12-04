@@ -39,6 +39,7 @@ namespace CrashAnalyzer
                 {
                     crashes = LoadCrashesFromLog(filePath);
                     var originalBets = LoadOriginalBetsFromLog(filePath);
+                    ExtractLogFileConfig(filePath);
                     
                     Dispatcher.Invoke(() =>
                     {
@@ -162,6 +163,9 @@ namespace CrashAnalyzer
             
             dgvOriginal.ItemsSource = originalData;
             dgvAnalyzed.ItemsSource = null;
+            
+            // Update log settings display
+            UpdateLogSettingsDisplay();
         }
         
         private void ShowComparisonData(List<BetResult> newResults)
@@ -187,6 +191,9 @@ namespace CrashAnalyzer
             });
             
             dgvAnalyzed.ItemsSource = analyzedData;
+            
+            // Update current settings display
+            UpdateCurrentSettingsDisplay();
         }
         
         private void BtnExport_Click(object sender, RoutedEventArgs e)
@@ -397,6 +404,76 @@ namespace CrashAnalyzer
             }
             
             return results;
+        }
+        
+        private BettingConfig logFileConfig = null;
+        
+        private void UpdateLogSettingsDisplay()
+        {
+            if (logFileConfig != null)
+            {
+                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | Loss: +{logFileConfig.OnLoss}% | Win: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes} crashes < {logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x";
+            }
+            else
+            {
+                txtLogSettings.Text = "No configuration found in log file";
+            }
+        }
+        
+        private void UpdateCurrentSettingsDisplay()
+        {
+            try
+            {
+                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | Loss: +{txtOnLoss.Text}% | Win: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text} crashes < {txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x";
+            }
+            catch
+            {
+                txtCurrentSettings.Text = "Invalid configuration values";
+            }
+        }
+        
+        private void ExtractLogFileConfig(string logPath)
+        {
+            var lines = File.ReadAllLines(logPath);
+            foreach (var line in lines)
+            {
+                if (line.Contains("CONFIG:"))
+                {
+                    try
+                    {
+                        var configStart = line.IndexOf("{");
+                        if (configStart >= 0)
+                        {
+                            var configJson = line.Substring(configStart);
+                            var config = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, System.Text.Json.JsonElement>>(configJson);
+                            
+                            logFileConfig = new BettingConfig
+                            {
+                                BetAmount = config["amount"].GetDouble(),
+                                CashoutAt = config["cashout"].GetDouble(),
+                                OnLoss = config["onLoss"].GetDouble(),
+                                OnWin = config["onWin"].GetDouble(),
+                                CrashAt = config["crashAt"].GetDouble(),
+                                CrashTimes = config["crashTimes"].GetInt32(),
+                                ResumeAt = config["resumeAt"].GetDouble(),
+                                ResumeAdjust = config["resumeAdjust"].GetDouble(),
+                                ResumeBelowAt = config["resumeBelowAt"].GetDouble(),
+                                ResumeBelowTimes = config["resumeBelowTimes"].GetInt32(),
+                                ResetThreshold = config["resetThreshold"].GetDouble(),
+                                ProfitTimes = config["profitTimes"].GetInt32(),
+                                LossResetAmount = config["lossResetAmount"].GetDouble(),
+                                WalletStopLoss = config["walletStopLoss"].GetDouble(),
+                                DecimalPlaces = config["decimalPlaces"].GetInt32()
+                            };
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        logFileConfig = null;
+                    }
+                }
+            }
         }
         
         private void ExportDetailedResults(List<BetResult> results, BettingConfig config, string fileName)

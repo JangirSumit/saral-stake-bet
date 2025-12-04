@@ -186,16 +186,49 @@
             </ScrollViewer>
         </Border>
         
-        <!-- Right Panel - Two Grids Side by Side -->
+        <!-- Right Panel - Settings Snapshot and Two Grids Side by Side -->
         <Border Grid.Column="1" Background="#1E293B" Padding="10">
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="10"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
                 
-                <!-- Original Data Grid -->
+                <!-- Settings Snapshot Row -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Log File Settings -->
+                    <Border Grid.Column="0" Background="#374151" CornerRadius="5" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="📄 Log File Settings" Foreground="#22C55E" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                            <TextBlock Name="txtLogSettings" Text="No log loaded" Foreground="#94A3B8" FontSize="10" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Current Analysis Settings -->
+                    <Border Grid.Column="2" Background="#374151" CornerRadius="5" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="⚡ Current Analysis Settings" Foreground="#FBBF24" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                            <TextBlock Name="txtCurrentSettings" Text="Configure settings and analyze" Foreground="#94A3B8" FontSize="10" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                
+                <!-- Data Grids Row -->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Original Data Grid -->
                 <Border Grid.Column="0" Background="#1E293B">
                     <StackPanel>
                         <TextBlock Text="📊 Original Log Data" Foreground="#22C55E" FontWeight="Bold" 
@@ -288,12 +321,12 @@
                     </StackPanel>
                 </Border>
                 
-                <!-- New Analyzed Data Grid -->
-                <Border Grid.Column="2" Background="#1E293B">
-                    <StackPanel>
-                        <TextBlock Text="⚡ New Analysis Data" Foreground="#FBBF24" FontWeight="Bold" 
-                                   FontSize="14" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-                        <DataGrid Name="dgvAnalyzed" 
+                    <!-- New Analyzed Data Grid -->
+                    <Border Grid.Column="2" Background="#1E293B">
+                        <StackPanel>
+                            <TextBlock Text="⚡ New Analysis Data" Foreground="#FBBF24" FontWeight="Bold" 
+                                       FontSize="14" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                            <DataGrid Name="dgvAnalyzed" 
                                   Background="#1E293B" 
                                   Foreground="White"
                                   GridLinesVisibility="None"
@@ -377,9 +410,10 @@
                                     </Style.Triggers>
                                 </Style>
                             </DataGrid.RowStyle>
-                        </DataGrid>
-                    </StackPanel>
-                </Border>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </Grid>
         </Border>
         
