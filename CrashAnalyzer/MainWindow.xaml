@@ -182,6 +182,33 @@
                             Background="#6B7280" Foreground="White" BorderThickness="0"
                             Click="BtnExport_Click"/>
                     
+                    <!-- Color Legends -->
+                    <TextBlock Text="🎨 Color Legends" Foreground="#22C55E" FontWeight="Bold" 
+                               FontSize="12" Margin="0,20,0,10"/>
+                    
+                    <StackPanel Margin="0,0,0,10">
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <Border Background="#16A34A" Width="15" Height="15" CornerRadius="2" Margin="0,0,8,0"/>
+                            <TextBlock Text="Won" Foreground="#94A3B8" FontSize="10" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <Border Background="#DC2626" Width="15" Height="15" CornerRadius="2" Margin="0,0,8,0"/>
+                            <TextBlock Text="Lost" Foreground="#94A3B8" FontSize="10" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <Border Background="#F59E0B" Width="15" Height="15" CornerRadius="2" Margin="0,0,8,0"/>
+                            <TextBlock Text="Skipped" Foreground="#94A3B8" FontSize="10" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <Border Background="#6B7280" Width="15" Height="15" CornerRadius="2" Margin="0,0,8,0"/>
+                            <TextBlock Text="No Bet" Foreground="#94A3B8" FontSize="10" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <Border Background="#374151" Width="15" Height="15" CornerRadius="2" Margin="0,0,8,0" BorderBrush="#22C55E" BorderThickness="1"/>
+                            <TextBlock Text="NET Total" Foreground="#94A3B8" FontSize="10" FontWeight="Bold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                    
                 </StackPanel>
             </ScrollViewer>
         </Border>
@@ -190,7 +217,7 @@
         <Border Grid.Column="1" Background="#1E293B" Padding="10">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="70"/>
                     <RowDefinition Height="10"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
@@ -230,10 +257,23 @@
                     
                     <!-- Original Data Grid -->
                 <Border Grid.Column="0" Background="#1E293B">
-                    <StackPanel>
-                        <TextBlock Text="📊 Original Log Data" Foreground="#22C55E" FontWeight="Bold" 
-                                   FontSize="14" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-                        <DataGrid Name="dgvOriginal" 
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="📊 Original Log Data" Foreground="#22C55E" FontWeight="Bold" 
+                                   FontSize="14" Margin="0,0,0,5" HorizontalAlignment="Center"/>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <Border Name="originalMaxProfit" Background="#00FF00" Padding="5,2" CornerRadius="3" Margin="0,0,5,0" BorderBrush="#FFFF00" BorderThickness="1">
+                                <TextBlock Name="txtOriginalMaxProfit" Text="Max Profit: $0.00" Foreground="Black" FontSize="10" FontWeight="Bold"/>
+                            </Border>
+                            <Border Name="originalMaxLoss" Background="#FF0000" Padding="5,2" CornerRadius="3" Margin="5,0,0,0" BorderBrush="#FFFF00" BorderThickness="1">
+                                <TextBlock Name="txtOriginalMaxLoss" Text="Max Loss: $0.00" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+                        <DataGrid Grid.Row="2" Name="dgvOriginal" 
                                   Background="#1E293B" 
                                   Foreground="White"
                                   GridLinesVisibility="None"
@@ -250,7 +290,9 @@
                                   CanUserSortColumns="False"
                                   AlternatingRowBackground="#334155"
                                   FontSize="12"
-                                  RowHeight="30">
+                                  RowHeight="30"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
                             
                             <DataGrid.Resources>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#475569"/>
@@ -314,19 +356,46 @@
                                         <DataTrigger Binding="{Binding Status}" Value="No Bet">
                                             <Setter Property="Background" Value="#6B7280"/>
                                         </DataTrigger>
+                                        <DataTrigger Binding="{Binding No}" Value="MAX PROFIT">
+                                            <Setter Property="Background" Value="#00FF00"/>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="BorderBrush" Value="#FFFF00"/>
+                                            <Setter Property="BorderThickness" Value="3"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding No}" Value="MAX LOSS">
+                                            <Setter Property="Background" Value="#FF0000"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="BorderBrush" Value="#FFFF00"/>
+                                            <Setter Property="BorderThickness" Value="3"/>
+                                        </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </DataGrid.RowStyle>
                         </DataGrid>
-                    </StackPanel>
+                    </Grid>
                 </Border>
                 
                     <!-- New Analyzed Data Grid -->
                     <Border Grid.Column="2" Background="#1E293B">
-                        <StackPanel>
-                            <TextBlock Text="⚡ New Analysis Data" Foreground="#FBBF24" FontWeight="Bold" 
-                                       FontSize="14" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-                            <DataGrid Name="dgvAnalyzed" 
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="⚡ New Analysis Data" Foreground="#FBBF24" FontWeight="Bold" 
+                                       FontSize="14" Margin="0,0,0,5" HorizontalAlignment="Center"/>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                <Border Name="analyzedMaxProfit" Background="#00FF00" Padding="5,2" CornerRadius="3" Margin="0,0,5,0" BorderBrush="#FFFF00" BorderThickness="1">
+                                    <TextBlock Name="txtAnalyzedMaxProfit" Text="Max Profit: $0.00" Foreground="Black" FontSize="10" FontWeight="Bold"/>
+                                </Border>
+                                <Border Name="analyzedMaxLoss" Background="#FF0000" Padding="5,2" CornerRadius="3" Margin="5,0,0,0" BorderBrush="#FFFF00" BorderThickness="1">
+                                    <TextBlock Name="txtAnalyzedMaxLoss" Text="Max Loss: $0.00" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                                </Border>
+                            </StackPanel>
+                            <DataGrid Grid.Row="2" Name="dgvAnalyzed" 
                                   Background="#1E293B" 
                                   Foreground="White"
                                   GridLinesVisibility="None"
@@ -343,7 +412,9 @@
                                   CanUserSortColumns="False"
                                   AlternatingRowBackground="#334155"
                                   FontSize="12"
-                                  RowHeight="30">
+                                  RowHeight="30"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
                             
                             <DataGrid.Resources>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#475569"/>
@@ -407,11 +478,25 @@
                                         <DataTrigger Binding="{Binding Status}" Value="Skipped">
                                             <Setter Property="Background" Value="#F59E0B"/>
                                         </DataTrigger>
+                                        <DataTrigger Binding="{Binding No}" Value="MAX PROFIT">
+                                            <Setter Property="Background" Value="#00FF00"/>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="BorderBrush" Value="#FFFF00"/>
+                                            <Setter Property="BorderThickness" Value="3"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding No}" Value="MAX LOSS">
+                                            <Setter Property="Background" Value="#FF0000"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="BorderBrush" Value="#FFFF00"/>
+                                            <Setter Property="BorderThickness" Value="3"/>
+                                        </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </DataGrid.RowStyle>
                             </DataGrid>
-                        </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
             </Grid>

@@ -124,6 +124,7 @@ namespace CrashAnalyzer
                 _isUpdatingSelection = true;
                 dgvAnalyzed.SelectedIndex = dgvOriginal.SelectedIndex;
                 dgvAnalyzed.ScrollIntoView(dgvAnalyzed.SelectedItem);
+                SynchronizeScrollPosition(dgvOriginal, dgvAnalyzed);
                 _isUpdatingSelection = false;
             }
         }
@@ -135,8 +136,52 @@ namespace CrashAnalyzer
                 _isUpdatingSelection = true;
                 dgvOriginal.SelectedIndex = dgvAnalyzed.SelectedIndex;
                 dgvOriginal.ScrollIntoView(dgvOriginal.SelectedItem);
+                SynchronizeScrollPosition(dgvAnalyzed, dgvOriginal);
                 _isUpdatingSelection = false;
             }
+        }
+        
+        private void SynchronizeScrollPosition(System.Windows.Controls.DataGrid source, System.Windows.Controls.DataGrid target)
+        {
+            var sourceScrollViewer = GetScrollViewer(source);
+            var targetScrollViewer = GetScrollViewer(target);
+            
+            if (sourceScrollViewer != null && targetScrollViewer != null)
+            {
+                targetScrollViewer.ScrollToVerticalOffset(sourceScrollViewer.VerticalOffset);
+            }
+        }
+        
+        private System.Windows.Controls.ScrollViewer GetScrollViewer(System.Windows.Controls.DataGrid dataGrid)
+        {
+            if (dataGrid == null) return null;
+            
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(dataGrid); i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(dataGrid, i);
+                if (child is System.Windows.Controls.ScrollViewer scrollViewer)
+                    return scrollViewer;
+                
+                var result = FindScrollViewer(child);
+                if (result != null)
+                    return result;
+            }
+            return null;
+        }
+        
+        private System.Windows.Controls.ScrollViewer FindScrollViewer(System.Windows.DependencyObject parent)
+        {
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is System.Windows.Controls.ScrollViewer scrollViewer)
+                    return scrollViewer;
+                
+                var result = FindScrollViewer(child);
+                if (result != null)
+                    return result;
+            }
+            return null;
         }
         
         private void ShowOriginalData(List<OriginalBet> originalBets)
@@ -149,6 +194,21 @@ namespace CrashAnalyzer
                 BetAmount = index < originalBets.Count ? $"${originalBets[index].BetAmount:F2}" : "-",
                 Profit = index < originalBets.Count ? $"${originalBets[index].Profit:F2}" : "-"
             }).ToList();
+            
+            // Update max profit/loss displays
+            if (originalBets.Any(b => b.Status != "Skipped"))
+            {
+                var maxProfit = originalBets.Where(b => b.Status != "Skipped").Max(b => b.Profit);
+                var minProfit = originalBets.Where(b => b.Status != "Skipped").Min(b => b.Profit);
+                
+                txtOriginalMaxProfit.Text = $"Max Profit: ${maxProfit:F2}";
+                txtOriginalMaxLoss.Text = $"Max Loss: ${Math.Abs(minProfit):F2}";
+            }
+            else
+            {
+                txtOriginalMaxProfit.Text = "Max Profit: $0.00";
+                txtOriginalMaxLoss.Text = "Max Loss: $0.00";
+            }
             
             // Add net profit row
             var totalProfit = originalBets.Where(b => b.Status != "Skipped").Sum(b => b.Profit);
@@ -178,6 +238,21 @@ namespace CrashAnalyzer
                 BetAmount = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].BetAmount:F2}" : "-",
                 Profit = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].Profit:F2}" : "-"
             }).ToList();
+            
+            // Update max profit/loss displays
+            if (newResults.Any(r => r.BetPlaced))
+            {
+                var maxProfit = newResults.Where(r => r.BetPlaced).Max(r => r.Profit);
+                var minProfit = newResults.Where(r => r.BetPlaced).Min(r => r.Profit);
+                
+                txtAnalyzedMaxProfit.Text = $"Max Profit: ${maxProfit:F2}";
+                txtAnalyzedMaxLoss.Text = $"Max Loss: ${Math.Abs(minProfit):F2}";
+            }
+            else
+            {
+                txtAnalyzedMaxProfit.Text = "Max Profit: $0.00";
+                txtAnalyzedMaxLoss.Text = "Max Loss: $0.00";
+            }
             
             // Add net profit row
             var totalProfit = newResults.Where(r => r.BetPlaced).Sum(r => r.Profit);
