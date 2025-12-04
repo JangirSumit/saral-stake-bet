@@ -190,7 +190,8 @@ namespace CrashAnalyzer
             {
                 No = (object)(index + 1),
                 Crash = $"{crash:F2}x",
-                Status = index < originalBets.Count ? originalBets[index].Status : "No Bet",
+                Status = index < originalBets.Count ? 
+                    (originalBets[index].Status == "Placed" ? "No Bet" : originalBets[index].Status) : "No Bet",
                 BetAmount = index < originalBets.Count ? $"${originalBets[index].BetAmount:F2}" : "-",
                 Profit = index < originalBets.Count ? $"${originalBets[index].Profit:F2}" : "-"
             }).ToList();
