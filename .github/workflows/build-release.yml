@@ -44,9 +44,18 @@ jobs:
     - name: Sign executable
       continue-on-error: true
       run: |
-        [System.Convert]::FromBase64String("${{ secrets.SIGNING_CERT }}") | Set-Content -Path cert.p12 -Encoding Byte
-        & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe" sign /f cert.p12 /p "${{ secrets.CERT_PASSWORD }}" /t http://timestamp.digicert.com ./publish/CrashAnalyzer.exe
-        Remove-Item cert.p12
+        if ("${{ secrets.SIGNING_CERT }}" -ne "") {
+          [System.Convert]::FromBase64String("${{ secrets.SIGNING_CERT }}") | Set-Content -Path cert.p12 -Encoding Byte
+          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object Name -Descending | Select-Object -First 1
+          if ($signtool) {
+            & $signtool.FullName sign /f cert.p12 /p "${{ secrets.CERT_PASSWORD }}" /t http://timestamp.digicert.com ./publish/CrashAnalyzer.exe
+          } else {
+            Write-Host "Signtool not found, skipping code signing"
+          }
+          Remove-Item cert.p12 -ErrorAction SilentlyContinue
+        } else {
+          Write-Host "No signing certificate provided, skipping code signing"
+        }
       shell: powershell
     
     - name: Create Release
