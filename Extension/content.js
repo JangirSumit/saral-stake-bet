@@ -103,7 +103,7 @@ function restoreState() {
       if (state.sessionStartTime) {
         sessionStartTime = new Date(state.sessionStartTime);
       }
-      console.log("State restored after disabled button refresh");
+      console.log("SESSION RESTORED");
       localStorage.removeItem("autoBetState");
       return true;
     }
@@ -118,10 +118,10 @@ function initializeElements() {
   fillProperties();
 
   if (!gameSidebar || !startBetButton) {
-    console.log("Elements not ready, retrying in 500ms...");
+
     setTimeout(initializeElements, 500);
   } else {
-    console.log("Elements ready, initializing watchers");
+
     const wasRestored = restoreState();
 
     // Add small delay to ensure DOM is stable
@@ -188,10 +188,7 @@ function betWatcher() {
       const currentText = currentButton?.textContent?.trim() || "Cashout";
 
       if (currentText !== lastStatus) {
-        console.log("Button text changed:", currentText);
         startBetButton = currentButton;
-
-        // Update input references when button changes
         fillProperties();
 
         chrome.runtime.sendMessage({
@@ -206,14 +203,7 @@ function betWatcher() {
           }
 
           setTimeout(() => {
-            console.log(
-              "Button ready - currentBet:",
-              !!currentBet,
-              "skipBetting:",
-              skipBetting,
-              "consecutiveLowCrashes:",
-              consecutiveLowCrashes
-            );
+
 
             // Check if we should skip due to consecutive low crashes
             if (
@@ -222,17 +212,13 @@ function betWatcher() {
               consecutiveLowCrashes >= betConfig.crashTimes
             ) {
               skipBetting = true;
-              console.log(
-                `Pre-bet check: Skipping due to ${consecutiveLowCrashes} consecutive low crashes`
-              );
+              console.log(`SKIP: ${consecutiveLowCrashes} consecutive crashes < ${betConfig.crashAt}`);
             }
 
             if (!skipBetting && !refreshInProgress) {
               placeBet();
             } else {
-              console.log(
-                "Bet skipped due to consecutive crashes or refresh in progress"
-              );
+              console.log("BET SKIPPED");
               currentBet = null; // Ensure no bet is tracked
               // Notify bet skipped
               if (!refreshInProgress) {
@@ -255,7 +241,7 @@ function betWatcher() {
       characterData: true,
     });
 
-    console.log("Button text monitoring started automatically");
+
   }
 }
 
@@ -267,11 +253,11 @@ function handleDisabledButton(currentButton) {
   ) {
     // Check if bet amount input has invalid class (zero balance scenario)
     if (betAmountInput?.classList.contains("invalid")) {
-      console.log("Bet amount input invalid (zero balance) - skipping refresh");
+
       return false;
     }
 
-    console.log("Bet button is disabled - saving state and refreshing page");
+
     refreshInProgress = true;
 
     // Track refresh
@@ -328,15 +314,6 @@ function fillProperties() {
     ?.closest("label")
     ?.querySelector("input");
 
-  console.log("Elements found:", {
-    gameSidebar: !!newGameSidebar,
-    startBetButton: !!newStartBetButton,
-    betAmountInput: !!newBetAmountInput,
-    profitInput: !!newProfitInput,
-    lastCrashes: !!newLastCrashes,
-    cashoutInput: !!newCashoutInput,
-  });
-
   // Update global variables if elements found
   if (newGameSidebar) gameSidebar = newGameSidebar;
   if (newStartBetButton) startBetButton = newStartBetButton;
@@ -348,10 +325,7 @@ function fillProperties() {
 
 function addCrashToHistory(crashValue) {
   // Only block if we're actually refreshing (not just skipped due to invalid input)
-  if (refreshInProgress) {
-    console.log("Crash processing blocked - refresh in progress");
-    return;
-  }
+  if (refreshInProgress) return;
 
   // Handle win case (e.g., "3.68× 2.50×")
   const isWin = crashValue.includes("×") && crashValue.split("×").length > 2;
@@ -365,7 +339,6 @@ function addCrashToHistory(crashValue) {
 
   // Ignore the first crash after starting auto betting
   if (ignorePreviousCrash) {
-    console.log("Ignoring previous crash:", crash);
     ignorePreviousCrash = false;
     return;
   }
@@ -379,9 +352,6 @@ function addCrashToHistory(crashValue) {
       adjustBetAmountBasedOnResult(crash);
     }
   }
-
-  console.log("Crash history updated:", crashHistory);
-  console.log("Current bet:", currentBet);
 
   const historyData = currentBet
     ? { ...currentBet, crashValue, isWin }
@@ -401,9 +371,7 @@ function addCrashToHistory(crashValue) {
 }
 
 function handleStopResumeLogic(crash) {
-  console.log(
-    `Crash: ${crash}, skipBetting: ${skipBetting}, consecutiveLowCrashes: ${consecutiveLowCrashes}, consecutiveHighCrashes: ${consecutiveHighCrashes}, currentBet: ${!!currentBet}`
-  );
+
 
   // Check resume logic first
   if (checkResumeLogic(crash)) return;
@@ -418,9 +386,7 @@ function checkResumeLogic(crash) {
   if (skipBetting) {
     // Check high crash resume (original logic)
     if (betConfig.resumeAt > 0 && crash >= betConfig.resumeAt) {
-      console.log(
-        `Resume triggered! Crash ${crash} >= resumeAt ${betConfig.resumeAt}`
-      );
+      console.log(`RESUME: Crash ${crash} >= ${betConfig.resumeAt}`);
       resumeBetting();
       return true;
     }
@@ -441,14 +407,10 @@ function checkResumeLogic(crash) {
         consecutiveResumeBelowCrashes++;
         const operator = betConfig.resumeBelowAt > 0 ? "<" : ">";
         const threshold = Math.abs(betConfig.resumeBelowAt);
-        console.log(
-          `Resume condition: ${crash} ${operator} ${threshold}. Count: ${consecutiveResumeBelowCrashes}`
-        );
+
 
         if (consecutiveResumeBelowCrashes >= betConfig.resumeBelowTimes) {
-          console.log(
-            `Resume triggered! ${consecutiveResumeBelowCrashes} consecutive crashes ${operator} ${threshold}`
-          );
+          console.log(`RESUME: ${consecutiveResumeBelowCrashes} crashes ${operator} ${threshold}`);
           resumeBetting();
           return true;
         }
@@ -456,9 +418,7 @@ function checkResumeLogic(crash) {
         consecutiveResumeBelowCrashes = 0;
         const operator = betConfig.resumeBelowAt > 0 ? ">=" : "<=";
         const threshold = Math.abs(betConfig.resumeBelowAt);
-        console.log(
-          `Resume condition reset: ${crash} ${operator} ${threshold}`
-        );
+
       }
     }
   }
@@ -469,12 +429,10 @@ function resumeBetting() {
   if (betConfig.resumeAdjust !== 0) {
     const oldAmount = currentBetAmount;
     currentBetAmount = adjustBetAmount(lastBetAmount, betConfig.resumeAdjust);
-    console.log(
-      `Resume bet adjustment: ${oldAmount} -> ${currentBetAmount} (${betConfig.resumeAdjust}% from last bet ${lastBetAmount})`
-    );
+
   } else {
     currentBetAmount = lastBetAmount;
-    console.log(`Resume: Using last bet amount ${lastBetAmount}`);
+
   }
 
   chrome.runtime.sendMessage({
@@ -493,31 +451,22 @@ function checkCrashPattern(crash) {
   if (betConfig.crashAt > 0 && betConfig.crashTimes > 0) {
     if (crash < betConfig.crashAt) {
       consecutiveLowCrashes++;
-      console.log(
-        `Bet crash below threshold: ${crash} < ${betConfig.crashAt}. Count: ${consecutiveLowCrashes}`
-      );
+      console.log(`Low crash: ${crash} < ${betConfig.crashAt}. Count: ${consecutiveLowCrashes}`);
 
       if (consecutiveLowCrashes >= betConfig.crashTimes) {
-        console.log(
-          `Will skip betting after ${consecutiveLowCrashes} consecutive crashes below ${betConfig.crashAt}`
-        );
+        console.log(`SKIP TRIGGERED: ${consecutiveLowCrashes} crashes < ${betConfig.crashAt}`);
         skipBetting = true;
       }
     } else {
       consecutiveLowCrashes = 0;
-      console.log(
-        `Crash reached threshold: ${crash} >= ${betConfig.crashAt}, reset count`
-      );
+      console.log(`Crash reached threshold: ${crash} >= ${betConfig.crashAt}, reset count`);
     }
   }
 }
 
 function placeBet() {
   // Only block if we're actually refreshing (not just skipped due to invalid input)
-  if (refreshInProgress) {
-    console.log("Bet placement blocked - refresh in progress");
-    return;
-  }
+  if (refreshInProgress) return;
 
   if (betAmountInput && cashoutInput) {
     console.log(`=== PLACING BET ===`);
@@ -568,10 +517,7 @@ function placeBet() {
 
 function adjustBetAmountBasedOnResult(crash) {
   // Only block if we're actually refreshing (not just skipped due to invalid input)
-  if (refreshInProgress) {
-    console.log("Bet adjustment blocked - refresh in progress");
-    return;
-  }
+  if (refreshInProgress) return;
 
   const { onWin, onLoss } = betConfig;
   const oldAmount = currentBetAmount;
@@ -584,11 +530,7 @@ function adjustBetAmountBasedOnResult(crash) {
     totalProfit += profit;
     superTotalProfit += profit;
     superTotalBets++;
-    console.log(
-      `Profit this round: ${profit.toFixed(
-        2
-      )}, Total profit: ${totalProfit.toFixed(2)}`
-    );
+    console.log(`Profit this round: ${profit.toFixed(2)}, Total profit: ${totalProfit.toFixed(2)}`);
 
     // Check if profit crosses threshold
     if (
@@ -597,9 +539,7 @@ function adjustBetAmountBasedOnResult(crash) {
     ) {
       currentBetAmount = originalBetAmount;
       totalProfit = 0; // Reset profit counter
-      console.log(
-        `Profit threshold reached! Reset to original amount: ${originalBetAmount}`
-      );
+      console.log(`Profit threshold reached! Reset to original amount: ${originalBetAmount}`);
 
       // Notify sidepanel to reset graph and calculations
       chrome.runtime.sendMessage({
@@ -608,15 +548,11 @@ function adjustBetAmountBasedOnResult(crash) {
     } else if (onWin === 0) {
       // Won - check if onWin is 0% to reset to original amount
       currentBetAmount = originalBetAmount;
-      console.log(
-        `WON: ${oldAmount} -> ${currentBetAmount} (reset to original)`
-      );
+      console.log(`WON: ${oldAmount} -> ${currentBetAmount} (reset to original)`);
     } else {
       // Won - adjust by onWin % (typically negative to decrease bet)
       currentBetAmount = adjustBetAmount(currentBetAmount, -Math.abs(onWin));
-      console.log(
-        `WON: ${oldAmount} -> ${currentBetAmount} (${onWin}% decrease)`
-      );
+      console.log(`WON: ${oldAmount} -> ${currentBetAmount} (${onWin}% decrease)`);
     }
   } else {
     // Lost - subtract loss from total profit
@@ -624,15 +560,11 @@ function adjustBetAmountBasedOnResult(crash) {
     totalProfit -= loss;
     superTotalLoss += loss;
     superTotalBets++;
-    console.log(
-      `Loss this round: ${loss}, Total profit: ${totalProfit.toFixed(2)}`
-    );
+    console.log(`Loss this round: ${loss}, Total profit: ${totalProfit.toFixed(2)}`);
 
     // Lost - adjust by onLoss % (typically positive to increase bet)
     currentBetAmount = adjustBetAmount(currentBetAmount, Math.abs(onLoss));
-    console.log(
-      `LOST: ${oldAmount} -> ${currentBetAmount} (${onLoss}% increase)`
-    );
+    console.log(`LOST: ${oldAmount} -> ${currentBetAmount} (${onLoss}% increase)`);
   }
 
   // Check if reset threshold is exceeded
@@ -683,11 +615,9 @@ function checkResetThreshold() {
         : changePercent <= betConfig.resetThreshold;
 
     if (thresholdExceeded) {
-      console.log(
-        `Reset threshold reached: ${changePercent.toFixed(2)}% ${
+      console.log(`Reset threshold reached: ${changePercent.toFixed(2)}% ${
           betConfig.resetThreshold > 0 ? ">=" : "<="
-        } ${betConfig.resetThreshold}%`
-      );
+        } ${betConfig.resetThreshold}%`);
       currentBetAmount = originalBetAmount;
       console.log(`Bet amount reset to original: ${originalBetAmount}`);
 
@@ -708,9 +638,7 @@ function checkLossResetAmount() {
     const currentLoss = Math.abs(totalProfit);
 
     if (currentLoss >= betConfig.lossResetAmount) {
-      console.log(
-        `Loss reset triggered! Loss: ${currentLoss} >= ${betConfig.lossResetAmount}`
-      );
+      console.log(`Loss reset triggered! Loss: ${currentLoss} >= ${betConfig.lossResetAmount}`);
 
       // Track sub-session reset details
       subSessionResets++;
@@ -728,9 +656,7 @@ function checkLossResetAmount() {
       lastBetAmount = originalBetAmount; // Fix: Update lastBetAmount for resume logic
       totalProfit = 0;
 
-      console.log(
-        `Sub session reset #${subSessionResets} - loss: ${currentLoss}, bet amount: ${originalBetAmount}`
-      );
+      console.log(`Sub session reset #${subSessionResets} - loss: ${currentLoss}, bet amount: ${originalBetAmount}`);
 
       // Notify sidepanel to reset graph and calculations
       chrome.runtime.sendMessage({
@@ -794,12 +720,7 @@ function walletWatcher() {
         const symbol =
           currency === "USDT" ? "$" : currency === "INR" ? "₹" : currency;
 
-        console.log("Wallet detected:", {
-          balance,
-          currency,
-          symbol,
-          balanceText,
-        });
+
 
         if (balance !== currentWalletBalance || symbol !== currentCurrency) {
           currentWalletBalance = balance;
@@ -836,12 +757,7 @@ function walletWatcher() {
       currentCurrency =
         currency === "USDT" ? "$" : currency === "INR" ? "₹" : currency;
 
-      console.log("Initial wallet:", {
-        balance: currentWalletBalance,
-        currency,
-        symbol: currentCurrency,
-        balanceText,
-      });
+
       chrome.runtime.sendMessage({
         action: "updateWalletBalance",
         data: { balance: currentWalletBalance, currency: currentCurrency },
@@ -849,8 +765,6 @@ function walletWatcher() {
     }
 
     console.log("Wallet watcher initialized");
-  } else {
-    console.log("Coin toggle not found");
   }
 }
 
@@ -870,11 +784,9 @@ function checkWalletProtection() {
     100;
 
   if (lossPercentage >= betConfig.walletStopLoss) {
-    console.log(
-      `Wallet protection triggered! Loss: ${lossPercentage.toFixed(2)}% >= ${
+    console.log(`Wallet protection triggered! Loss: ${lossPercentage.toFixed(2)}% >= ${
         betConfig.walletStopLoss
-      }%`
-    );
+      }%`);
 
     walletProtectionTriggered = true;
     autoBetRunning = false;
@@ -896,7 +808,7 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initializeElements);
 } else {
   initializeElements();
-  console.log("Document already loaded, elements initialized.");
+
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -968,7 +880,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     refreshDetails = [];
     initialWalletBalance = currentWalletBalance;
     walletProtectionTriggered = false;
-    console.log("Auto-betting started - will ignore next crash");
+    console.log("AUTO-BETTING STARTED");
+    console.log("CONFIG:", JSON.stringify(betConfig));
 
     // Send session start time to sidepanel
     chrome.runtime.sendMessage({
@@ -989,7 +902,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "stopAutoBet") {
     autoBetRunning = false;
     skipBetting = false;
-    console.log("Auto-betting stopped");
+    console.log("AUTO-BETTING STOPPED");
   }
 
   if (message.action === "resetBetAmount") {

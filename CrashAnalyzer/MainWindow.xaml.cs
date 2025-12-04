@@ -150,7 +150,7 @@ namespace CrashAnalyzer
             }).ToList();
             
             // Add net profit row
-            var totalProfit = originalBets.Sum(b => b.Profit);
+            var totalProfit = originalBets.Where(b => b.Status != "Skipped").Sum(b => b.Profit);
             originalData.Add(new
             {
                 No = (object)"NET",
@@ -265,27 +265,59 @@ namespace CrashAnalyzer
             var bets = new List<OriginalBet>();
             var lines = File.ReadAllLines(logPath);
             
-            foreach (var line in lines)
+            for (int i = 0; i < lines.Length; i++)
             {
-                if (line.Contains("WON:") || line.Contains("LOST:"))
+                var line = lines[i];
+                
+                if (line.Contains("=== PLACING BET ==="))
                 {
-                    var isWon = line.Contains("WON:");
-                    var parts = line.Split(' ');
-                    
-                    for (int i = 0; i < parts.Length - 1; i++)
+                    // Look for bet amount in next few lines
+                    for (int j = i + 1; j < Math.Min(i + 5, lines.Length); j++)
                     {
-                        if (double.TryParse(parts[i], out double betAmount))
+                        if (lines[j].Contains("Current bet amount:"))
                         {
-                            var profit = isWon ? betAmount * 1.5 - betAmount : -betAmount; // Simplified calculation
-                            bets.Add(new OriginalBet
+                            var betMatch = System.Text.RegularExpressions.Regex.Match(lines[j], @"Current bet amount: ([\d\.]+)");
+                            if (betMatch.Success)
                             {
-                                Status = isWon ? "Won" : "Lost",
-                                BetAmount = betAmount,
-                                Profit = profit
-                            });
-                            break;
+                                bets.Add(new OriginalBet
+                                {
+                                    Status = "Placed",
+                                    BetAmount = double.Parse(betMatch.Groups[1].Value),
+                                    Profit = 0
+                                });
+                                break;
+                            }
                         }
                     }
+                }
+                else if (line.Contains("Profit this round:") && bets.Count > 0)
+                {
+                    var profitMatch = System.Text.RegularExpressions.Regex.Match(line, @"Profit this round: ([\d\.]+)");
+                    if (profitMatch.Success)
+                    {
+                        var lastBet = bets[bets.Count - 1];
+                        lastBet.Status = "Won";
+                        lastBet.Profit = double.Parse(profitMatch.Groups[1].Value);
+                    }
+                }
+                else if (line.Contains("Loss this round:") && bets.Count > 0)
+                {
+                    var lossMatch = System.Text.RegularExpressions.Regex.Match(line, @"Loss this round: ([\d\.]+)");
+                    if (lossMatch.Success)
+                    {
+                        var lastBet = bets[bets.Count - 1];
+                        lastBet.Status = "Lost";
+                        lastBet.Profit = -double.Parse(lossMatch.Groups[1].Value);
+                    }
+                }
+                else if (line.Contains("BET SKIPPED"))
+                {
+                    bets.Add(new OriginalBet
+                    {
+                        Status = "Skipped",
+                        BetAmount = 0,
+                        Profit = 0
+                    });
                 }
             }
             
