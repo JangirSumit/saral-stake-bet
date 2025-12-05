@@ -314,9 +314,9 @@
                                     <Setter Property="Foreground" Value="#FFFFFF"/>
                                     <Setter Property="FontWeight" Value="Bold"/>
                                     <Setter Property="FontSize" Value="12"/>
-                                    <Setter Property="Padding" Value="8,8"/>
+                                    <Setter Property="Padding" Value="12,8"/>
                                     <Setter Property="BorderBrush" Value="#4B5563"/>
-                                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
                                     <Setter Property="Height" Value="40"/>
                                     <Setter Property="HorizontalContentAlignment" Value="Center"/>
                                     <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -327,7 +327,7 @@
                                 <Style TargetType="DataGridCell">
                                     <Setter Property="Foreground" Value="White"/>
                                     <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Padding" Value="8,4"/>
+                                    <Setter Property="Padding" Value="12,4"/>
                                     <Setter Property="FontSize" Value="12"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
                                 </Style>
@@ -424,9 +424,9 @@
                                     <Setter Property="Foreground" Value="#FFFFFF"/>
                                     <Setter Property="FontWeight" Value="Bold"/>
                                     <Setter Property="FontSize" Value="12"/>
-                                    <Setter Property="Padding" Value="8,8"/>
+                                    <Setter Property="Padding" Value="12,8"/>
                                     <Setter Property="BorderBrush" Value="#4B5563"/>
-                                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
                                     <Setter Property="Height" Value="40"/>
                                     <Setter Property="HorizontalContentAlignment" Value="Center"/>
                                     <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -437,7 +437,7 @@
                                 <Style TargetType="DataGridCell">
                                     <Setter Property="Foreground" Value="White"/>
                                     <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Padding" Value="8,4"/>
+                                    <Setter Property="Padding" Value="12,4"/>
                                     <Setter Property="FontSize" Value="12"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
                                 </Style>

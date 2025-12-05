@@ -318,23 +318,24 @@ namespace CrashAnalyzer
         {
             var crashes = new List<double>();
             var lines = File.ReadAllLines(logPath);
+            bool bettingStarted = false;
             
             foreach (var line in lines)
             {
-                if (line.Contains("New crash detected:"))
+                if (line.Contains("AUTO-BETTING STARTED"))
                 {
-                    // Extract crash value from log line like: "New crash detected: 7.64"
-                    var startIndex = line.IndexOf("New crash detected:") + "New crash detected:".Length;
-                    var remaining = line.Substring(startIndex).Trim();
-                    
-                    // Find the first number in the remaining text
-                    var parts = remaining.Split(' ', ',', '\t');
-                    foreach (var part in parts)
+                    bettingStarted = true;
+                    continue;
+                }
+                
+                if (bettingStarted && line.Contains("New crash detected:"))
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(line, @"New crash detected: ([\d\.]+)×?");
+                    if (match.Success)
                     {
-                        if (double.TryParse(part, out double crash) && crash > 0)
+                        if (double.TryParse(match.Groups[1].Value, out double crash))
                         {
                             crashes.Add(crash);
-                            break;
                         }
                     }
                 }
@@ -347,60 +348,113 @@ namespace CrashAnalyzer
         {
             var bets = new List<OriginalBet>();
             var lines = File.ReadAllLines(logPath);
+            var crashCount = 0;
+            bool bettingStarted = false;
+            
+            // First count crashes after AUTO-BETTING STARTED
+            foreach (var line in lines)
+            {
+                if (line.Contains("AUTO-BETTING STARTED"))
+                {
+                    bettingStarted = true;
+                    continue;
+                }
+                
+                if (bettingStarted && line.Contains("New crash detected:"))
+                {
+                    crashCount++;
+                }
+            }
+            
+            // Initialize bets list with "No Bet" entries for all crashes
+            for (int i = 0; i < crashCount; i++)
+            {
+                bets.Add(new OriginalBet
+                {
+                    Status = "No Bet",
+                    BetAmount = 0,
+                    Profit = 0
+                });
+            }
+            
+            int currentCrashIndex = -1;
+            int nextBetCrashIndex = -1;
+            bettingStarted = false;
             
             for (int i = 0; i < lines.Length; i++)
             {
                 var line = lines[i];
                 
+                if (line.Contains("AUTO-BETTING STARTED"))
+                {
+                    bettingStarted = true;
+                    continue;
+                }
+                
+                // Track crash index only after betting started
+                if (bettingStarted && line.Contains("New crash detected:"))
+                {
+                    currentCrashIndex++;
+                    
+                    // Check if this crash has betting results
+                    if (nextBetCrashIndex == currentCrashIndex)
+                    {
+                        // Look ahead for profit/loss results for this crash
+                        for (int j = i + 1; j < Math.Min(i + 20, lines.Length); j++)
+                        {
+                            if (lines[j].Contains("Profit this round:"))
+                            {
+                                var profitMatch = System.Text.RegularExpressions.Regex.Match(lines[j], @"Profit this round: ([\d\.]+)");
+                                if (profitMatch.Success)
+                                {
+                                    bets[currentCrashIndex].Status = "Won";
+                                    bets[currentCrashIndex].Profit = double.Parse(profitMatch.Groups[1].Value);
+                                }
+                                break;
+                            }
+                            else if (lines[j].Contains("Loss this round:"))
+                            {
+                                var lossMatch = System.Text.RegularExpressions.Regex.Match(lines[j], @"Loss this round: ([\d\.]+)");
+                                if (lossMatch.Success)
+                                {
+                                    bets[currentCrashIndex].Status = "Lost";
+                                    bets[currentCrashIndex].Profit = -double.Parse(lossMatch.Groups[1].Value);
+                                }
+                                break;
+                            }
+                            else if (lines[j].Contains("BET SKIPPED"))
+                            {
+                                bets[currentCrashIndex].Status = "Skipped";
+                                break;
+                            }
+                            else if (lines[j].Contains("New crash detected:"))
+                            {
+                                break; // Next crash found, stop looking
+                            }
+                        }
+                    }
+                    continue;
+                }
+                
+                // Check for bet placement - this bet is for the NEXT crash
                 if (line.Contains("=== PLACING BET ==="))
                 {
+                    nextBetCrashIndex = currentCrashIndex + 1;
+                    
                     // Look for bet amount in next few lines
                     for (int j = i + 1; j < Math.Min(i + 5, lines.Length); j++)
                     {
                         if (lines[j].Contains("Current bet amount:"))
                         {
                             var betMatch = System.Text.RegularExpressions.Regex.Match(lines[j], @"Current bet amount: ([\d\.]+)");
-                            if (betMatch.Success)
+                            if (betMatch.Success && nextBetCrashIndex < bets.Count)
                             {
-                                bets.Add(new OriginalBet
-                                {
-                                    Status = "Placed",
-                                    BetAmount = double.Parse(betMatch.Groups[1].Value),
-                                    Profit = 0
-                                });
+                                bets[nextBetCrashIndex].Status = "Placed";
+                                bets[nextBetCrashIndex].BetAmount = double.Parse(betMatch.Groups[1].Value);
                                 break;
                             }
                         }
                     }
-                }
-                else if (line.Contains("Profit this round:") && bets.Count > 0)
-                {
-                    var profitMatch = System.Text.RegularExpressions.Regex.Match(line, @"Profit this round: ([\d\.]+)");
-                    if (profitMatch.Success)
-                    {
-                        var lastBet = bets[bets.Count - 1];
-                        lastBet.Status = "Won";
-                        lastBet.Profit = double.Parse(profitMatch.Groups[1].Value);
-                    }
-                }
-                else if (line.Contains("Loss this round:") && bets.Count > 0)
-                {
-                    var lossMatch = System.Text.RegularExpressions.Regex.Match(line, @"Loss this round: ([\d\.]+)");
-                    if (lossMatch.Success)
-                    {
-                        var lastBet = bets[bets.Count - 1];
-                        lastBet.Status = "Lost";
-                        lastBet.Profit = -double.Parse(lossMatch.Groups[1].Value);
-                    }
-                }
-                else if (line.Contains("BET SKIPPED"))
-                {
-                    bets.Add(new OriginalBet
-                    {
-                        Status = "Skipped",
-                        BetAmount = 0,
-                        Profit = 0
-                    });
                 }
             }
             

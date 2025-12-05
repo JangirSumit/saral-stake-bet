@@ -1,0 +1,647 @@
+[2025-12-05T03:30:12.299Z] Wallet watcher initialized
+[2025-12-05T03:30:12.713Z] New crash detected: 1.58×
+[2025-12-05T03:30:12.729Z] New crash detected: 1.07×
+[2025-12-05T03:30:12.730Z] New crash detected: 1.62×
+[2025-12-05T03:30:12.730Z] New crash detected: 1.20×
+[2025-12-05T03:30:12.730Z] New crash detected: 1.06×
+[2025-12-05T03:30:12.730Z] New crash detected: 1.39×
+[2025-12-05T03:30:12.731Z] New crash detected: 5.50×
+[2025-12-05T03:30:12.731Z] New crash detected: 10.43×
+[2025-12-05T03:30:12.731Z] New crash detected: 5.20×
+[2025-12-05T03:30:12.732Z] New crash detected: 3.19×
+[2025-12-05T03:30:34.905Z] New crash detected: 1.60×
+[2025-12-05T03:30:49.184Z] New crash detected: 1.16×
+[2025-12-05T03:31:16.629Z] New crash detected: 2.55×
+[2025-12-05T03:31:19.087Z] AUTO-BETTING STARTED
+[2025-12-05T03:31:19.087Z] CONFIG: {"amount":5,"cashout":2.9,"crashAt":2.9,"crashTimes":3,"onLoss":35,"onWin":-50,"resumeAt":0,"resumeAdjust":35,"resumeBelowAt":2.9,"resumeBelowTimes":5,"resetThreshold":-40,"profitTimes":3,"lossResetAmount":5000,"walletStopLoss":0,"decimalPlaces":2}
+[2025-12-05T03:31:32.739Z] New crash detected: 1.30×
+[2025-12-05T03:31:32.793Z] === PLACING BET ===
+[2025-12-05T03:31:32.793Z] Current bet amount: 5
+[2025-12-05T03:31:32.793Z] Last bet amount: 0
+[2025-12-05T03:31:32.793Z] Original bet amount: 5
+[2025-12-05T03:31:32.958Z] Placing bet: {"betAmount":5,"cashoutAt":2.9,"timestamp":"09:01:32"}
+[2025-12-05T03:31:55.629Z] New crash detected: 1.95×
+[2025-12-05T03:31:55.630Z] Low crash: 1.95 < 2.9. Count: 1
+[2025-12-05T03:31:55.636Z] Loss this round: 5, Total profit: -5.00
+[2025-12-05T03:31:55.636Z] LOST: 5 -> 6.75 (35% increase)
+[2025-12-05T03:31:55.637Z] Sending super data update: {"superTotalProfit":0,"superTotalLoss":5,"superTotalBets":1}
+[2025-12-05T03:31:55.721Z] === PLACING BET ===
+[2025-12-05T03:31:55.721Z] Current bet amount: 6.75
+[2025-12-05T03:31:55.721Z] Last bet amount: 5
+[2025-12-05T03:31:55.725Z] Original bet amount: 5
+[2025-12-05T03:31:55.862Z] Placing bet: {"betAmount":6.75,"cashoutAt":2.9,"timestamp":"09:01:55"}
+[2025-12-05T03:32:29.359Z] New crash detected: 3.72×
+[2025-12-05T03:32:29.359Z] Crash reached threshold: 3.72 >= 2.9, reset count
+[2025-12-05T03:32:29.359Z] Profit this round: 12.82, Total profit: 7.82
+[2025-12-05T03:32:29.364Z] WON: 6.75 -> 3.38 (-50% decrease)
+[2025-12-05T03:32:29.365Z] Sending super data update: {"superTotalProfit":12.825,"superTotalLoss":5,"superTotalBets":2}
+[2025-12-05T03:32:29.440Z] === PLACING BET ===
+[2025-12-05T03:32:29.441Z] Current bet amount: 3.38
+[2025-12-05T03:32:29.441Z] Last bet amount: 6.75
+[2025-12-05T03:32:29.441Z] Original bet amount: 5
+[2025-12-05T03:32:29.612Z] Placing bet: {"betAmount":3.38,"cashoutAt":2.9,"timestamp":"09:02:29"}
+[2025-12-05T03:32:49.453Z] New crash detected: 1.64×
+[2025-12-05T03:32:49.454Z] Low crash: 1.64 < 2.9. Count: 1
+[2025-12-05T03:32:49.459Z] Loss this round: 3.38, Total profit: 4.44
+[2025-12-05T03:32:49.459Z] LOST: 3.38 -> 4.56 (35% increase)
+[2025-12-05T03:32:49.459Z] Sending super data update: {"superTotalProfit":12.825,"superTotalLoss":8.379999999999999,"superTotalBets":3}
+[2025-12-05T03:32:49.540Z] === PLACING BET ===
+[2025-12-05T03:32:49.541Z] Current bet amount: 4.56
+[2025-12-05T03:32:49.541Z] Last bet amount: 3.38
+[2025-12-05T03:32:49.541Z] Original bet amount: 5
+[2025-12-05T03:32:49.717Z] Placing bet: {"betAmount":4.56,"cashoutAt":2.9,"timestamp":"09:02:49"}
+[2025-12-05T03:33:26.959Z] New crash detected: 4.72×
+[2025-12-05T03:33:26.959Z] Crash reached threshold: 4.72 >= 2.9, reset count
+[2025-12-05T03:33:26.959Z] Profit this round: 8.66, Total profit: 13.11
+[2025-12-05T03:33:26.959Z] WON: 4.56 -> 2.28 (-50% decrease)
+[2025-12-05T03:33:26.959Z] Reset threshold reached: -54.40% <= -40%
+[2025-12-05T03:33:26.960Z] Bet amount reset to original: 5
+[2025-12-05T03:33:26.960Z] Sending super data update: {"superTotalProfit":21.488999999999997,"superTotalLoss":8.379999999999999,"superTotalBets":4}
+[2025-12-05T03:33:27.049Z] === PLACING BET ===
+[2025-12-05T03:33:27.049Z] Current bet amount: 5
+[2025-12-05T03:33:27.049Z] Last bet amount: 4.56
+[2025-12-05T03:33:27.049Z] Original bet amount: 5
+[2025-12-05T03:33:27.204Z] Placing bet: {"betAmount":5,"cashoutAt":2.9,"timestamp":"09:03:27"}
+[2025-12-05T03:33:42.142Z] New crash detected: 1.21×
+[2025-12-05T03:33:42.143Z] Low crash: 1.21 < 2.9. Count: 1
+[2025-12-05T03:33:42.143Z] Loss this round: 5, Total profit: 8.11
+[2025-12-05T03:33:42.143Z] LOST: 5 -> 6.75 (35% increase)
+[2025-12-05T03:33:42.143Z] Sending super data update: {"superTotalProfit":21.488999999999997,"superTotalLoss":13.379999999999999,"superTotalBets":5}
+[2025-12-05T03:33:42.243Z] === PLACING BET ===
+[2025-12-05T03:33:42.243Z] Current bet amount: 6.75
+[2025-12-05T03:33:42.243Z] Last bet amount: 5
+[2025-12-05T03:33:42.243Z] Original bet amount: 5
+[2025-12-05T03:33:42.369Z] Placing bet: {"betAmount":6.75,"cashoutAt":2.9,"timestamp":"09:03:42"}
+[2025-12-05T03:34:02.323Z] New crash detected: 1.64×
+[2025-12-05T03:34:02.323Z] Low crash: 1.64 < 2.9. Count: 2
+[2025-12-05T03:34:02.323Z] Loss this round: 6.75, Total profit: 1.36
+[2025-12-05T03:34:02.323Z] LOST: 6.75 -> 9.11 (35% increase)
+[2025-12-05T03:34:02.323Z] Sending super data update: {"superTotalProfit":21.488999999999997,"superTotalLoss":20.13,"superTotalBets":6}
+[2025-12-05T03:34:02.407Z] === PLACING BET ===
+[2025-12-05T03:34:02.407Z] Current bet amount: 9.11
+[2025-12-05T03:34:02.407Z] Last bet amount: 6.75
+[2025-12-05T03:34:02.408Z] Original bet amount: 5
+[2025-12-05T03:34:02.559Z] Placing bet: {"betAmount":9.11,"cashoutAt":2.9,"timestamp":"09:04:02"}
+[2025-12-05T03:34:27.459Z] New crash detected: 2.23×
+[2025-12-05T03:34:27.460Z] Low crash: 2.23 < 2.9. Count: 3
+[2025-12-05T03:34:27.460Z] SKIP TRIGGERED: 3 crashes < 2.9
+[2025-12-05T03:34:27.460Z] Loss this round: 9.11, Total profit: -7.75
+[2025-12-05T03:34:27.460Z] LOST: 9.11 -> 12.3 (35% increase)
+[2025-12-05T03:34:27.460Z] Sending super data update: {"superTotalProfit":21.488999999999997,"superTotalLoss":29.24,"superTotalBets":7}
+[2025-12-05T03:34:27.520Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:34:27.521Z] BET SKIPPED
+[2025-12-05T03:34:54.372Z] New crash detected: 2.51×
+[2025-12-05T03:34:54.445Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:34:54.445Z] BET SKIPPED
+[2025-12-05T03:35:18.047Z] New crash detected: 2.05×
+[2025-12-05T03:35:18.134Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:35:18.135Z] BET SKIPPED
+[2025-12-05T03:35:31.282Z] New crash detected: 1.09×
+[2025-12-05T03:35:31.346Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:35:31.346Z] BET SKIPPED
+[2025-12-05T03:35:43.670Z] New crash detected: 1.04×
+[2025-12-05T03:35:43.775Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:35:43.775Z] BET SKIPPED
+[2025-12-05T03:35:57.098Z] New crash detected: 1.11×
+[2025-12-05T03:35:57.099Z] RESUME: 5 crashes < 2.9
+[2025-12-05T03:35:57.151Z] === PLACING BET ===
+[2025-12-05T03:35:57.151Z] Current bet amount: 12.3
+[2025-12-05T03:35:57.152Z] Last bet amount: 9.11
+[2025-12-05T03:35:57.152Z] Original bet amount: 5
+[2025-12-05T03:35:57.329Z] Placing bet: {"betAmount":12.3,"cashoutAt":2.9,"timestamp":"09:05:57"}
+[2025-12-05T03:36:09.728Z] New crash detected: 1.05×
+[2025-12-05T03:36:09.728Z] Low crash: 1.05 < 2.9. Count: 1
+[2025-12-05T03:36:09.729Z] Loss this round: 12.3, Total profit: -20.05
+[2025-12-05T03:36:09.729Z] LOST: 12.3 -> 16.61 (35% increase)
+[2025-12-05T03:36:09.729Z] Sending super data update: {"superTotalProfit":21.488999999999997,"superTotalLoss":41.54,"superTotalBets":8}
+[2025-12-05T03:36:09.824Z] === PLACING BET ===
+[2025-12-05T03:36:09.824Z] Current bet amount: 16.61
+[2025-12-05T03:36:09.824Z] Last bet amount: 12.3
+[2025-12-05T03:36:09.824Z] Original bet amount: 5
+[2025-12-05T03:36:09.952Z] Placing bet: {"betAmount":16.61,"cashoutAt":2.9,"timestamp":"09:06:09"}
+[2025-12-05T03:36:33.339Z] New crash detected: 2.02×
+[2025-12-05T03:36:33.339Z] Low crash: 2.02 < 2.9. Count: 2
+[2025-12-05T03:36:33.339Z] Loss this round: 16.61, Total profit: -36.66
+[2025-12-05T03:36:33.339Z] LOST: 16.61 -> 22.42 (35% increase)
+[2025-12-05T03:36:33.340Z] Sending super data update: {"superTotalProfit":21.488999999999997,"superTotalLoss":58.15,"superTotalBets":9}
+[2025-12-05T03:36:33.426Z] === PLACING BET ===
+[2025-12-05T03:36:33.426Z] Current bet amount: 22.42
+[2025-12-05T03:36:33.426Z] Last bet amount: 16.61
+[2025-12-05T03:36:33.426Z] Original bet amount: 5
+[2025-12-05T03:36:33.582Z] Placing bet: {"betAmount":22.42,"cashoutAt":2.9,"timestamp":"09:06:33"}
+[2025-12-05T03:36:56.468Z] New crash detected: 1.99×
+[2025-12-05T03:36:56.468Z] Low crash: 1.99 < 2.9. Count: 3
+[2025-12-05T03:36:56.468Z] SKIP TRIGGERED: 3 crashes < 2.9
+[2025-12-05T03:36:56.468Z] Loss this round: 22.42, Total profit: -59.08
+[2025-12-05T03:36:56.468Z] LOST: 22.42 -> 30.27 (35% increase)
+[2025-12-05T03:36:56.469Z] Sending super data update: {"superTotalProfit":21.488999999999997,"superTotalLoss":80.57,"superTotalBets":10}
+[2025-12-05T03:36:56.558Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:36:56.558Z] BET SKIPPED
+[2025-12-05T03:37:10.585Z] New crash detected: 1.15×
+[2025-12-05T03:37:10.669Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:37:10.669Z] BET SKIPPED
+[2025-12-05T03:37:38.304Z] New crash detected: 2.60×
+[2025-12-05T03:37:38.394Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:37:38.394Z] BET SKIPPED
+[2025-12-05T03:37:58.935Z] New crash detected: 1.71×
+[2025-12-05T03:37:59.021Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:37:59.021Z] BET SKIPPED
+[2025-12-05T03:38:10.827Z] New crash detected: 1.00×
+[2025-12-05T03:38:10.878Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:38:10.879Z] BET SKIPPED
+[2025-12-05T03:38:23.204Z] New crash detected: 1.04×
+[2025-12-05T03:38:23.205Z] RESUME: 5 crashes < 2.9
+[2025-12-05T03:38:23.322Z] === PLACING BET ===
+[2025-12-05T03:38:23.322Z] Current bet amount: 30.27
+[2025-12-05T03:38:23.322Z] Last bet amount: 22.42
+[2025-12-05T03:38:23.322Z] Original bet amount: 5
+[2025-12-05T03:38:23.465Z] Placing bet: {"betAmount":30.27,"cashoutAt":2.9,"timestamp":"09:08:23"}
+[2025-12-05T03:38:54.591Z] New crash detected: 3.23×
+[2025-12-05T03:38:54.591Z] Crash reached threshold: 3.23 >= 2.9, reset count
+[2025-12-05T03:38:54.592Z] Profit this round: 57.51, Total profit: -1.57
+[2025-12-05T03:38:54.592Z] WON: 30.27 -> 15.13 (-50% decrease)
+[2025-12-05T03:38:54.592Z] Sending super data update: {"superTotalProfit":79.00200000000001,"superTotalLoss":80.57,"superTotalBets":11}
+[2025-12-05T03:38:54.681Z] === PLACING BET ===
+[2025-12-05T03:38:54.681Z] Current bet amount: 15.13
+[2025-12-05T03:38:54.681Z] Last bet amount: 30.27
+[2025-12-05T03:38:54.682Z] Original bet amount: 5
+[2025-12-05T03:38:54.840Z] Placing bet: {"betAmount":15.13,"cashoutAt":2.9,"timestamp":"09:08:54"}
+[2025-12-05T03:39:14.587Z] New crash detected: 1.65×
+[2025-12-05T03:39:14.587Z] Low crash: 1.65 < 2.9. Count: 1
+[2025-12-05T03:39:14.588Z] Loss this round: 15.13, Total profit: -16.70
+[2025-12-05T03:39:14.588Z] LOST: 15.13 -> 20.43 (35% increase)
+[2025-12-05T03:39:14.588Z] Sending super data update: {"superTotalProfit":79.00200000000001,"superTotalLoss":95.69999999999999,"superTotalBets":12}
+[2025-12-05T03:39:14.668Z] === PLACING BET ===
+[2025-12-05T03:39:14.669Z] Current bet amount: 20.43
+[2025-12-05T03:39:14.669Z] Last bet amount: 15.13
+[2025-12-05T03:39:14.669Z] Original bet amount: 5
+[2025-12-05T03:39:14.853Z] Placing bet: {"betAmount":20.43,"cashoutAt":2.9,"timestamp":"09:09:14"}
+[2025-12-05T03:39:54.510Z] New crash detected: 5.45×
+[2025-12-05T03:39:54.510Z] Crash reached threshold: 5.45 >= 2.9, reset count
+[2025-12-05T03:39:54.510Z] Profit this round: 38.82, Total profit: 22.12
+[2025-12-05T03:39:54.510Z] Profit threshold reached! Reset to original amount: 5
+[2025-12-05T03:39:54.511Z] Sending super data update: {"superTotalProfit":117.81900000000002,"superTotalLoss":95.69999999999999,"superTotalBets":13}
+[2025-12-05T03:39:54.592Z] === PLACING BET ===
+[2025-12-05T03:39:54.593Z] Current bet amount: 5
+[2025-12-05T03:39:54.598Z] Last bet amount: 20.43
+[2025-12-05T03:39:54.598Z] Original bet amount: 5
+[2025-12-05T03:39:54.759Z] Placing bet: {"betAmount":5,"cashoutAt":2.9,"timestamp":"09:09:54"}
+[2025-12-05T03:40:17.916Z] New crash detected: 2.02×
+[2025-12-05T03:40:17.916Z] Low crash: 2.02 < 2.9. Count: 1
+[2025-12-05T03:40:17.917Z] Loss this round: 5, Total profit: -5.00
+[2025-12-05T03:40:17.917Z] LOST: 5 -> 6.75 (35% increase)
+[2025-12-05T03:40:17.917Z] Sending super data update: {"superTotalProfit":117.81900000000002,"superTotalLoss":100.69999999999999,"superTotalBets":14}
+[2025-12-05T03:40:17.986Z] === PLACING BET ===
+[2025-12-05T03:40:17.987Z] Current bet amount: 6.75
+[2025-12-05T03:40:17.987Z] Last bet amount: 5
+[2025-12-05T03:40:17.987Z] Original bet amount: 5
+[2025-12-05T03:40:18.152Z] Placing bet: {"betAmount":6.75,"cashoutAt":2.9,"timestamp":"09:10:18"}
+[2025-12-05T03:41:02.085Z] New crash detected: 7.06×
+[2025-12-05T03:41:02.085Z] Crash reached threshold: 7.06 >= 2.9, reset count
+[2025-12-05T03:41:02.085Z] Profit this round: 12.82, Total profit: 7.82
+[2025-12-05T03:41:02.085Z] WON: 6.75 -> 3.38 (-50% decrease)
+[2025-12-05T03:41:02.085Z] Sending super data update: {"superTotalProfit":130.644,"superTotalLoss":100.69999999999999,"superTotalBets":15}
+[2025-12-05T03:41:02.169Z] === PLACING BET ===
+[2025-12-05T03:41:02.169Z] Current bet amount: 3.38
+[2025-12-05T03:41:02.170Z] Last bet amount: 6.75
+[2025-12-05T03:41:02.170Z] Original bet amount: 5
+[2025-12-05T03:41:02.338Z] Placing bet: {"betAmount":3.38,"cashoutAt":2.9,"timestamp":"09:11:02"}
+[2025-12-05T03:41:14.095Z] New crash detected: 1.00×
+[2025-12-05T03:41:14.095Z] Low crash: 1 < 2.9. Count: 1
+[2025-12-05T03:41:14.095Z] Loss this round: 3.38, Total profit: 4.44
+[2025-12-05T03:41:14.095Z] LOST: 3.38 -> 4.56 (35% increase)
+[2025-12-05T03:41:14.095Z] Sending super data update: {"superTotalProfit":130.644,"superTotalLoss":104.07999999999998,"superTotalBets":16}
+[2025-12-05T03:41:14.198Z] === PLACING BET ===
+[2025-12-05T03:41:14.199Z] Current bet amount: 4.56
+[2025-12-05T03:41:14.199Z] Last bet amount: 3.38
+[2025-12-05T03:41:14.199Z] Original bet amount: 5
+[2025-12-05T03:41:14.364Z] Placing bet: {"betAmount":4.56,"cashoutAt":2.9,"timestamp":"09:11:14"}
+[2025-12-05T03:42:31.417Z] New crash detected: 51.04×
+[2025-12-05T03:42:31.420Z] Crash reached threshold: 51.04 >= 2.9, reset count
+[2025-12-05T03:42:31.420Z] Profit this round: 8.66, Total profit: 13.11
+[2025-12-05T03:42:31.421Z] WON: 4.56 -> 2.28 (-50% decrease)
+[2025-12-05T03:42:31.421Z] Reset threshold reached: -54.40% <= -40%
+[2025-12-05T03:42:31.421Z] Bet amount reset to original: 5
+[2025-12-05T03:42:31.421Z] Sending super data update: {"superTotalProfit":139.308,"superTotalLoss":104.07999999999998,"superTotalBets":17}
+[2025-12-05T03:42:31.515Z] === PLACING BET ===
+[2025-12-05T03:42:31.516Z] Current bet amount: 5
+[2025-12-05T03:42:31.516Z] Last bet amount: 4.56
+[2025-12-05T03:42:31.516Z] Original bet amount: 5
+[2025-12-05T03:42:31.713Z] Placing bet: {"betAmount":5,"cashoutAt":2.9,"timestamp":"09:12:31"}
+[2025-12-05T03:42:44.981Z] New crash detected: 1.11×
+[2025-12-05T03:42:44.981Z] Low crash: 1.11 < 2.9. Count: 1
+[2025-12-05T03:42:44.981Z] Loss this round: 5, Total profit: 8.11
+[2025-12-05T03:42:44.981Z] LOST: 5 -> 6.75 (35% increase)
+[2025-12-05T03:42:44.981Z] Sending super data update: {"superTotalProfit":139.308,"superTotalLoss":109.07999999999998,"superTotalBets":18}
+[2025-12-05T03:42:45.120Z] === PLACING BET ===
+[2025-12-05T03:42:45.120Z] Current bet amount: 6.75
+[2025-12-05T03:42:45.120Z] Last bet amount: 5
+[2025-12-05T03:42:45.120Z] Original bet amount: 5
+[2025-12-05T03:42:45.267Z] Placing bet: {"betAmount":6.75,"cashoutAt":2.9,"timestamp":"09:12:45"}
+[2025-12-05T03:43:43.158Z] New crash detected: 16.06×
+[2025-12-05T03:43:43.158Z] Crash reached threshold: 16.06 >= 2.9, reset count
+[2025-12-05T03:43:43.158Z] Profit this round: 12.82, Total profit: 20.93
+[2025-12-05T03:43:43.158Z] Profit threshold reached! Reset to original amount: 5
+[2025-12-05T03:43:43.159Z] Sending super data update: {"superTotalProfit":152.13299999999998,"superTotalLoss":109.07999999999998,"superTotalBets":19}
+[2025-12-05T03:43:43.250Z] === PLACING BET ===
+[2025-12-05T03:43:43.250Z] Current bet amount: 5
+[2025-12-05T03:43:43.251Z] Last bet amount: 6.75
+[2025-12-05T03:43:43.251Z] Original bet amount: 5
+[2025-12-05T03:43:43.408Z] Placing bet: {"betAmount":5,"cashoutAt":2.9,"timestamp":"09:13:43"}
+[2025-12-05T03:44:03.722Z] New crash detected: 1.69×
+[2025-12-05T03:44:03.722Z] Low crash: 1.69 < 2.9. Count: 1
+[2025-12-05T03:44:03.722Z] Loss this round: 5, Total profit: -5.00
+[2025-12-05T03:44:03.723Z] LOST: 5 -> 6.75 (35% increase)
+[2025-12-05T03:44:03.723Z] Sending super data update: {"superTotalProfit":152.13299999999998,"superTotalLoss":114.07999999999998,"superTotalBets":20}
+[2025-12-05T03:44:03.804Z] === PLACING BET ===
+[2025-12-05T03:44:03.804Z] Current bet amount: 6.75
+[2025-12-05T03:44:03.804Z] Last bet amount: 5
+[2025-12-05T03:44:03.804Z] Original bet amount: 5
+[2025-12-05T03:44:03.988Z] Placing bet: {"betAmount":6.75,"cashoutAt":2.9,"timestamp":"09:14:03"}
+[2025-12-05T03:44:32.036Z] New crash detected: 2.71×
+[2025-12-05T03:44:32.037Z] Low crash: 2.71 < 2.9. Count: 2
+[2025-12-05T03:44:32.037Z] Loss this round: 6.75, Total profit: -11.75
+[2025-12-05T03:44:32.037Z] LOST: 6.75 -> 9.11 (35% increase)
+[2025-12-05T03:44:32.037Z] Sending super data update: {"superTotalProfit":152.13299999999998,"superTotalLoss":120.82999999999998,"superTotalBets":21}
+[2025-12-05T03:44:32.119Z] === PLACING BET ===
+[2025-12-05T03:44:32.119Z] Current bet amount: 9.11
+[2025-12-05T03:44:32.119Z] Last bet amount: 6.75
+[2025-12-05T03:44:32.120Z] Original bet amount: 5
+[2025-12-05T03:44:32.252Z] Placing bet: {"betAmount":9.11,"cashoutAt":2.9,"timestamp":"09:14:32"}
+[2025-12-05T03:44:52.005Z] New crash detected: 1.64×
+[2025-12-05T03:44:52.005Z] Low crash: 1.64 < 2.9. Count: 3
+[2025-12-05T03:44:52.006Z] SKIP TRIGGERED: 3 crashes < 2.9
+[2025-12-05T03:44:52.006Z] Loss this round: 9.11, Total profit: -20.86
+[2025-12-05T03:44:52.006Z] LOST: 9.11 -> 12.3 (35% increase)
+[2025-12-05T03:44:52.006Z] Sending super data update: {"superTotalProfit":152.13299999999998,"superTotalLoss":129.94,"superTotalBets":22}
+[2025-12-05T03:44:52.091Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:44:52.091Z] BET SKIPPED
+[2025-12-05T03:45:14.728Z] New crash detected: 1.90×
+[2025-12-05T03:45:14.806Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:45:14.807Z] BET SKIPPED
+[2025-12-05T03:45:27.366Z] New crash detected: 1.06×
+[2025-12-05T03:45:27.417Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:45:27.417Z] BET SKIPPED
+[2025-12-05T03:45:45.287Z] New crash detected: 1.45×
+[2025-12-05T03:45:45.374Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:45:45.374Z] BET SKIPPED
+[2025-12-05T03:46:00.131Z] New crash detected: 1.20×
+[2025-12-05T03:46:00.193Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:46:00.194Z] BET SKIPPED
+[2025-12-05T03:46:13.100Z] New crash detected: 1.08×
+[2025-12-05T03:46:13.100Z] RESUME: 5 crashes < 2.9
+[2025-12-05T03:46:13.217Z] === PLACING BET ===
+[2025-12-05T03:46:13.217Z] Current bet amount: 12.3
+[2025-12-05T03:46:13.217Z] Last bet amount: 9.11
+[2025-12-05T03:46:13.218Z] Original bet amount: 5
+[2025-12-05T03:46:13.353Z] Placing bet: {"betAmount":12.3,"cashoutAt":2.9,"timestamp":"09:16:13"}
+[2025-12-05T03:46:49.150Z] New crash detected: 4.30×
+[2025-12-05T03:46:49.150Z] Crash reached threshold: 4.3 >= 2.9, reset count
+[2025-12-05T03:46:49.150Z] Profit this round: 23.37, Total profit: 2.51
+[2025-12-05T03:46:49.150Z] WON: 12.3 -> 6.15 (-50% decrease)
+[2025-12-05T03:46:49.150Z] Sending super data update: {"superTotalProfit":175.503,"superTotalLoss":129.94,"superTotalBets":23}
+[2025-12-05T03:46:49.227Z] === PLACING BET ===
+[2025-12-05T03:46:49.227Z] Current bet amount: 6.15
+[2025-12-05T03:46:49.227Z] Last bet amount: 12.3
+[2025-12-05T03:46:49.227Z] Original bet amount: 5
+[2025-12-05T03:46:49.528Z] Placing bet: {"betAmount":6.15,"cashoutAt":2.9,"timestamp":"09:16:49"}
+[2025-12-05T03:47:06.595Z] New crash detected: 1.41×
+[2025-12-05T03:47:06.595Z] Low crash: 1.41 < 2.9. Count: 1
+[2025-12-05T03:47:06.595Z] Loss this round: 6.15, Total profit: -3.64
+[2025-12-05T03:47:06.595Z] LOST: 6.15 -> 8.3 (35% increase)
+[2025-12-05T03:47:06.596Z] Sending super data update: {"superTotalProfit":175.503,"superTotalLoss":136.09,"superTotalBets":24}
+[2025-12-05T03:47:06.663Z] === PLACING BET ===
+[2025-12-05T03:47:06.664Z] Current bet amount: 8.3
+[2025-12-05T03:47:06.664Z] Last bet amount: 6.15
+[2025-12-05T03:47:06.664Z] Original bet amount: 5
+[2025-12-05T03:47:06.868Z] Placing bet: {"betAmount":8.3,"cashoutAt":2.9,"timestamp":"09:17:06"}
+[2025-12-05T03:47:33.013Z] New crash detected: 2.40×
+[2025-12-05T03:47:33.018Z] Low crash: 2.4 < 2.9. Count: 2
+[2025-12-05T03:47:33.018Z] Loss this round: 8.3, Total profit: -11.94
+[2025-12-05T03:47:33.018Z] LOST: 8.3 -> 11.21 (35% increase)
+[2025-12-05T03:47:33.018Z] Sending super data update: {"superTotalProfit":175.503,"superTotalLoss":144.39000000000001,"superTotalBets":25}
+[2025-12-05T03:47:33.092Z] === PLACING BET ===
+[2025-12-05T03:47:33.092Z] Current bet amount: 11.21
+[2025-12-05T03:47:33.092Z] Last bet amount: 8.3
+[2025-12-05T03:47:33.092Z] Original bet amount: 5
+[2025-12-05T03:47:33.271Z] Placing bet: {"betAmount":11.21,"cashoutAt":2.9,"timestamp":"09:17:33"}
+[2025-12-05T03:47:45.846Z] New crash detected: 1.06×
+[2025-12-05T03:47:45.846Z] Low crash: 1.06 < 2.9. Count: 3
+[2025-12-05T03:47:45.846Z] SKIP TRIGGERED: 3 crashes < 2.9
+[2025-12-05T03:47:45.846Z] Loss this round: 11.21, Total profit: -23.15
+[2025-12-05T03:47:45.847Z] LOST: 11.21 -> 15.13 (35% increase)
+[2025-12-05T03:47:45.847Z] Sending super data update: {"superTotalProfit":175.503,"superTotalLoss":155.60000000000002,"superTotalBets":26}
+[2025-12-05T03:47:45.941Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:47:45.941Z] BET SKIPPED
+[2025-12-05T03:48:12.110Z] New crash detected: 2.38×
+[2025-12-05T03:48:12.185Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:48:12.186Z] BET SKIPPED
+[2025-12-05T03:48:38.696Z] New crash detected: 2.45×
+[2025-12-05T03:48:38.784Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:48:38.784Z] BET SKIPPED
+[2025-12-05T03:49:17.325Z] New crash detected: 5.10×
+[2025-12-05T03:49:17.394Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:49:17.394Z] BET SKIPPED
+[2025-12-05T03:49:47.516Z] New crash detected: 3.02×
+[2025-12-05T03:49:47.603Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:49:47.604Z] BET SKIPPED
+[2025-12-05T03:50:36.923Z] New crash detected: 9.68×
+[2025-12-05T03:50:36.995Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:50:36.996Z] BET SKIPPED
+[2025-12-05T03:51:03.867Z] New crash detected: 2.48×
+[2025-12-05T03:51:03.960Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:51:03.960Z] BET SKIPPED
+[2025-12-05T03:51:30.050Z] New crash detected: 2.40×
+[2025-12-05T03:51:30.131Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:51:30.131Z] BET SKIPPED
+[2025-12-05T03:51:45.255Z] New crash detected: 1.22×
+[2025-12-05T03:51:45.305Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:51:45.305Z] BET SKIPPED
+[2025-12-05T03:52:05.663Z] New crash detected: 1.67×
+[2025-12-05T03:52:05.743Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:52:05.743Z] BET SKIPPED
+[2025-12-05T03:52:50.614Z] New crash detected: 7.36×
+[2025-12-05T03:52:50.701Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:52:50.702Z] BET SKIPPED
+[2025-12-05T03:53:56.882Z] New crash detected: 25.69×
+[2025-12-05T03:53:56.983Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:53:56.983Z] BET SKIPPED
+[2025-12-05T03:54:14.890Z] New crash detected: 1.03×
+[2025-12-05T03:54:14.942Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:54:14.942Z] BET SKIPPED
+[2025-12-05T03:54:30.645Z] New crash detected: 1.85×
+[2025-12-05T03:54:30.737Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:54:30.737Z] BET SKIPPED
+[2025-12-05T03:55:09.411Z] New crash detected: 5.07×
+[2025-12-05T03:55:09.476Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:55:09.476Z] BET SKIPPED
+[2025-12-05T03:55:36.712Z] New crash detected: 2.56×
+[2025-12-05T03:55:36.801Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:55:36.801Z] BET SKIPPED
+[2025-12-05T03:56:05.886Z] New crash detected: 2.86×
+[2025-12-05T03:56:05.947Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:56:05.948Z] BET SKIPPED
+[2025-12-05T03:56:24.292Z] New crash detected: 1.47×
+[2025-12-05T03:56:24.409Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:56:24.409Z] BET SKIPPED
+[2025-12-05T03:56:55.468Z] New crash detected: 3.20×
+[2025-12-05T03:56:55.549Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:56:55.554Z] BET SKIPPED
+[2025-12-05T03:57:44.427Z] New crash detected: 9.47×
+[2025-12-05T03:57:44.528Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:57:44.528Z] BET SKIPPED
+[2025-12-05T03:57:57.920Z] New crash detected: 1.09×
+[2025-12-05T03:57:57.971Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:57:57.971Z] BET SKIPPED
+[2025-12-05T03:58:43.652Z] New crash detected: 7.64×
+[2025-12-05T03:58:43.740Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:58:43.740Z] BET SKIPPED
+[2025-12-05T03:58:56.723Z] New crash detected: 1.07×
+[2025-12-05T03:58:56.823Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:58:56.823Z] BET SKIPPED
+[2025-12-05T03:59:22.472Z] New crash detected: 2.32×
+[2025-12-05T03:59:22.547Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T03:59:22.548Z] BET SKIPPED
+[2025-12-05T04:00:01.750Z] New crash detected: 5.24×
+[2025-12-05T04:00:01.833Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:00:01.834Z] BET SKIPPED
+[2025-12-05T04:00:14.908Z] New crash detected: 1.08×
+[2025-12-05T04:00:14.958Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:00:14.959Z] BET SKIPPED
+[2025-12-05T04:00:40.016Z] New crash detected: 2.22×
+[2025-12-05T04:00:40.099Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:00:40.099Z] BET SKIPPED
+[2025-12-05T04:00:52.923Z] New crash detected: 1.07×
+[2025-12-05T04:00:53.048Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:00:53.048Z] BET SKIPPED
+[2025-12-05T04:01:06.523Z] New crash detected: 1.11×
+[2025-12-05T04:01:06.601Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:01:06.601Z] BET SKIPPED
+[2025-12-05T04:01:21.382Z] New crash detected: 1.21×
+[2025-12-05T04:01:21.382Z] RESUME: 5 crashes < 2.9
+[2025-12-05T04:01:21.436Z] === PLACING BET ===
+[2025-12-05T04:01:21.439Z] Current bet amount: 15.13
+[2025-12-05T04:01:21.439Z] Last bet amount: 11.21
+[2025-12-05T04:01:21.439Z] Original bet amount: 5
+[2025-12-05T04:01:21.666Z] Placing bet: {"betAmount":15.13,"cashoutAt":2.9,"timestamp":"09:31:21"}
+[2025-12-05T04:02:15.223Z] New crash detected: 12.58×
+[2025-12-05T04:02:15.224Z] Crash reached threshold: 12.58 >= 2.9, reset count
+[2025-12-05T04:02:15.225Z] Profit this round: 28.75, Total profit: 5.60
+[2025-12-05T04:02:15.225Z] WON: 15.13 -> 7.57 (-50% decrease)
+[2025-12-05T04:02:15.225Z] Sending super data update: {"superTotalProfit":204.25,"superTotalLoss":155.60000000000002,"superTotalBets":27}
+[2025-12-05T04:02:15.657Z] === PLACING BET ===
+[2025-12-05T04:02:15.658Z] Current bet amount: 7.57
+[2025-12-05T04:02:15.658Z] Last bet amount: 15.13
+[2025-12-05T04:02:15.658Z] Original bet amount: 5
+[2025-12-05T04:02:17.655Z] Placing bet: {"betAmount":7.57,"cashoutAt":2.9,"timestamp":"09:32:17"}
+[2025-12-05T04:02:43.036Z] New crash detected: 2.63×
+[2025-12-05T04:02:43.036Z] Low crash: 2.63 < 2.9. Count: 1
+[2025-12-05T04:02:43.036Z] Loss this round: 7.57, Total profit: -1.97
+[2025-12-05T04:02:43.036Z] LOST: 7.57 -> 10.22 (35% increase)
+[2025-12-05T04:02:43.036Z] Sending super data update: {"superTotalProfit":204.25,"superTotalLoss":163.17000000000002,"superTotalBets":28}
+[2025-12-05T04:02:43.639Z] === PLACING BET ===
+[2025-12-05T04:02:43.639Z] Current bet amount: 10.22
+[2025-12-05T04:02:43.640Z] Last bet amount: 7.57
+[2025-12-05T04:02:43.640Z] Original bet amount: 5
+[2025-12-05T04:02:45.642Z] Placing bet: {"betAmount":10.22,"cashoutAt":2.9,"timestamp":"09:32:45"}
+[2025-12-05T04:03:06.333Z] New crash detected: 2.00×
+[2025-12-05T04:03:06.333Z] Low crash: 2 < 2.9. Count: 2
+[2025-12-05T04:03:06.334Z] Loss this round: 10.22, Total profit: -12.19
+[2025-12-05T04:03:06.334Z] LOST: 10.22 -> 13.8 (35% increase)
+[2025-12-05T04:03:06.334Z] Sending super data update: {"superTotalProfit":204.25,"superTotalLoss":173.39000000000001,"superTotalBets":29}
+[2025-12-05T04:03:06.636Z] === PLACING BET ===
+[2025-12-05T04:03:06.636Z] Current bet amount: 13.8
+[2025-12-05T04:03:06.637Z] Last bet amount: 10.22
+[2025-12-05T04:03:06.637Z] Original bet amount: 5
+[2025-12-05T04:03:08.644Z] Placing bet: {"betAmount":13.8,"cashoutAt":2.9,"timestamp":"09:33:08"}
+[2025-12-05T04:03:18.182Z] New crash detected: 1.00×
+[2025-12-05T04:03:18.183Z] Low crash: 1 < 2.9. Count: 3
+[2025-12-05T04:03:18.183Z] SKIP TRIGGERED: 3 crashes < 2.9
+[2025-12-05T04:03:18.183Z] Loss this round: 13.8, Total profit: -25.99
+[2025-12-05T04:03:18.183Z] LOST: 13.8 -> 18.63 (35% increase)
+[2025-12-05T04:03:18.183Z] Sending super data update: {"superTotalProfit":204.25,"superTotalLoss":187.19000000000003,"superTotalBets":30}
+[2025-12-05T04:03:18.642Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:03:18.642Z] BET SKIPPED
+[2025-12-05T04:03:33.624Z] New crash detected: 1.25×
+[2025-12-05T04:03:34.637Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:03:34.637Z] BET SKIPPED
+[2025-12-05T04:03:58.751Z] New crash detected: 2.25×
+[2025-12-05T04:03:59.637Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:03:59.637Z] BET SKIPPED
+[2025-12-05T04:04:27.000Z] New crash detected: 2.67×
+[2025-12-05T04:04:27.078Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:04:27.078Z] BET SKIPPED
+[2025-12-05T04:04:39.677Z] New crash detected: 1.05×
+[2025-12-05T04:04:39.735Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:04:39.736Z] BET SKIPPED
+[2025-12-05T04:04:54.506Z] New crash detected: 1.20×
+[2025-12-05T04:04:54.506Z] RESUME: 5 crashes < 2.9
+[2025-12-05T04:04:54.567Z] === PLACING BET ===
+[2025-12-05T04:04:54.568Z] Current bet amount: 18.63
+[2025-12-05T04:04:54.568Z] Last bet amount: 13.8
+[2025-12-05T04:04:54.568Z] Original bet amount: 5
+[2025-12-05T04:04:54.777Z] Placing bet: {"betAmount":18.63,"cashoutAt":2.9,"timestamp":"09:34:54"}
+[2025-12-05T04:05:13.859Z] New crash detected: 1.58×
+[2025-12-05T04:05:13.859Z] Low crash: 1.58 < 2.9. Count: 1
+[2025-12-05T04:05:13.859Z] Loss this round: 18.63, Total profit: -44.62
+[2025-12-05T04:05:13.859Z] LOST: 18.63 -> 25.15 (35% increase)
+[2025-12-05T04:05:13.859Z] Sending super data update: {"superTotalProfit":204.25,"superTotalLoss":205.82000000000002,"superTotalBets":31}
+[2025-12-05T04:05:13.969Z] === PLACING BET ===
+[2025-12-05T04:05:13.969Z] Current bet amount: 25.15
+[2025-12-05T04:05:13.969Z] Last bet amount: 18.63
+[2025-12-05T04:05:13.969Z] Original bet amount: 5
+[2025-12-05T04:05:14.118Z] Placing bet: {"betAmount":25.15,"cashoutAt":2.9,"timestamp":"09:35:14"}
+[2025-12-05T04:05:39.030Z] New crash detected: 2.24×
+[2025-12-05T04:05:39.031Z] Low crash: 2.24 < 2.9. Count: 2
+[2025-12-05T04:05:39.031Z] Loss this round: 25.15, Total profit: -69.77
+[2025-12-05T04:05:39.031Z] LOST: 25.15 -> 33.95 (35% increase)
+[2025-12-05T04:05:39.031Z] Sending super data update: {"superTotalProfit":204.25,"superTotalLoss":230.97000000000003,"superTotalBets":32}
+[2025-12-05T04:05:39.109Z] === PLACING BET ===
+[2025-12-05T04:05:39.109Z] Current bet amount: 33.95
+[2025-12-05T04:05:39.109Z] Last bet amount: 25.15
+[2025-12-05T04:05:39.109Z] Original bet amount: 5
+[2025-12-05T04:05:39.297Z] Placing bet: {"betAmount":33.95,"cashoutAt":2.9,"timestamp":"09:35:39"}
+[2025-12-05T04:06:08.661Z] New crash detected: 2.93×
+[2025-12-05T04:06:08.661Z] Crash reached threshold: 2.93 >= 2.9, reset count
+[2025-12-05T04:06:08.661Z] Profit this round: 64.50, Total profit: -5.27
+[2025-12-05T04:06:08.661Z] WON: 33.95 -> 16.98 (-50% decrease)
+[2025-12-05T04:06:08.661Z] Sending super data update: {"superTotalProfit":268.755,"superTotalLoss":230.97000000000003,"superTotalBets":33}
+[2025-12-05T04:06:08.725Z] === PLACING BET ===
+[2025-12-05T04:06:08.725Z] Current bet amount: 16.98
+[2025-12-05T04:06:08.725Z] Last bet amount: 33.95
+[2025-12-05T04:06:08.725Z] Original bet amount: 5
+[2025-12-05T04:06:08.871Z] Placing bet: {"betAmount":16.98,"cashoutAt":2.9,"timestamp":"09:36:08"}
+[2025-12-05T04:06:27.046Z] New crash detected: 1.48×
+[2025-12-05T04:06:27.046Z] Low crash: 1.48 < 2.9. Count: 1
+[2025-12-05T04:06:27.046Z] Loss this round: 16.98, Total profit: -22.25
+[2025-12-05T04:06:27.046Z] LOST: 16.98 -> 22.92 (35% increase)
+[2025-12-05T04:06:27.047Z] Sending super data update: {"superTotalProfit":268.755,"superTotalLoss":247.95000000000002,"superTotalBets":34}
+[2025-12-05T04:06:27.126Z] === PLACING BET ===
+[2025-12-05T04:06:27.126Z] Current bet amount: 22.92
+[2025-12-05T04:06:27.127Z] Last bet amount: 16.98
+[2025-12-05T04:06:27.127Z] Original bet amount: 5
+[2025-12-05T04:06:27.280Z] Placing bet: {"betAmount":22.92,"cashoutAt":2.9,"timestamp":"09:36:27"}
+[2025-12-05T04:06:58.748Z] New crash detected: 3.32×
+[2025-12-05T04:06:58.748Z] Crash reached threshold: 3.32 >= 2.9, reset count
+[2025-12-05T04:06:58.748Z] Profit this round: 43.55, Total profit: 21.30
+[2025-12-05T04:06:58.748Z] Profit threshold reached! Reset to original amount: 5
+[2025-12-05T04:06:58.749Z] Sending super data update: {"superTotalProfit":312.303,"superTotalLoss":247.95000000000002,"superTotalBets":35}
+[2025-12-05T04:06:58.823Z] === PLACING BET ===
+[2025-12-05T04:06:58.823Z] Current bet amount: 5
+[2025-12-05T04:06:58.823Z] Last bet amount: 22.92
+[2025-12-05T04:06:58.823Z] Original bet amount: 5
+[2025-12-05T04:06:58.973Z] Placing bet: {"betAmount":5,"cashoutAt":2.9,"timestamp":"09:36:58"}
+[2025-12-05T04:07:22.738Z] New crash detected: 2.09×
+[2025-12-05T04:07:22.738Z] Low crash: 2.09 < 2.9. Count: 1
+[2025-12-05T04:07:22.738Z] Loss this round: 5, Total profit: -5.00
+[2025-12-05T04:07:22.738Z] LOST: 5 -> 6.75 (35% increase)
+[2025-12-05T04:07:22.738Z] Sending super data update: {"superTotalProfit":312.303,"superTotalLoss":252.95000000000002,"superTotalBets":36}
+[2025-12-05T04:07:22.818Z] === PLACING BET ===
+[2025-12-05T04:07:22.819Z] Current bet amount: 6.75
+[2025-12-05T04:07:22.819Z] Last bet amount: 5
+[2025-12-05T04:07:22.819Z] Original bet amount: 5
+[2025-12-05T04:07:22.973Z] Placing bet: {"betAmount":6.75,"cashoutAt":2.9,"timestamp":"09:37:22"}
+[2025-12-05T04:07:41.996Z] New crash detected: 1.57×
+[2025-12-05T04:07:41.996Z] Low crash: 1.57 < 2.9. Count: 2
+[2025-12-05T04:07:41.996Z] Loss this round: 6.75, Total profit: -11.75
+[2025-12-05T04:07:41.996Z] LOST: 6.75 -> 9.11 (35% increase)
+[2025-12-05T04:07:41.997Z] Sending super data update: {"superTotalProfit":312.303,"superTotalLoss":259.70000000000005,"superTotalBets":37}
+[2025-12-05T04:07:42.093Z] === PLACING BET ===
+[2025-12-05T04:07:42.093Z] Current bet amount: 9.11
+[2025-12-05T04:07:42.093Z] Last bet amount: 6.75
+[2025-12-05T04:07:42.093Z] Original bet amount: 5
+[2025-12-05T04:07:42.226Z] Placing bet: {"betAmount":9.11,"cashoutAt":2.9,"timestamp":"09:37:42"}
+[2025-12-05T04:08:04.621Z] New crash detected: 1.91×
+[2025-12-05T04:08:04.621Z] Low crash: 1.91 < 2.9. Count: 3
+[2025-12-05T04:08:04.621Z] SKIP TRIGGERED: 3 crashes < 2.9
+[2025-12-05T04:08:04.622Z] Loss this round: 9.11, Total profit: -20.86
+[2025-12-05T04:08:04.622Z] LOST: 9.11 -> 12.3 (35% increase)
+[2025-12-05T04:08:04.622Z] Sending super data update: {"superTotalProfit":312.303,"superTotalLoss":268.81000000000006,"superTotalBets":38}
+[2025-12-05T04:08:04.702Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:08:04.702Z] BET SKIPPED
+[2025-12-05T04:09:01.946Z] New crash detected: 15.41×
+[2025-12-05T04:09:02.019Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:09:02.019Z] BET SKIPPED
+[2025-12-05T04:09:20.234Z] New crash detected: 1.49×
+[2025-12-05T04:09:20.339Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:09:20.339Z] BET SKIPPED
+[2025-12-05T04:09:32.346Z] New crash detected: 1.02×
+[2025-12-05T04:09:32.405Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:09:32.406Z] BET SKIPPED
+[2025-12-05T04:10:03.946Z] New crash detected: 3.28×
+[2025-12-05T04:10:04.026Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:10:04.027Z] BET SKIPPED
+[2025-12-05T04:10:22.378Z] New crash detected: 1.50×
+[2025-12-05T04:10:22.462Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:10:22.462Z] BET SKIPPED
+[2025-12-05T04:10:34.197Z] New crash detected: 1.00×
+[2025-12-05T04:10:34.282Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:10:34.283Z] BET SKIPPED
+[2025-12-05T04:10:48.066Z] New crash detected: 1.14×
+[2025-12-05T04:10:48.153Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:10:48.153Z] BET SKIPPED
+[2025-12-05T04:11:00.778Z] New crash detected: 1.06×
+[2025-12-05T04:11:00.870Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:11:00.870Z] BET SKIPPED
+[2025-12-05T04:11:19.022Z] New crash detected: 1.48×
+[2025-12-05T04:11:19.022Z] RESUME: 5 crashes < 2.9
+[2025-12-05T04:11:19.108Z] === PLACING BET ===
+[2025-12-05T04:11:19.108Z] Current bet amount: 12.3
+[2025-12-05T04:11:19.108Z] Last bet amount: 9.11
+[2025-12-05T04:11:19.108Z] Original bet amount: 5
+[2025-12-05T04:11:19.238Z] Placing bet: {"betAmount":12.3,"cashoutAt":2.9,"timestamp":"09:41:19"}
+[2025-12-05T04:11:33.492Z] New crash detected: 1.18×
+[2025-12-05T04:11:33.492Z] Low crash: 1.18 < 2.9. Count: 1
+[2025-12-05T04:11:33.492Z] Loss this round: 12.3, Total profit: -33.16
+[2025-12-05T04:11:33.492Z] LOST: 12.3 -> 16.61 (35% increase)
+[2025-12-05T04:11:33.493Z] Sending super data update: {"superTotalProfit":312.303,"superTotalLoss":281.11000000000007,"superTotalBets":39}
+[2025-12-05T04:11:33.574Z] === PLACING BET ===
+[2025-12-05T04:11:33.574Z] Current bet amount: 16.61
+[2025-12-05T04:11:33.574Z] Last bet amount: 12.3
+[2025-12-05T04:11:33.575Z] Original bet amount: 5
+[2025-12-05T04:11:33.741Z] Placing bet: {"betAmount":16.61,"cashoutAt":2.9,"timestamp":"09:41:33"}
+[2025-12-05T04:11:58.040Z] New crash detected: 2.15×
+[2025-12-05T04:11:58.041Z] Low crash: 2.15 < 2.9. Count: 2
+[2025-12-05T04:11:58.041Z] Loss this round: 16.61, Total profit: -49.77
+[2025-12-05T04:11:58.041Z] LOST: 16.61 -> 22.42 (35% increase)
+[2025-12-05T04:11:58.041Z] Sending super data update: {"superTotalProfit":312.303,"superTotalLoss":297.7200000000001,"superTotalBets":40}
+[2025-12-05T04:11:58.124Z] === PLACING BET ===
+[2025-12-05T04:11:58.124Z] Current bet amount: 22.42
+[2025-12-05T04:11:58.124Z] Last bet amount: 16.61
+[2025-12-05T04:11:58.124Z] Original bet amount: 5
+[2025-12-05T04:11:58.286Z] Placing bet: {"betAmount":22.42,"cashoutAt":2.9,"timestamp":"09:41:58"}
+[2025-12-05T04:12:13.989Z] New crash detected: 1.29×
+[2025-12-05T04:12:13.990Z] Low crash: 1.29 < 2.9. Count: 3
+[2025-12-05T04:12:13.990Z] SKIP TRIGGERED: 3 crashes < 2.9
+[2025-12-05T04:12:13.990Z] Loss this round: 22.42, Total profit: -72.19
+[2025-12-05T04:12:13.991Z] LOST: 22.42 -> 30.27 (35% increase)
+[2025-12-05T04:12:13.991Z] Sending super data update: {"superTotalProfit":312.303,"superTotalLoss":320.1400000000001,"superTotalBets":41}
+[2025-12-05T04:12:14.046Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:12:14.047Z] BET SKIPPED
+[2025-12-05T04:12:30.325Z] New crash detected: 1.32×
+[2025-12-05T04:12:30.388Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:12:30.389Z] BET SKIPPED
+[2025-12-05T04:12:43.900Z] New crash detected: 1.12×
+[2025-12-05T04:12:43.959Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:12:43.959Z] BET SKIPPED
+[2025-12-05T04:13:11.662Z] New crash detected: 2.61×
+[2025-12-05T04:13:11.743Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:13:11.743Z] BET SKIPPED
+[2025-12-05T04:13:26.625Z] New crash detected: 1.21×
+[2025-12-05T04:13:26.683Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:13:26.683Z] BET SKIPPED
+[2025-12-05T04:14:01.691Z] New crash detected: 4.06×
+[2025-12-05T04:14:01.780Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:14:01.780Z] BET SKIPPED
+[2025-12-05T04:14:20.624Z] New crash detected: 1.53×
+[2025-12-05T04:14:20.694Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:14:20.694Z] BET SKIPPED
+[2025-12-05T04:14:49.385Z] New crash detected: 2.79×
+[2025-12-05T04:14:49.450Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:14:49.451Z] BET SKIPPED
+[2025-12-05T04:15:32.036Z] New crash detected: 6.30×
+[2025-12-05T04:15:32.112Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:15:32.112Z] BET SKIPPED
+[2025-12-05T04:15:52.298Z] New crash detected: 1.68×
+[2025-12-05T04:15:52.378Z] SKIP: 3 consecutive crashes < 2.9
+[2025-12-05T04:15:52.378Z] BET SKIPPED
