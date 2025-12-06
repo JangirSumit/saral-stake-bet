@@ -176,7 +176,7 @@ namespace CrashAnalyzer
             }
         }
 
-        private System.Windows.Controls.ScrollViewer GetScrollViewer(System.Windows.Controls.DataGrid dataGrid)
+        private System.Windows.Controls.ScrollViewer? GetScrollViewer(System.Windows.Controls.DataGrid dataGrid)
         {
             if (dataGrid == null) return null;
 
@@ -193,7 +193,7 @@ namespace CrashAnalyzer
             return null;
         }
 
-        private System.Windows.Controls.ScrollViewer FindScrollViewer(System.Windows.DependencyObject parent)
+        private System.Windows.Controls.ScrollViewer? FindScrollViewer(System.Windows.DependencyObject parent)
         {
             for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
             {
@@ -206,6 +206,54 @@ namespace CrashAnalyzer
                     return result;
             }
             return null;
+        }
+
+        private bool _isScrollSyncing = false;
+
+        private void OnOriginalGridScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+        {
+            if (!_isScrollSyncing)
+            {
+                _isScrollSyncing = true;
+                var targetScrollViewer = GetScrollViewer(dgvAnalyzed);
+                if (targetScrollViewer != null)
+                {
+                    targetScrollViewer.ScrollToVerticalOffset(e.VerticalOffset);
+                }
+                _isScrollSyncing = false;
+            }
+        }
+
+        private void OnAnalyzedGridScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+        {
+            if (!_isScrollSyncing)
+            {
+                _isScrollSyncing = true;
+                var targetScrollViewer = GetScrollViewer(dgvOriginal);
+                if (targetScrollViewer != null)
+                {
+                    targetScrollViewer.ScrollToVerticalOffset(e.VerticalOffset);
+                }
+                _isScrollSyncing = false;
+            }
+        }
+
+        private void AttachScrollSynchronization()
+        {
+            var originalScrollViewer = GetScrollViewer(dgvOriginal);
+            var analyzedScrollViewer = GetScrollViewer(dgvAnalyzed);
+
+            if (originalScrollViewer != null)
+            {
+                originalScrollViewer.ScrollChanged -= OnOriginalGridScrollChanged;
+                originalScrollViewer.ScrollChanged += OnOriginalGridScrollChanged;
+            }
+
+            if (analyzedScrollViewer != null)
+            {
+                analyzedScrollViewer.ScrollChanged -= OnAnalyzedGridScrollChanged;
+                analyzedScrollViewer.ScrollChanged += OnAnalyzedGridScrollChanged;
+            }
         }
 
         private void ShowOriginalData(List<OriginalBet> originalBets)
@@ -221,34 +269,37 @@ namespace CrashAnalyzer
                     (originalBets[index].Status == "Skipped" ? "-" : $"${originalBets[index].Profit:F2}") : "-"
             }).ToList();
 
-            // Update max profit/loss displays
+            // Update summary displays
             if (originalBets.Any(b => b.Status != "Skipped"))
             {
-                var maxProfit = originalBets.Where(b => b.Status != "Skipped").Max(b => b.Profit);
-                var minProfit = originalBets.Where(b => b.Status != "Skipped").Min(b => b.Profit);
-
-                txtOriginalMaxProfit.Text = $"Max Profit: ${maxProfit:F2}";
-                txtOriginalMaxLoss.Text = $"Max Loss: ${Math.Abs(minProfit):F2}";
+                var betsPlaced = originalBets.Where(b => b.Status != "Skipped");
+                var totalBets = betsPlaced.Count();
+                var wins = betsPlaced.Count(b => b.Status == "Won");
+                var losses = betsPlaced.Count(b => b.Status == "Lost");
+                var totalProfit = betsPlaced.Sum(b => b.Profit);
+                var maxProfit = betsPlaced.Max(b => b.Profit);
+                var minProfit = betsPlaced.Min(b => b.Profit);
+                
+                txtOriginalMaxProfit.Text = $"Total: ${totalProfit:F2}";
+                txtOriginalMaxLoss.Text = $"Bets: {totalBets} (W:{wins} L:{losses})";
+                txtOriginalMaxSingle.Text = $"Max Profit: ${maxProfit:F2}";
+                txtOriginalSkipped.Text = $"Skipped: {originalBets.Count(b => b.Status == "Skipped")}";
+                txtOriginalLoss.Text = $"Max Loss: ${Math.Abs(minProfit):F2}";
             }
             else
             {
-                txtOriginalMaxProfit.Text = "Max Profit: $0.00";
-                txtOriginalMaxLoss.Text = "Max Loss: $0.00";
+                txtOriginalMaxProfit.Text = "Total: $0.00";
+                txtOriginalMaxLoss.Text = "Bets: 0";
+                txtOriginalMaxSingle.Text = "Max Profit: $0.00";
+                txtOriginalSkipped.Text = "Skipped: 0";
+                txtOriginalLoss.Text = "Max Loss: $0.00";
             }
-
-            // Add net profit row
-            var totalProfit = originalBets.Where(b => b.Status != "Skipped").Sum(b => b.Profit);
-            originalData.Add(new
-            {
-                No = (object)"NET",
-                Crash = "-",
-                Status = totalProfit >= 0 ? "PROFIT" : "LOSS",
-                BetAmount = "-",
-                Profit = $"${totalProfit:F2}"
-            });
 
             dgvOriginal.ItemsSource = originalData;
             dgvAnalyzed.ItemsSource = null;
+
+            // Attach scroll synchronization
+            AttachScrollSynchronization();
 
             // Update log settings display
             UpdateLogSettingsDisplay();
@@ -265,33 +316,36 @@ namespace CrashAnalyzer
                 Profit = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].Profit:F2}" : "-"
             }).ToList();
 
-            // Update max profit/loss displays
+            // Update summary displays
             if (newResults.Any(r => r.BetPlaced))
             {
-                var maxProfit = newResults.Where(r => r.BetPlaced).Max(r => r.Profit);
-                var minProfit = newResults.Where(r => r.BetPlaced).Min(r => r.Profit);
-
-                txtAnalyzedMaxProfit.Text = $"Max Profit: ${maxProfit:F2}";
-                txtAnalyzedMaxLoss.Text = $"Max Loss: ${Math.Abs(minProfit):F2}";
+                var betsPlaced = newResults.Where(r => r.BetPlaced);
+                var totalBets = betsPlaced.Count();
+                var wins = betsPlaced.Count(r => r.Won);
+                var losses = betsPlaced.Count(r => !r.Won);
+                var totalProfit = betsPlaced.Sum(r => r.Profit);
+                var maxProfit = betsPlaced.Max(r => r.Profit);
+                var minProfit = betsPlaced.Min(r => r.Profit);
+                
+                txtAnalyzedMaxProfit.Text = $"Total: ${totalProfit:F2}";
+                txtAnalyzedMaxLoss.Text = $"Bets: {totalBets} (W:{wins} L:{losses})";
+                txtAnalyzedMaxSingle.Text = $"Max Profit: ${maxProfit:F2}";
+                txtAnalyzedSkipped.Text = $"Skipped: {newResults.Count(r => !r.BetPlaced)}";
+                txtAnalyzedLoss.Text = $"Max Loss: ${Math.Abs(minProfit):F2}";
             }
             else
             {
-                txtAnalyzedMaxProfit.Text = "Max Profit: $0.00";
-                txtAnalyzedMaxLoss.Text = "Max Loss: $0.00";
+                txtAnalyzedMaxProfit.Text = "Total: $0.00";
+                txtAnalyzedMaxLoss.Text = "Bets: 0";
+                txtAnalyzedMaxSingle.Text = "Max Profit: $0.00";
+                txtAnalyzedSkipped.Text = "Skipped: 0";
+                txtAnalyzedLoss.Text = "Max Loss: $0.00";
             }
 
-            // Add net profit row
-            var totalProfit = newResults.Where(r => r.BetPlaced).Sum(r => r.Profit);
-            analyzedData.Add(new
-            {
-                No = (object)"NET",
-                Crash = "-",
-                Status = totalProfit >= 0 ? "PROFIT" : "LOSS",
-                BetAmount = "-",
-                Profit = $"${totalProfit:F2}"
-            });
-
             dgvAnalyzed.ItemsSource = analyzedData;
+
+            // Attach scroll synchronization
+            AttachScrollSynchronization();
 
             // Update current settings display
             UpdateCurrentSettingsDisplay();
