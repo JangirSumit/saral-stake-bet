@@ -12,6 +12,7 @@ namespace CrashAnalyzer
     public partial class MainWindow : Window
     {
         private List<double> crashes = new List<double>();
+        private List<DateTime> crashTimestamps = new List<DateTime>();
         private List<BetResult> betResults = new List<BetResult>();
 
         public MainWindow()
@@ -261,6 +262,7 @@ namespace CrashAnalyzer
             var originalData = crashes.Select((crash, index) => new
             {
                 No = (object)(index + 1),
+                Timestamp = index < crashTimestamps.Count ? crashTimestamps[index].ToString("HH:mm:ss") : "-",
                 Crash = $"{crash:F2}x",
                 Status = index < originalBets.Count ? originalBets[index].Status : "No Bet",
                 BetAmount = index < originalBets.Count ?
@@ -310,6 +312,7 @@ namespace CrashAnalyzer
             var analyzedData = crashes.Select((crash, index) => new
             {
                 No = (object)(index + 1),
+                Timestamp = index < crashTimestamps.Count ? crashTimestamps[index].ToString("HH:mm:ss") : "-",
                 Crash = $"{crash:F2}x",
                 Status = index < newResults.Count ? (newResults[index].BetPlaced ? (newResults[index].Won ? "Won" : "Lost") : "Skipped") : "-",
                 BetAmount = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].BetAmount:F2}" : "-",
@@ -396,6 +399,7 @@ namespace CrashAnalyzer
         private List<double> LoadCrashesFromLog(string logPath)
         {
             var crashes = new List<double>();
+            crashTimestamps = new List<DateTime>();
             var lines = File.ReadAllLines(logPath);
             bool firstBetPlaced = false;
 
@@ -418,12 +422,36 @@ namespace CrashAnalyzer
                         if (double.TryParse(match.Groups[1].Value, out double crash))
                         {
                             crashes.Add(crash);
+                            // Extract timestamp from log line
+                            var timestamp = ExtractTimestampFromLine(line);
+                            crashTimestamps.Add(timestamp);
                         }
                     }
                 }
             }
 
             return crashes;
+        }
+
+        private DateTime ExtractTimestampFromLine(string line)
+        {
+            // Try to extract timestamp from various formats
+            var timestampMatch = System.Text.RegularExpressions.Regex.Match(line, @"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)");
+            if (timestampMatch.Success)
+            {
+                if (DateTime.TryParse(timestampMatch.Groups[1].Value, out DateTime timestamp))
+                    return timestamp;
+            }
+            
+            // Try simpler format
+            timestampMatch = System.Text.RegularExpressions.Regex.Match(line, @"(\d{2}:\d{2}:\d{2})");
+            if (timestampMatch.Success)
+            {
+                if (TimeSpan.TryParse(timestampMatch.Groups[1].Value, out TimeSpan time))
+                    return DateTime.Today.Add(time);
+            }
+            
+            return DateTime.Now;
         }
 
         private List<OriginalBet> LoadOriginalBetsFromLog(string logPath)
@@ -538,7 +566,11 @@ namespace CrashAnalyzer
             for (int i = 0; i < crashes.Count; i++)
             {
                 var crash = crashes[i];
-                var result = new BetResult { CrashValue = crash };
+                var result = new BetResult 
+                { 
+                    CrashValue = crash,
+                    Timestamp = i < crashTimestamps.Count ? crashTimestamps[i] : DateTime.Now
+                };
                 currentBetExists = false; // Reset each round
 
                 if (i == 20)
@@ -965,6 +997,7 @@ namespace CrashAnalyzer
     public class BetResult
     {
         public double CrashValue { get; set; }
+        public DateTime Timestamp { get; set; }
         public bool BetPlaced { get; set; }
         public bool Won { get; set; }
         public double BetAmount { get; set; }
@@ -979,5 +1012,6 @@ namespace CrashAnalyzer
         public string Status { get; set; } = "";
         public double BetAmount { get; set; }
         public double Profit { get; set; }
+        public DateTime Timestamp { get; set; }
     }
 }

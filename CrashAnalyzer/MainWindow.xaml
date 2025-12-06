@@ -302,11 +302,12 @@
                             </DataGrid.Resources>
                             
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="No" Binding="{Binding No}" Width="50"/>
-                                <DataGridTextColumn Header="Crash" Binding="{Binding Crash}" Width="80"/>
-                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="80"/>
-                                <DataGridTextColumn Header="Bet Amount" Binding="{Binding BetAmount}" Width="100"/>
-                                <DataGridTextColumn Header="Profit" Binding="{Binding Profit}" Width="100"/>
+                                <DataGridTextColumn Header="No" Binding="{Binding No}" Width="40"/>
+                                <DataGridTextColumn Header="Time" Binding="{Binding Timestamp}" Width="70"/>
+                                <DataGridTextColumn Header="Crash" Binding="{Binding Crash}" Width="70"/>
+                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="70"/>
+                                <DataGridTextColumn Header="Bet Amount" Binding="{Binding BetAmount}" Width="90"/>
+                                <DataGridTextColumn Header="Profit" Binding="{Binding Profit}" Width="90"/>
                             </DataGrid.Columns>
                             
                             <DataGrid.ColumnHeaderStyle>
@@ -421,11 +422,12 @@
                             </DataGrid.Resources>
                             
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="No" Binding="{Binding No}" Width="50"/>
-                                <DataGridTextColumn Header="Crash" Binding="{Binding Crash}" Width="80"/>
-                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="80"/>
-                                <DataGridTextColumn Header="Bet Amount" Binding="{Binding BetAmount}" Width="100"/>
-                                <DataGridTextColumn Header="Profit" Binding="{Binding Profit}" Width="100"/>
+                                <DataGridTextColumn Header="No" Binding="{Binding No}" Width="40"/>
+                                <DataGridTextColumn Header="Time" Binding="{Binding Timestamp}" Width="70"/>
+                                <DataGridTextColumn Header="Crash" Binding="{Binding Crash}" Width="70"/>
+                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="70"/>
+                                <DataGridTextColumn Header="Bet Amount" Binding="{Binding BetAmount}" Width="90"/>
+                                <DataGridTextColumn Header="Profit" Binding="{Binding Profit}" Width="90"/>
                             </DataGrid.Columns>
                             
                             <DataGrid.ColumnHeaderStyle>
