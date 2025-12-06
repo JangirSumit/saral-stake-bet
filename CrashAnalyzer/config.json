@@ -1,0 +1,17 @@
+{
+  "BetAmount": "1.0",
+  "CashoutAt": "2.0",
+  "OnLoss": "30",
+  "OnWin": "-25",
+  "CrashAt": "2.0",
+  "CrashTimes": "3",
+  "ResumeAt": "5.0",
+  "ResumeAdjust": "0",
+  "ResumeBelowAt": "0",
+  "ResumeBelowTimes": "0",
+  "ResetThreshold": "0",
+  "ProfitTimes": "0",
+  "LossResetAmount": "0",
+  "WalletStopLoss": "0",
+  "DecimalPlaces": "0"
+}

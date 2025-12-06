@@ -32,11 +32,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,4,0">
                                 <TextBlock Text="Bet Amount" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtBetAmount" Text="1.0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtBetAmount" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                 <TextBlock Text="Cashout At" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtCashoutAt" Text="2.0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtCashoutAt" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
                         
@@ -47,11 +47,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,4,0">
                                 <TextBlock Text="On Loss (%)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtOnLoss" Text="30" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtOnLoss" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                 <TextBlock Text="On Win (%)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtOnWin" Text="-25" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtOnWin" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -68,11 +68,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,4,0">
                                 <TextBlock Text="Crash At" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtCrashAt" Text="2.0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtCrashAt" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                 <TextBlock Text="Times" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtCrashTimes" Text="3" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtCrashTimes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -89,11 +89,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,4,0">
                                 <TextBlock Text="Resume At" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtResumeAt" Text="5.0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtResumeAt" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                 <TextBlock Text="Adjust Bet (%)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtResumeAdjust" Text="0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtResumeAdjust" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
                         
@@ -104,11 +104,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,4,0">
                                 <TextBlock Text="Resume Below At" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtResumeBelowAt" Text="0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtResumeBelowAt" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                 <TextBlock Text="Below Times" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtResumeBelowTimes" Text="0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtResumeBelowTimes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -125,11 +125,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,4,0">
                                 <TextBlock Text="If Changes (%)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtResetThreshold" Text="0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtResetThreshold" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                 <TextBlock Text="If Profit (x times)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtProfitTimes" Text="0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtProfitTimes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
                         
@@ -139,7 +139,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="If Loss Amount" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtLossResetAmount" Text="0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtLossResetAmount" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -156,11 +156,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,4,0">
                                 <TextBlock Text="Stop if Wallet Down (%)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtWalletStopLoss" Text="0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtWalletStopLoss" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                 <TextBlock Text="Decimal Places (0-5)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtDecimalPlaces" Text="0" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBox Name="txtDecimalPlaces" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
