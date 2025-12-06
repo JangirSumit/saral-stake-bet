@@ -185,7 +185,7 @@
                     </Grid>
                     
                     <!-- Config Management -->
-                    <Grid Margin="0,5,0,10">
+                    <Grid Margin="0,5,0,5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -197,6 +197,11 @@
                                 Background="#3B82F6" Foreground="White" BorderThickness="0" FontSize="10"
                                 Click="BtnLoadConfig_Click"/>
                     </Grid>
+                    
+                    <!-- Deep Analysis Button -->
+                    <Button Name="btnDeepAnalysis" Content="🔍 Deep Analysis" Height="35" Margin="0,5,0,10"
+                            Background="#8B5CF6" Foreground="White" BorderThickness="0"
+                            Click="BtnDeepAnalysis_Click"/>
                     
                     
                     <!-- Color Legends -->

@@ -1055,6 +1055,283 @@ namespace CrashAnalyzer
                 }
             }
         }
+
+        private void BtnDeepAnalysis_Click(object sender, RoutedEventArgs e)
+        {
+            if (betResults.Count == 0)
+            {
+                MessageBox.Show("Please analyze a file first.", "No Data", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var analysis = PerformDeepAnalysis();
+            ShowDeepAnalysisResults(analysis);
+        }
+
+        private DeepAnalysisResult PerformDeepAnalysis()
+        {
+            var result = new DeepAnalysisResult();
+            var betsPlaced = betResults.Where(r => r.BetPlaced).ToList();
+            
+            if (!betsPlaced.Any()) return result;
+
+            // Crash Sequence Analysis
+            result.CrashSequences = AnalyzeCrashSequences();
+            
+            // Profit Distribution
+            result.ProfitDistribution = AnalyzeProfitDistribution(betsPlaced);
+            
+            // Time-based Analysis
+            result.TimeAnalysis = AnalyzeTimePatterns(betsPlaced);
+            
+            // Streak Analysis
+            result.StreakAnalysis = AnalyzeStreaks(betsPlaced);
+            
+            return result;
+        }
+
+        private List<string> AnalyzeCrashSequences()
+        {
+            var sequences = new List<string>();
+            var lossPatterns = new Dictionary<string, int>();
+            
+            for (int i = 0; i < betResults.Count - 2; i++)
+            {
+                if (betResults[i].BetPlaced && !betResults[i].Won &&
+                    betResults[i + 1].BetPlaced && !betResults[i + 1].Won &&
+                    betResults[i + 2].BetPlaced && !betResults[i + 2].Won)
+                {
+                    var pattern = $"{betResults[i].CrashValue:F1}x → {betResults[i + 1].CrashValue:F1}x → {betResults[i + 2].CrashValue:F1}x";
+                    lossPatterns[pattern] = lossPatterns.GetValueOrDefault(pattern, 0) + 1;
+                }
+            }
+            
+            sequences.Add("🔴 Most Common Loss Patterns:");
+            if (lossPatterns.Any())
+            {
+                foreach (var pattern in lossPatterns.OrderByDescending(p => p.Value).Take(5))
+                {
+                    sequences.Add($"• {pattern.Key} (occurred {pattern.Value} times)");
+                }
+            }
+            else
+            {
+                sequences.Add("• No significant loss patterns found");
+            }
+            
+            return sequences;
+        }
+
+        private List<string> AnalyzeProfitDistribution(List<BetResult> betsPlaced)
+        {
+            var distribution = new List<string>();
+            var profits = betsPlaced.Select(b => b.Profit).ToList();
+            
+            var ranges = new[] { (-1000, -100), (-100, -10), (-10, 0), (0, 10), (10, 100), (100, 1000) };
+            
+            distribution.Add("💰 Profit Distribution:");
+            foreach (var (min, max) in ranges)
+            {
+                var count = profits.Count(p => p > min && p <= max);
+                var percentage = (count * 100.0 / profits.Count);
+                if (count > 0)
+                {
+                    distribution.Add($"• ${min} to ${max}: {count} bets ({percentage:F1}%)");
+                }
+            }
+            
+            return distribution;
+        }
+
+        private List<string> AnalyzeTimePatterns(List<BetResult> betsPlaced)
+        {
+            var timeAnalysis = new List<string>();
+            var hourlyStats = betsPlaced.GroupBy(b => b.Timestamp.Hour)
+                .Select(g => new { Hour = g.Key, Profit = g.Sum(b => b.Profit), Count = g.Count() })
+                .OrderByDescending(h => h.Profit)
+                .ToList();
+            
+            timeAnalysis.Add("⏰ Time-based Analysis:");
+            if (hourlyStats.Any())
+            {
+                timeAnalysis.Add("🟢 Best Performing Hours:");
+                foreach (var hour in hourlyStats.Take(3))
+                {
+                    timeAnalysis.Add($"• {hour.Hour:D2}:00 - Profit: ${hour.Profit:F2} ({hour.Count} bets)");
+                }
+                
+                timeAnalysis.Add("🔴 Worst Performing Hours:");
+                foreach (var hour in hourlyStats.TakeLast(3).Reverse())
+                {
+                    timeAnalysis.Add($"• {hour.Hour:D2}:00 - Profit: ${hour.Profit:F2} ({hour.Count} bets)");
+                }
+            }
+            else
+            {
+                timeAnalysis.Add("• Insufficient data for time analysis");
+            }
+            
+            return timeAnalysis;
+        }
+
+        private List<string> AnalyzeStreaks(List<BetResult> betsPlaced)
+        {
+            var streaks = new List<string>();
+            int currentWinStreak = 0, currentLossStreak = 0;
+            int maxWinStreak = 0, maxLossStreak = 0;
+            int winStreakStart = -1, lossStreakStart = -1;
+            
+            for (int i = 0; i < betsPlaced.Count; i++)
+            {
+                if (betsPlaced[i].Won)
+                {
+                    if (currentWinStreak == 0) winStreakStart = i;
+                    currentWinStreak++;
+                    currentLossStreak = 0;
+                    maxWinStreak = Math.Max(maxWinStreak, currentWinStreak);
+                }
+                else
+                {
+                    if (currentLossStreak == 0) lossStreakStart = i;
+                    currentLossStreak++;
+                    currentWinStreak = 0;
+                    maxLossStreak = Math.Max(maxLossStreak, currentLossStreak);
+                }
+            }
+            
+            streaks.Add("🎯 Streak Analysis:");
+            streaks.Add($"• Longest Win Streak: {maxWinStreak} consecutive wins");
+            streaks.Add($"• Longest Loss Streak: {maxLossStreak} consecutive losses");
+            
+            // Recovery analysis
+            var recoveryTimes = new List<int>();
+            int lossCount = 0;
+            for (int i = 0; i < betsPlaced.Count; i++)
+            {
+                if (!betsPlaced[i].Won)
+                {
+                    lossCount++;
+                }
+                else if (lossCount > 0)
+                {
+                    recoveryTimes.Add(lossCount);
+                    lossCount = 0;
+                }
+            }
+            
+            if (recoveryTimes.Any())
+            {
+                streaks.Add($"• Average Recovery Time: {recoveryTimes.Average():F1} losses before win");
+                streaks.Add($"• Maximum Recovery Time: {recoveryTimes.Max()} losses before win");
+                streaks.Add($"• Total Recovery Cycles: {recoveryTimes.Count}");
+            }
+            else
+            {
+                streaks.Add("• No recovery cycles detected");
+            }
+            
+            return streaks;
+        }
+
+        private void ShowDeepAnalysisResults(DeepAnalysisResult analysis)
+        {
+            var window = new Window
+            {
+                Title = "🔍 Deep Analysis Results",
+                Width = 800,
+                Height = 600,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = this,
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(15, 23, 42))
+            };
+
+            var scrollViewer = new System.Windows.Controls.ScrollViewer
+            {
+                VerticalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Auto,
+                Padding = new Thickness(20)
+            };
+
+            var mainPanel = new System.Windows.Controls.StackPanel();
+
+            // Title
+            var titleBlock = new System.Windows.Controls.TextBlock
+            {
+                Text = "🔍 Deep Analysis Results",
+                FontSize = 20,
+                FontWeight = FontWeights.Bold,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(34, 197, 94)),
+                Margin = new Thickness(0, 0, 0, 20),
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            mainPanel.Children.Add(titleBlock);
+
+            // Create sections
+            CreateAnalysisSection(mainPanel, "🔴 Crash Sequence Analysis", analysis.CrashSequences, "#EF4444");
+            CreateAnalysisSection(mainPanel, "💰 Profit Distribution", analysis.ProfitDistribution, "#10B981");
+            CreateAnalysisSection(mainPanel, "⏰ Time-based Analysis", analysis.TimeAnalysis, "#3B82F6");
+            CreateAnalysisSection(mainPanel, "🎯 Streak Analysis", analysis.StreakAnalysis, "#8B5CF6");
+
+            scrollViewer.Content = mainPanel;
+            window.Content = scrollViewer;
+            window.ShowDialog();
+        }
+
+        private void CreateAnalysisSection(System.Windows.Controls.StackPanel parent, string title, List<string> data, string colorHex)
+        {
+            // Section container
+            var sectionBorder = new System.Windows.Controls.Border
+            {
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 41, 59)),
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(15),
+                Margin = new Thickness(0, 0, 0, 15)
+            };
+
+            var sectionPanel = new System.Windows.Controls.StackPanel();
+
+            // Section title
+            var titleBlock = new System.Windows.Controls.TextBlock
+            {
+                Text = title,
+                FontSize = 16,
+                FontWeight = FontWeights.Bold,
+                Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorHex)),
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+            sectionPanel.Children.Add(titleBlock);
+
+            // Section content
+            foreach (var item in data.Skip(1)) // Skip the title as we already added it
+            {
+                var itemBlock = new System.Windows.Controls.TextBlock
+                {
+                    Text = item,
+                    FontSize = 12,
+                    Foreground = System.Windows.Media.Brushes.White,
+                    Margin = new Thickness(0, 2, 0, 2),
+                    TextWrapping = TextWrapping.Wrap
+                };
+                
+                // Highlight important numbers
+                if (item.Contains("$") || item.Contains("%") || item.Contains("times"))
+                {
+                    itemBlock.FontWeight = FontWeights.SemiBold;
+                }
+                
+                sectionPanel.Children.Add(itemBlock);
+            }
+
+            sectionBorder.Child = sectionPanel;
+            parent.Children.Add(sectionBorder);
+        }
+    }
+
+    public class DeepAnalysisResult
+    {
+        public List<string> CrashSequences { get; set; } = new List<string>();
+        public List<string> ProfitDistribution { get; set; } = new List<string>();
+        public List<string> TimeAnalysis { get; set; } = new List<string>();
+        public List<string> StreakAnalysis { get; set; } = new List<string>();
     }
 
     public class BettingConfig
