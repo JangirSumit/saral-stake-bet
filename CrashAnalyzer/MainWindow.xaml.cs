@@ -972,6 +972,89 @@ namespace CrashAnalyzer
             // Save configuration after loading
             SaveConfiguration();
         }
+
+        private void BtnSaveConfig_Click(object sender, RoutedEventArgs e)
+        {
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+                Title = "Save Configuration",
+                DefaultExt = "json"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var config = new
+                    {
+                        BetAmount = txtBetAmount.Text,
+                        CashoutAt = txtCashoutAt.Text,
+                        OnLoss = txtOnLoss.Text,
+                        OnWin = txtOnWin.Text,
+                        CrashAt = txtCrashAt.Text,
+                        CrashTimes = txtCrashTimes.Text,
+                        ResumeAt = txtResumeAt.Text,
+                        ResumeAdjust = txtResumeAdjust.Text,
+                        ResumeBelowAt = txtResumeBelowAt.Text,
+                        ResumeBelowTimes = txtResumeBelowTimes.Text,
+                        ResetThreshold = txtResetThreshold.Text,
+                        ProfitTimes = txtProfitTimes.Text,
+                        LossResetAmount = txtLossResetAmount.Text,
+                        WalletStopLoss = txtWalletStopLoss.Text,
+                        DecimalPlaces = txtDecimalPlaces.Text
+                    };
+
+                    var json = System.Text.Json.JsonSerializer.Serialize(config, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(saveFileDialog.FileName, json);
+                    MessageBox.Show("Configuration saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving configuration: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void BtnLoadConfig_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+                Title = "Load Configuration"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var json = File.ReadAllText(openFileDialog.FileName);
+                    var config = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, System.Text.Json.JsonElement>>(json);
+
+                    txtBetAmount.Text = config["BetAmount"].GetString();
+                    txtCashoutAt.Text = config["CashoutAt"].GetString();
+                    txtOnLoss.Text = config["OnLoss"].GetString();
+                    txtOnWin.Text = config["OnWin"].GetString();
+                    txtCrashAt.Text = config["CrashAt"].GetString();
+                    txtCrashTimes.Text = config["CrashTimes"].GetString();
+                    txtResumeAt.Text = config["ResumeAt"].GetString();
+                    txtResumeAdjust.Text = config["ResumeAdjust"].GetString();
+                    txtResumeBelowAt.Text = config["ResumeBelowAt"].GetString();
+                    txtResumeBelowTimes.Text = config["ResumeBelowTimes"].GetString();
+                    txtResetThreshold.Text = config["ResetThreshold"].GetString();
+                    txtProfitTimes.Text = config["ProfitTimes"].GetString();
+                    txtLossResetAmount.Text = config["LossResetAmount"].GetString();
+                    txtWalletStopLoss.Text = config["WalletStopLoss"].GetString();
+                    txtDecimalPlaces.Text = config["DecimalPlaces"].GetString();
+
+                    MessageBox.Show("Configuration loaded successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading configuration: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
     }
 
     public class BettingConfig
