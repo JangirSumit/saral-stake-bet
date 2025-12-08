@@ -322,16 +322,17 @@ namespace CrashAnalyzer
                 allOriginalBets = new List<OriginalBet>(originalBetsParam);
             }
             this.originalBets = originalBetsParam;
+            var decimalPlaces = int.TryParse(txtDecimalPlaces.Text, out int dp) ? dp : 2;
             var originalData = crashes.Select((crash, index) => new
             {
                 No = (object)(index + 1),
                 Timestamp = index < crashTimestamps.Count ? crashTimestamps[index].ToString("HH:mm:ss") : "-",
-                Crash = $"{crash:F2}x",
+                Crash = $"{crash.ToString($"F{decimalPlaces}")}x",
                 Status = index < originalBetsParam.Count ? originalBetsParam[index].Status : "No Bet",
                 BetAmount = index < originalBetsParam.Count ?
-                    (originalBetsParam[index].Status == "Skipped" ? "-" : $"${originalBetsParam[index].BetAmount:F2}") : "-",
+                    (originalBetsParam[index].Status == "Skipped" ? "-" : $"${originalBetsParam[index].BetAmount.ToString($"F{decimalPlaces}")}") : "-",
                 Profit = index < originalBetsParam.Count ?
-                    (originalBetsParam[index].Status == "Skipped" ? "-" : $"${originalBetsParam[index].Profit:F2}") : "-"
+                    (originalBetsParam[index].Status == "Skipped" ? "-" : $"${originalBetsParam[index].Profit.ToString($"F{decimalPlaces}")}") : "-"
             }).ToList();
 
             // Update summary displays
@@ -345,11 +346,11 @@ namespace CrashAnalyzer
                 var maxProfit = betsPlaced.Max(b => b.Profit);
                 var minProfit = betsPlaced.Min(b => b.Profit);
                 
-                txtOriginalMaxProfit.Text = $"Total: ${totalProfit:F2}";
+                txtOriginalMaxProfit.Text = $"Total: ${totalProfit.ToString($"F{decimalPlaces}")}";
                 txtOriginalMaxLoss.Text = $"Bets: {totalBets} (W:{wins} L:{losses})";
-                txtOriginalMaxSingle.Text = $"Max Profit: ${maxProfit:F2}";
+                txtOriginalMaxSingle.Text = $"Max Profit: ${maxProfit.ToString($"F{decimalPlaces}")}";
                 txtOriginalSkipped.Text = $"Skipped: {originalBetsParam.Count(b => b.Status == "Skipped")}";
-                txtOriginalLoss.Text = $"Max Loss: ${Math.Abs(minProfit):F2}";
+                txtOriginalLoss.Text = $"Max Loss: ${Math.Abs(minProfit).ToString($"F{decimalPlaces}")}";
             }
             else
             {
@@ -372,14 +373,15 @@ namespace CrashAnalyzer
 
         private void ShowComparisonData(List<BetResult> newResults)
         {
+            var decimalPlaces = int.TryParse(txtDecimalPlaces.Text, out int dp) ? dp : 2;
             var analyzedData = crashes.Select((crash, index) => new
             {
                 No = (object)(index + 1),
                 Timestamp = index < crashTimestamps.Count ? crashTimestamps[index].ToString("HH:mm:ss") : "-",
-                Crash = $"{crash:F2}x",
+                Crash = $"{crash.ToString($"F{decimalPlaces}")}x",
                 Status = index < newResults.Count ? (newResults[index].BetPlaced ? (newResults[index].Won ? "Won" : "Lost") : "Skipped") : "-",
-                BetAmount = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].BetAmount:F2}" : "-",
-                Profit = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].Profit:F2}" : "-"
+                BetAmount = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].BetAmount.ToString($"F{decimalPlaces}")}" : "-",
+                Profit = index < newResults.Count && newResults[index].BetPlaced ? $"${newResults[index].Profit.ToString($"F{decimalPlaces}")}" : "-"
             }).ToList();
 
             // Update summary displays
@@ -393,11 +395,11 @@ namespace CrashAnalyzer
                 var maxProfit = betsPlaced.Max(r => r.Profit);
                 var minProfit = betsPlaced.Min(r => r.Profit);
                 
-                txtAnalyzedMaxProfit.Text = $"Total: ${totalProfit:F2}";
+                txtAnalyzedMaxProfit.Text = $"Total: ${totalProfit.ToString($"F{decimalPlaces}")}";
                 txtAnalyzedMaxLoss.Text = $"Bets: {totalBets} (W:{wins} L:{losses})";
-                txtAnalyzedMaxSingle.Text = $"Max Profit: ${maxProfit:F2}";
+                txtAnalyzedMaxSingle.Text = $"Max Profit: ${maxProfit.ToString($"F{decimalPlaces}")}";
                 txtAnalyzedSkipped.Text = $"Skipped: {newResults.Count(r => !r.BetPlaced)}";
-                txtAnalyzedLoss.Text = $"Max Loss: ${Math.Abs(minProfit):F2}";
+                txtAnalyzedLoss.Text = $"Max Loss: ${Math.Abs(minProfit).ToString($"F{decimalPlaces}")}";
             }
             else
             {
@@ -754,6 +756,16 @@ namespace CrashAnalyzer
                             totalProfit = 0;
                         }
                     }
+
+                    // Wallet stop loss check
+                    if (config.WalletStopLoss > 0)
+                    {
+                        double lossPercentage = (Math.Abs(runningTotal) / (originalBetAmount * 100)) * 100;
+                        if (runningTotal < 0 && lossPercentage >= config.WalletStopLoss)
+                        {
+                            skipBetting = true;
+                        }
+                    }
                 }
 
                 // Step 3: Process crash patterns AFTER bet result (matches checkCrashPattern)
@@ -797,7 +809,7 @@ namespace CrashAnalyzer
         {
             if (logFileConfig != null)
             {
-                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | Loss: +{logFileConfig.OnLoss}% | Win: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes} crashes < {logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x";
+                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | Loss: +{logFileConfig.OnLoss}% | Win: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | Reset: {logFileConfig.ResetThreshold}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | Decimals: {logFileConfig.DecimalPlaces}";
             }
             else
             {
@@ -809,7 +821,7 @@ namespace CrashAnalyzer
         {
             try
             {
-                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | Loss: +{txtOnLoss.Text}% | Win: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text} crashes < {txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x";
+                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | Loss: +{txtOnLoss.Text}% | Win: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | Reset: {txtResetThreshold.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | Decimals: {txtDecimalPlaces.Text}";
             }
             catch
             {
