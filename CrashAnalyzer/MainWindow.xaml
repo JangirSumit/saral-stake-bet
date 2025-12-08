@@ -233,6 +233,8 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="70"/>
                     <RowDefinition Height="10"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="10"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
@@ -261,8 +263,24 @@
                     </Border>
                 </Grid>
                 
+                <!-- Date-Time Filter Row -->
+                <Border Grid.Row="2" Background="#374151" CornerRadius="5" Padding="8">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="📅 From:" Foreground="#22C55E" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBox Name="txtFromDateTime" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" 
+                                 Width="130" Height="25" Padding="5" Text="2024-01-01 00:00" Margin="0,0,15,0"/>
+                        <TextBlock Text="📅 To:" Foreground="#22C55E" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBox Name="txtToDateTime" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" 
+                                 Width="130" Height="25" Padding="5" Text="2024-12-31 23:59" Margin="0,0,15,0"/>
+                        <Button Name="btnFilter" Content="🔍 Filter" Background="#22C55E" Foreground="White" 
+                                BorderThickness="0" Padding="15,5" Height="25" Click="BtnFilter_Click"/>
+                        <Button Name="btnClearFilter" Content="🔄 Reset" Background="#6B7280" Foreground="White" 
+                                BorderThickness="0" Padding="15,5" Height="25" Margin="5,0,0,0" Click="BtnClearFilter_Click"/>
+                    </StackPanel>
+                </Border>
+                
                 <!-- Data Grids Row -->
-                <Grid Grid.Row="2">
+                <Grid Grid.Row="4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="10"/>

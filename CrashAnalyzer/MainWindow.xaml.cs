@@ -14,6 +14,7 @@ namespace CrashAnalyzer
         private List<double> crashes = new List<double>();
         private List<DateTime> crashTimestamps = new List<DateTime>();
         private List<BetResult> betResults = new List<BetResult>();
+        private List<OriginalBet> originalBets = new List<OriginalBet>();
 
         public MainWindow()
         {
@@ -122,6 +123,7 @@ namespace CrashAnalyzer
                     Dispatcher.Invoke(() =>
                     {
                         ShowComparisonData(betResults);
+                        AutoFillDateTimeRange();
                         btnAnalyze.Content = "⚡ Analyze";
                         btnAnalyze.IsEnabled = true;
                     });
@@ -257,24 +259,85 @@ namespace CrashAnalyzer
             }
         }
 
-        private void ShowOriginalData(List<OriginalBet> originalBets)
+        private List<double> originalCrashes = new List<double>();
+        private List<DateTime> originalCrashTimestamps = new List<DateTime>();
+        private List<OriginalBet> allOriginalBets = new List<OriginalBet>();
+
+        private void BtnFilter_Click(object sender, RoutedEventArgs e)
         {
+            if (!DateTime.TryParse(txtFromDateTime.Text, out DateTime fromDate) || 
+                !DateTime.TryParse(txtToDateTime.Text, out DateTime toDate))
+            {
+                MessageBox.Show("Please enter valid date-time format (YYYY-MM-DD HH:MM).", "Invalid Date Format", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var filteredIndices = originalCrashTimestamps
+                .Select((timestamp, index) => new { timestamp, index })
+                .Where(x => x.timestamp >= fromDate && x.timestamp <= toDate)
+                .Select(x => x.index)
+                .ToList();
+
+            if (!filteredIndices.Any())
+            {
+                MessageBox.Show("No data found in the selected date range.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            crashes = filteredIndices.Select(i => originalCrashes[i]).ToList();
+            crashTimestamps = filteredIndices.Select(i => originalCrashTimestamps[i]).ToList();
+            var filteredOriginalBets = filteredIndices.Select(i => i < allOriginalBets.Count ? allOriginalBets[i] : new OriginalBet()).ToList();
+
+            ShowOriginalData(filteredOriginalBets);
+            betResults.Clear();
+        }
+
+        private void BtnClearFilter_Click(object sender, RoutedEventArgs e)
+        {
+            crashes = new List<double>(originalCrashes);
+            crashTimestamps = new List<DateTime>(originalCrashTimestamps);
+            ShowOriginalData(allOriginalBets);
+            betResults.Clear();
+            dgvAnalyzed.ItemsSource = null;
+            AutoFillDateTimeRange();
+        }
+
+        private void AutoFillDateTimeRange()
+        {
+            if (crashTimestamps.Any())
+            {
+                var startTime = crashTimestamps.Min();
+                var endTime = crashTimestamps.Max();
+                txtFromDateTime.Text = startTime.ToString("yyyy-MM-dd HH:mm");
+                txtToDateTime.Text = endTime.ToString("yyyy-MM-dd HH:mm");
+            }
+        }
+
+        private void ShowOriginalData(List<OriginalBet> originalBetsParam)
+        {
+            if (originalCrashes.Count == 0)
+            {
+                originalCrashes = new List<double>(crashes);
+                originalCrashTimestamps = new List<DateTime>(crashTimestamps);
+                allOriginalBets = new List<OriginalBet>(originalBetsParam);
+            }
+            this.originalBets = originalBetsParam;
             var originalData = crashes.Select((crash, index) => new
             {
                 No = (object)(index + 1),
                 Timestamp = index < crashTimestamps.Count ? crashTimestamps[index].ToString("HH:mm:ss") : "-",
                 Crash = $"{crash:F2}x",
-                Status = index < originalBets.Count ? originalBets[index].Status : "No Bet",
-                BetAmount = index < originalBets.Count ?
-                    (originalBets[index].Status == "Skipped" ? "-" : $"${originalBets[index].BetAmount:F2}") : "-",
-                Profit = index < originalBets.Count ?
-                    (originalBets[index].Status == "Skipped" ? "-" : $"${originalBets[index].Profit:F2}") : "-"
+                Status = index < originalBetsParam.Count ? originalBetsParam[index].Status : "No Bet",
+                BetAmount = index < originalBetsParam.Count ?
+                    (originalBetsParam[index].Status == "Skipped" ? "-" : $"${originalBetsParam[index].BetAmount:F2}") : "-",
+                Profit = index < originalBetsParam.Count ?
+                    (originalBetsParam[index].Status == "Skipped" ? "-" : $"${originalBetsParam[index].Profit:F2}") : "-"
             }).ToList();
 
             // Update summary displays
-            if (originalBets.Any(b => b.Status != "Skipped"))
+            if (originalBetsParam.Any(b => b.Status != "Skipped"))
             {
-                var betsPlaced = originalBets.Where(b => b.Status != "Skipped");
+                var betsPlaced = originalBetsParam.Where(b => b.Status != "Skipped");
                 var totalBets = betsPlaced.Count();
                 var wins = betsPlaced.Count(b => b.Status == "Won");
                 var losses = betsPlaced.Count(b => b.Status == "Lost");
@@ -285,7 +348,7 @@ namespace CrashAnalyzer
                 txtOriginalMaxProfit.Text = $"Total: ${totalProfit:F2}";
                 txtOriginalMaxLoss.Text = $"Bets: {totalBets} (W:{wins} L:{losses})";
                 txtOriginalMaxSingle.Text = $"Max Profit: ${maxProfit:F2}";
-                txtOriginalSkipped.Text = $"Skipped: {originalBets.Count(b => b.Status == "Skipped")}";
+                txtOriginalSkipped.Text = $"Skipped: {originalBetsParam.Count(b => b.Status == "Skipped")}";
                 txtOriginalLoss.Text = $"Max Loss: ${Math.Abs(minProfit):F2}";
             }
             else
