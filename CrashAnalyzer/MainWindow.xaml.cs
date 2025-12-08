@@ -1075,52 +1075,16 @@ namespace CrashAnalyzer
             
             if (!betsPlaced.Any()) return result;
 
-            // Crash Sequence Analysis
-            result.CrashSequences = AnalyzeCrashSequences();
-            
             // Profit Distribution
             result.ProfitDistribution = AnalyzeProfitDistribution(betsPlaced);
             
             // Time-based Analysis
             result.TimeAnalysis = AnalyzeTimePatterns(betsPlaced);
             
-            // Streak Analysis
-            result.StreakAnalysis = AnalyzeStreaks(betsPlaced);
-            
             return result;
         }
 
-        private List<string> AnalyzeCrashSequences()
-        {
-            var sequences = new List<string>();
-            var lossPatterns = new Dictionary<string, int>();
-            
-            for (int i = 0; i < betResults.Count - 2; i++)
-            {
-                if (betResults[i].BetPlaced && !betResults[i].Won &&
-                    betResults[i + 1].BetPlaced && !betResults[i + 1].Won &&
-                    betResults[i + 2].BetPlaced && !betResults[i + 2].Won)
-                {
-                    var pattern = $"{betResults[i].CrashValue:F1}x → {betResults[i + 1].CrashValue:F1}x → {betResults[i + 2].CrashValue:F1}x";
-                    lossPatterns[pattern] = lossPatterns.GetValueOrDefault(pattern, 0) + 1;
-                }
-            }
-            
-            sequences.Add("🔴 Most Common Loss Patterns:");
-            if (lossPatterns.Any())
-            {
-                foreach (var pattern in lossPatterns.OrderByDescending(p => p.Value).Take(5))
-                {
-                    sequences.Add($"• {pattern.Key} (occurred {pattern.Value} times)");
-                }
-            }
-            else
-            {
-                sequences.Add("• No significant loss patterns found");
-            }
-            
-            return sequences;
-        }
+
 
         private List<string> AnalyzeProfitDistribution(List<BetResult> betsPlaced)
         {
@@ -1174,72 +1138,15 @@ namespace CrashAnalyzer
             return timeAnalysis;
         }
 
-        private List<string> AnalyzeStreaks(List<BetResult> betsPlaced)
-        {
-            var streaks = new List<string>();
-            int currentWinStreak = 0, currentLossStreak = 0;
-            int maxWinStreak = 0, maxLossStreak = 0;
-            int winStreakStart = -1, lossStreakStart = -1;
-            
-            for (int i = 0; i < betsPlaced.Count; i++)
-            {
-                if (betsPlaced[i].Won)
-                {
-                    if (currentWinStreak == 0) winStreakStart = i;
-                    currentWinStreak++;
-                    currentLossStreak = 0;
-                    maxWinStreak = Math.Max(maxWinStreak, currentWinStreak);
-                }
-                else
-                {
-                    if (currentLossStreak == 0) lossStreakStart = i;
-                    currentLossStreak++;
-                    currentWinStreak = 0;
-                    maxLossStreak = Math.Max(maxLossStreak, currentLossStreak);
-                }
-            }
-            
-            streaks.Add("🎯 Streak Analysis:");
-            streaks.Add($"• Longest Win Streak: {maxWinStreak} consecutive wins");
-            streaks.Add($"• Longest Loss Streak: {maxLossStreak} consecutive losses");
-            
-            // Recovery analysis
-            var recoveryTimes = new List<int>();
-            int lossCount = 0;
-            for (int i = 0; i < betsPlaced.Count; i++)
-            {
-                if (!betsPlaced[i].Won)
-                {
-                    lossCount++;
-                }
-                else if (lossCount > 0)
-                {
-                    recoveryTimes.Add(lossCount);
-                    lossCount = 0;
-                }
-            }
-            
-            if (recoveryTimes.Any())
-            {
-                streaks.Add($"• Average Recovery Time: {recoveryTimes.Average():F1} losses before win");
-                streaks.Add($"• Maximum Recovery Time: {recoveryTimes.Max()} losses before win");
-                streaks.Add($"• Total Recovery Cycles: {recoveryTimes.Count}");
-            }
-            else
-            {
-                streaks.Add("• No recovery cycles detected");
-            }
-            
-            return streaks;
-        }
+
 
         private void ShowDeepAnalysisResults(DeepAnalysisResult analysis)
         {
             var window = new Window
             {
                 Title = "🔍 Deep Analysis Results",
-                Width = 800,
-                Height = 600,
+                Width = 1200,
+                Height = 800,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = this,
                 Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(15, 23, 42))
@@ -1253,32 +1160,21 @@ namespace CrashAnalyzer
 
             var mainPanel = new System.Windows.Controls.StackPanel();
 
-            // Title
-            var titleBlock = new System.Windows.Controls.TextBlock
-            {
-                Text = "🔍 Deep Analysis Results",
-                FontSize = 20,
-                FontWeight = FontWeights.Bold,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(34, 197, 94)),
-                Margin = new Thickness(0, 0, 0, 20),
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
-            mainPanel.Children.Add(titleBlock);
-
-            // Create sections
-            CreateAnalysisSection(mainPanel, "🔴 Crash Sequence Analysis", analysis.CrashSequences, "#EF4444");
-            CreateAnalysisSection(mainPanel, "💰 Profit Distribution", analysis.ProfitDistribution, "#10B981");
-            CreateAnalysisSection(mainPanel, "⏰ Time-based Analysis", analysis.TimeAnalysis, "#3B82F6");
-            CreateAnalysisSection(mainPanel, "🎯 Streak Analysis", analysis.StreakAnalysis, "#8B5CF6");
+            // Create visual sections with charts
+            CreateCrashPatternsHeatmap(mainPanel);
+            CreateProfitDistributionChart(mainPanel);
+            CreateCrashLineChart(mainPanel);
 
             scrollViewer.Content = mainPanel;
             window.Content = scrollViewer;
             window.ShowDialog();
         }
 
-        private void CreateAnalysisSection(System.Windows.Controls.StackPanel parent, string title, List<string> data, string colorHex)
+        private void CreateProfitDistributionChart(System.Windows.Controls.StackPanel parent)
         {
-            // Section container
+            var betsPlaced = betResults.Where(r => r.BetPlaced).ToList();
+            if (!betsPlaced.Any()) return;
+
             var sectionBorder = new System.Windows.Controls.Border
             {
                 Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 41, 59)),
@@ -1289,7 +1185,303 @@ namespace CrashAnalyzer
 
             var sectionPanel = new System.Windows.Controls.StackPanel();
 
-            // Section title
+            var titleBlock = new System.Windows.Controls.TextBlock
+            {
+                Text = "💰 Profit Distribution Chart",
+                FontSize = 16,
+                FontWeight = FontWeights.Bold,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(16, 185, 129)),
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+            sectionPanel.Children.Add(titleBlock);
+
+            var canvas = new System.Windows.Controls.Canvas
+            {
+                Width = 1000,
+                Height = 200,
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(15, 23, 42))
+            };
+
+            var profits = betsPlaced.Select(b => b.Profit).ToList();
+            var ranges = new[] { (-1000, -100), (-100, -10), (-10, 0), (0, 10), (10, 100), (100, 1000) };
+
+            var rangeCounts = new List<int>();
+            foreach (var (min, max) in ranges)
+            {
+                var count = profits.Count(p => p > min && p <= max);
+                rangeCounts.Add(count);
+            }
+
+            var maxCount = rangeCounts.Max();
+            var width = 950;
+            var height = 150;
+            var stepX = width / (double)(ranges.Length - 1);
+
+            var polyline = new System.Windows.Shapes.Polyline
+            {
+                Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(16, 185, 129)),
+                StrokeThickness = 3,
+                Fill = System.Windows.Media.Brushes.Transparent
+            };
+
+            for (int i = 0; i < ranges.Length; i++)
+            {
+                var x = i * stepX + 25;
+                var y = height - (rangeCounts[i] / (double)maxCount * height) + 25;
+                polyline.Points.Add(new System.Windows.Point(x, y));
+
+                var label = new System.Windows.Controls.TextBlock
+                {
+                    Text = $"${ranges[i].Item1}\nto\n${ranges[i].Item2}",
+                    Foreground = System.Windows.Media.Brushes.White,
+                    FontSize = 9,
+                    TextAlignment = TextAlignment.Center
+                };
+                System.Windows.Controls.Canvas.SetLeft(label, x - 20);
+                System.Windows.Controls.Canvas.SetTop(label, height + 30);
+                canvas.Children.Add(label);
+
+                var countLabel = new System.Windows.Controls.TextBlock
+                {
+                    Text = rangeCounts[i].ToString(),
+                    Foreground = System.Windows.Media.Brushes.White,
+                    FontSize = 10,
+                    FontWeight = FontWeights.Bold
+                };
+                System.Windows.Controls.Canvas.SetLeft(countLabel, x - 10);
+                System.Windows.Controls.Canvas.SetTop(countLabel, y - 20);
+                canvas.Children.Add(countLabel);
+            }
+
+            canvas.Children.Add(polyline);
+
+            sectionPanel.Children.Add(canvas);
+            sectionBorder.Child = sectionPanel;
+            parent.Children.Add(sectionBorder);
+        }
+
+        private void CreateCrashPatternsHeatmap(System.Windows.Controls.StackPanel parent)
+        {
+            if (!crashes.Any()) return;
+
+            var sectionBorder = new System.Windows.Controls.Border
+            {
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 41, 59)),
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(15),
+                Margin = new Thickness(0, 0, 0, 15)
+            };
+
+            var sectionPanel = new System.Windows.Controls.StackPanel();
+
+            var titleBlock = new System.Windows.Controls.TextBlock
+            {
+                Text = "🔥 Crash Patterns Heatmap",
+                FontSize = 16,
+                FontWeight = FontWeights.Bold,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(249, 115, 22)),
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+            sectionPanel.Children.Add(titleBlock);
+
+            var canvas = new System.Windows.Controls.Canvas
+            {
+                Width = 800,
+                Height = 200,
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(15, 23, 42))
+            };
+
+            var crashRanges = new[] 
+            {
+                (1.0, 1.2, "1.0-1.2x"),
+                (1.2, 1.5, "1.2-1.5x"),
+                (1.5, 2.0, "1.5-2.0x"),
+                (2.0, 3.0, "2.0-3.0x"),
+                (3.0, 5.0, "3.0-5.0x"),
+                (5.0, 10.0, "5.0-10x"),
+                (10.0, 20.0, "10-20x"),
+                (20.0, 50.0, "20-50x"),
+                (50.0, 100.0, "50-100x"),
+                (100.0, double.MaxValue, "100x+")
+            };
+
+            var crashCounts = new Dictionary<int, int>();
+            var maxCount = 0;
+            
+            for (int i = 0; i < crashRanges.Length; i++)
+            {
+                var (min, max, _) = crashRanges[i];
+                var count = crashes.Count(c => c >= min && c < max);
+                crashCounts[i] = count;
+                maxCount = Math.Max(maxCount, count);
+            }
+
+            var cellWidth = 75;
+            var cellHeight = 80;
+            var cols = 5;
+            var rows = 2;
+
+            for (int i = 0; i < Math.Min(crashRanges.Length, cols * rows); i++)
+            {
+                var row = i / cols;
+                var col = i % cols;
+                var count = crashCounts[i];
+                var intensity = maxCount > 0 ? (double)count / maxCount : 0;
+                
+                var color = intensity > 0.7 ? 
+                    System.Windows.Media.Color.FromRgb((byte)(220 + intensity * 35), (byte)(38), (byte)(38)) :
+                    intensity > 0.4 ?
+                    System.Windows.Media.Color.FromRgb((byte)(251), (byte)(146), (byte)(60)) :
+                    System.Windows.Media.Color.FromRgb((byte)(34), (byte)(197), (byte)(94));
+
+                var rect = new System.Windows.Shapes.Rectangle
+                {
+                    Width = cellWidth,
+                    Height = cellHeight,
+                    Fill = new System.Windows.Media.SolidColorBrush(color),
+                    Stroke = System.Windows.Media.Brushes.Gray,
+                    StrokeThickness = 1
+                };
+                System.Windows.Controls.Canvas.SetLeft(rect, col * (cellWidth + 5) + 20);
+                System.Windows.Controls.Canvas.SetTop(rect, row * (cellHeight + 10) + 20);
+                canvas.Children.Add(rect);
+
+                var rangeLabel = new System.Windows.Controls.TextBlock
+                {
+                    Text = crashRanges[i].Item3,
+                    Foreground = System.Windows.Media.Brushes.White,
+                    FontSize = 10,
+                    FontWeight = FontWeights.Bold,
+                    TextAlignment = TextAlignment.Center
+                };
+                System.Windows.Controls.Canvas.SetLeft(rangeLabel, col * (cellWidth + 5) + 25);
+                System.Windows.Controls.Canvas.SetTop(rangeLabel, row * (cellHeight + 10) + 30);
+                canvas.Children.Add(rangeLabel);
+
+                var countLabel = new System.Windows.Controls.TextBlock
+                {
+                    Text = count.ToString(),
+                    Foreground = System.Windows.Media.Brushes.White,
+                    FontSize = 14,
+                    FontWeight = FontWeights.Bold,
+                    TextAlignment = TextAlignment.Center
+                };
+                System.Windows.Controls.Canvas.SetLeft(countLabel, col * (cellWidth + 5) + 45);
+                System.Windows.Controls.Canvas.SetTop(rangeLabel, row * (cellHeight + 10) + 50);
+                canvas.Children.Add(countLabel);
+
+                var percentage = crashes.Count > 0 ? (count * 100.0 / crashes.Count) : 0;
+                var percentLabel = new System.Windows.Controls.TextBlock
+                {
+                    Text = $"{percentage:F1}%",
+                    Foreground = System.Windows.Media.Brushes.LightGray,
+                    FontSize = 9,
+                    TextAlignment = TextAlignment.Center
+                };
+                System.Windows.Controls.Canvas.SetLeft(percentLabel, col * (cellWidth + 5) + 40);
+                System.Windows.Controls.Canvas.SetTop(percentLabel, row * (cellHeight + 10) + 70);
+                canvas.Children.Add(percentLabel);
+            }
+
+            sectionPanel.Children.Add(canvas);
+            sectionBorder.Child = sectionPanel;
+            parent.Children.Add(sectionBorder);
+        }
+
+        private void CreateCrashLineChart(System.Windows.Controls.StackPanel parent)
+        {
+            if (!betResults.Any()) return;
+
+            var sectionBorder = new System.Windows.Controls.Border
+            {
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 41, 59)),
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(15),
+                Margin = new Thickness(0, 0, 0, 15)
+            };
+
+            var sectionPanel = new System.Windows.Controls.StackPanel();
+
+            var titleBlock = new System.Windows.Controls.TextBlock
+            {
+                Text = "📈 All Crashes Line Chart",
+                FontSize = 16,
+                FontWeight = FontWeights.Bold,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(59, 130, 246)),
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+            sectionPanel.Children.Add(titleBlock);
+
+            var canvas = new System.Windows.Controls.Canvas
+            {
+                Width = 1000,
+                Height = 200,
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(15, 23, 42))
+            };
+
+            var crashes = betResults.Select(r => r.CrashValue).ToList();
+            var maxCrash = crashes.Max();
+            var minCrash = crashes.Min();
+            var range = maxCrash - minCrash;
+            var width = 980;
+            var height = 160;
+            var stepX = width / (double)(crashes.Count - 1);
+
+            var polyline = new System.Windows.Shapes.Polyline
+            {
+                Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(34, 197, 94)),
+                StrokeThickness = 2,
+                Fill = System.Windows.Media.Brushes.Transparent
+            };
+
+            for (int i = 0; i < crashes.Count; i++)
+            {
+                var x = i * stepX + 10;
+                var y = height - ((crashes[i] - minCrash) / range * height) + 20;
+                polyline.Points.Add(new System.Windows.Point(x, y));
+            }
+
+            canvas.Children.Add(polyline);
+
+            var maxLabel = new System.Windows.Controls.TextBlock
+            {
+                Text = $"Max: {maxCrash:F2}x",
+                Foreground = System.Windows.Media.Brushes.White,
+                FontSize = 10
+            };
+            System.Windows.Controls.Canvas.SetLeft(maxLabel, 10);
+            System.Windows.Controls.Canvas.SetTop(maxLabel, 5);
+            canvas.Children.Add(maxLabel);
+
+            var minLabel = new System.Windows.Controls.TextBlock
+            {
+                Text = $"Min: {minCrash:F2}x",
+                Foreground = System.Windows.Media.Brushes.White,
+                FontSize = 10
+            };
+            System.Windows.Controls.Canvas.SetLeft(minLabel, 10);
+            System.Windows.Controls.Canvas.SetTop(minLabel, height + 5);
+            canvas.Children.Add(minLabel);
+
+            sectionPanel.Children.Add(canvas);
+            sectionBorder.Child = sectionPanel;
+            parent.Children.Add(sectionBorder);
+        }
+
+
+
+        private void CreateAnalysisSection(System.Windows.Controls.StackPanel parent, string title, List<string> data, string colorHex)
+        {
+            var sectionBorder = new System.Windows.Controls.Border
+            {
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 41, 59)),
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(15),
+                Margin = new Thickness(0, 0, 0, 15)
+            };
+
+            var sectionPanel = new System.Windows.Controls.StackPanel();
+
             var titleBlock = new System.Windows.Controls.TextBlock
             {
                 Text = title,
@@ -1300,8 +1492,7 @@ namespace CrashAnalyzer
             };
             sectionPanel.Children.Add(titleBlock);
 
-            // Section content
-            foreach (var item in data.Skip(1)) // Skip the title as we already added it
+            foreach (var item in data.Skip(1))
             {
                 var itemBlock = new System.Windows.Controls.TextBlock
                 {
@@ -1312,7 +1503,6 @@ namespace CrashAnalyzer
                     TextWrapping = TextWrapping.Wrap
                 };
                 
-                // Highlight important numbers
                 if (item.Contains("$") || item.Contains("%") || item.Contains("times"))
                 {
                     itemBlock.FontWeight = FontWeights.SemiBold;
@@ -1328,10 +1518,8 @@ namespace CrashAnalyzer
 
     public class DeepAnalysisResult
     {
-        public List<string> CrashSequences { get; set; } = new List<string>();
         public List<string> ProfitDistribution { get; set; } = new List<string>();
         public List<string> TimeAnalysis { get; set; } = new List<string>();
-        public List<string> StreakAnalysis { get; set; } = new List<string>();
     }
 
     public class BettingConfig
