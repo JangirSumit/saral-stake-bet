@@ -122,6 +122,7 @@ namespace CrashAnalyzer
 
                     Dispatcher.Invoke(() =>
                     {
+                        allBetResults = new List<BetResult>(betResults);
                         ShowComparisonData(betResults);
                         AutoFillDateTimeRange();
                         btnAnalyze.Content = "⚡ Analyze";
@@ -262,9 +263,16 @@ namespace CrashAnalyzer
         private List<double> originalCrashes = new List<double>();
         private List<DateTime> originalCrashTimestamps = new List<DateTime>();
         private List<OriginalBet> allOriginalBets = new List<OriginalBet>();
+        private List<BetResult> allBetResults = new List<BetResult>();
 
         private void BtnFilter_Click(object sender, RoutedEventArgs e)
         {
+            if (originalCrashes.Count == 0)
+            {
+                MessageBox.Show("No data loaded. Please load a log file first.", "No Data", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             if (!DateTime.TryParse(txtFromDateTime.Text, out DateTime fromDate) || 
                 !DateTime.TryParse(txtToDateTime.Text, out DateTime toDate))
             {
@@ -289,7 +297,25 @@ namespace CrashAnalyzer
             var filteredOriginalBets = filteredIndices.Select(i => i < allOriginalBets.Count ? allOriginalBets[i] : new OriginalBet()).ToList();
 
             ShowOriginalData(filteredOriginalBets);
-            betResults.Clear();
+            
+            // Filter analyzed data if it exists
+            if (allBetResults.Any())
+            {
+                betResults = filteredIndices.Select(i => i < allBetResults.Count ? allBetResults[i] : new BetResult()).ToList();
+                ShowComparisonData(betResults);
+            }
+            else
+            {
+                betResults.Clear();
+                dgvAnalyzed.ItemsSource = null;
+                
+                // Clear analyzed summary badges
+                txtAnalyzedMaxProfit.Text = "Total: $0.00";
+                txtAnalyzedMaxLoss.Text = "Bets: 0";
+                txtAnalyzedMaxSingle.Text = "Max Profit: $0.00";
+                txtAnalyzedSkipped.Text = "Skipped: 0";
+                txtAnalyzedLoss.Text = "Max Loss: $0.00";
+            }
         }
 
         private void BtnClearFilter_Click(object sender, RoutedEventArgs e)
@@ -297,8 +323,19 @@ namespace CrashAnalyzer
             crashes = new List<double>(originalCrashes);
             crashTimestamps = new List<DateTime>(originalCrashTimestamps);
             ShowOriginalData(allOriginalBets);
-            betResults.Clear();
-            dgvAnalyzed.ItemsSource = null;
+            
+            // Restore analyzed data if it exists
+            if (allBetResults.Any())
+            {
+                betResults = new List<BetResult>(allBetResults);
+                ShowComparisonData(betResults);
+            }
+            else
+            {
+                betResults.Clear();
+                dgvAnalyzed.ItemsSource = null;
+            }
+            
             AutoFillDateTimeRange();
         }
 
@@ -315,7 +352,8 @@ namespace CrashAnalyzer
 
         private void ShowOriginalData(List<OriginalBet> originalBetsParam)
         {
-            if (originalCrashes.Count == 0)
+            // Store original data only on first load (when original arrays are empty)
+            if (originalCrashes.Count == 0 && crashes.Count > 0)
             {
                 originalCrashes = new List<double>(crashes);
                 originalCrashTimestamps = new List<DateTime>(crashTimestamps);
@@ -361,6 +399,7 @@ namespace CrashAnalyzer
                 txtOriginalLoss.Text = "Max Loss: $0.00";
             }
 
+            dgvOriginal.ItemsSource = null;
             dgvOriginal.ItemsSource = originalData;
             dgvAnalyzed.ItemsSource = null;
 
@@ -410,6 +449,7 @@ namespace CrashAnalyzer
                 txtAnalyzedLoss.Text = "Max Loss: $0.00";
             }
 
+            dgvAnalyzed.ItemsSource = null;
             dgvAnalyzed.ItemsSource = analyzedData;
 
             // Attach scroll synchronization
