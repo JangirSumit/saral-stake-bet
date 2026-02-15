@@ -42,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const lossResetAmount = document.getElementById("lossResetAmount");
   const walletStopLoss = document.getElementById("walletStopLoss");
   const decimalPlaces = document.getElementById("decimalPlaces");
-  const saveBtn = document.getElementById("saveBtn");
   // const resetBetBtn = document.getElementById("resetBetBtn");
   const screenshotBtn = document.getElementById("screenshotBtn");
   const downloadLogsBtn = document.getElementById("downloadLogsBtn");
@@ -118,41 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  saveBtn.addEventListener("click", () => {
-    // Validate all inputs
-    if (!validateInputs()) {
-      return;
-    }
-
-    const betData = {
-      amount: betAmount.value,
-      cashout: cashoutAt.value,
-      loss: onLoss.value,
-      win: onWin.value,
-      stopCrashAt: crashAt.value,
-      stopCrashTimes: crashTimes.value,
-      resumeAt: resumeAt.value,
-      resumeAdjust: resumeAdjust.value,
-      resumeBelowAt: resumeBelowAt.value,
-      resumeBelowTimes: resumeBelowTimes.value,
-      resetThreshold: resetThreshold.value,
-      profitTimes: profitTimes.value,
-      lossResetAmount: lossResetAmount.value,
-      walletStopLoss: walletStopLoss.value,
-      decimalPlaces: decimalPlaces.value,
-    };
-
-    chrome.storage.local.set({ betData });
-
-    // Show saved feedback
-    const originalText = saveBtn.textContent;
-    saveBtn.textContent = "✅ Saved!";
-    saveBtn.style.background = "#16a34a";
-    setTimeout(() => {
-      saveBtn.textContent = originalText;
-      saveBtn.style.background = "";
-    }, 1500);
-  });
 
   /*
   resetBetBtn.addEventListener("click", () => {

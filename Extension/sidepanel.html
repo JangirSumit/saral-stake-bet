@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="config-styles.css" />
+    <script src="config-management.js" defer></script>
 
   </head>
   <body>
@@ -61,6 +63,22 @@
 
     <!-- Settings Tab Content -->
     <div id="settingsContent" class="tab-content active">
+      <!-- Configuration Manager -->
+      <div class="config-manager">
+        <select id="configSelect" class="config-select">
+          <option value="">Select configuration...</option>
+        </select>
+        <div class="config-actions">
+          <button id="saveConfigBtn" class="icon-btn" title="Save">💾</button>
+          <button id="saveNewBtn" class="icon-btn" title="Save As New">➕</button>
+          <button id="deleteConfigBtn" class="icon-btn" title="Delete">🗑️</button>
+          <button id="exportBtn" class="icon-btn" title="Export">📤</button>
+          <button id="importBtn" class="icon-btn" title="Import">📥</button>
+        </div>
+        <input type="file" id="importFileInput" accept=".json" style="display: none;">
+      </div>
+
+      
       <!-- Validation Error Message -->
       <div id="validationError" class="validation-error hidden"></div>
       <!-- Configuration -->
@@ -154,11 +172,6 @@
             <input type="number" id="decimalPlaces" step="1" min="0" max="5" placeholder="0" value="0" />
           </div>
         </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <button id="saveBtn" class="save-btn btn-small">💰 Save Config</button>
       </div>
     </div>
 

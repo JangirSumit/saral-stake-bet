@@ -1,0 +1,91 @@
+/* Configuration Management Styles */
+.config-manager {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.config-select {
+  width: 100%;
+  padding: 8px 10px;
+  background: #0f172a;
+  border: 2px solid #334155;
+  border-radius: 6px;
+  color: #f1f5f9;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+
+.config-select:hover {
+  border-color: #22c55e;
+  background: #1e293b;
+}
+
+.config-select:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+.config-select option {
+  background: #0f172a;
+  color: #f1f5f9;
+  padding: 8px;
+}
+
+.config-actions {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+
+.icon-btn {
+  padding: 8px;
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+  border-color: #22c55e;
+}
+
+.icon-btn:active {
+  transform: translateY(0);
+}
+
+#saveConfigBtn:hover {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+#saveNewBtn:hover {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+#deleteConfigBtn:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+#exportBtn:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+#importBtn:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}

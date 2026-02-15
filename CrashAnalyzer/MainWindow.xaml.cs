@@ -1146,21 +1146,22 @@ namespace CrashAnalyzer
                     var json = File.ReadAllText(openFileDialog.FileName);
                     var config = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, System.Text.Json.JsonElement>>(json);
 
-                    txtBetAmount.Text = config["BetAmount"].GetString();
-                    txtCashoutAt.Text = config["CashoutAt"].GetString();
-                    txtOnLoss.Text = config["OnLoss"].GetString();
-                    txtOnWin.Text = config["OnWin"].GetString();
-                    txtCrashAt.Text = config["CrashAt"].GetString();
-                    txtCrashTimes.Text = config["CrashTimes"].GetString();
-                    txtResumeAt.Text = config["ResumeAt"].GetString();
-                    txtResumeAdjust.Text = config["ResumeAdjust"].GetString();
-                    txtResumeBelowAt.Text = config["ResumeBelowAt"].GetString();
-                    txtResumeBelowTimes.Text = config["ResumeBelowTimes"].GetString();
-                    txtResetThreshold.Text = config["ResetThreshold"].GetString();
-                    txtProfitTimes.Text = config["ProfitTimes"].GetString();
-                    txtLossResetAmount.Text = config["LossResetAmount"].GetString();
-                    txtWalletStopLoss.Text = config["WalletStopLoss"].GetString();
-                    txtDecimalPlaces.Text = config["DecimalPlaces"].GetString();
+                    // Handle both string and numeric values from JSON
+                    txtBetAmount.Text = GetConfigValue(config, "BetAmount");
+                    txtCashoutAt.Text = GetConfigValue(config, "CashoutAt");
+                    txtOnLoss.Text = GetConfigValue(config, "OnLoss");
+                    txtOnWin.Text = GetConfigValue(config, "OnWin");
+                    txtCrashAt.Text = GetConfigValue(config, "CrashAt");
+                    txtCrashTimes.Text = GetConfigValue(config, "CrashTimes");
+                    txtResumeAt.Text = GetConfigValue(config, "ResumeAt");
+                    txtResumeAdjust.Text = GetConfigValue(config, "ResumeAdjust");
+                    txtResumeBelowAt.Text = GetConfigValue(config, "ResumeBelowAt");
+                    txtResumeBelowTimes.Text = GetConfigValue(config, "ResumeBelowTimes");
+                    txtResetThreshold.Text = GetConfigValue(config, "ResetThreshold");
+                    txtProfitTimes.Text = GetConfigValue(config, "ProfitTimes");
+                    txtLossResetAmount.Text = GetConfigValue(config, "LossResetAmount");
+                    txtWalletStopLoss.Text = GetConfigValue(config, "WalletStopLoss");
+                    txtDecimalPlaces.Text = GetConfigValue(config, "DecimalPlaces");
 
                     MessageBox.Show("Configuration loaded successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -1584,6 +1585,16 @@ namespace CrashAnalyzer
         }
 
 
+
+        private string GetConfigValue(Dictionary<string, System.Text.Json.JsonElement> config, string key)
+        {
+            if (!config.ContainsKey(key)) return "0";
+            
+            var element = config[key];
+            return element.ValueKind == System.Text.Json.JsonValueKind.String 
+                ? element.GetString() ?? "0"
+                : element.ToString();
+        }
 
         private void CreateAnalysisSection(System.Windows.Controls.StackPanel parent, string title, List<string> data, string colorHex)
         {
