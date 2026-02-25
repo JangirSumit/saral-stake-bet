@@ -130,6 +130,8 @@ function getCurrentConfig() {
     ProfitTimes: parseInt(document.getElementById('profitTimes').value) || 0,
     LossResetAmount: parseFloat(document.getElementById('lossResetAmount').value) || 0,
     WalletStopLoss: parseFloat(document.getElementById('walletStopLoss').value) || 0,
+    StopOnProfitAmount: parseFloat(document.getElementById('stopOnProfitAmount').value) || 0,
+    StopOnLossAmount: parseFloat(document.getElementById('stopOnLossAmount').value) || 0,
     DecimalPlaces: parseInt(document.getElementById('decimalPlaces').value) || 0
   };
 }
@@ -149,6 +151,8 @@ function loadConfigToForm(config, configName = null) {
   document.getElementById('profitTimes').value = config.ProfitTimes || config.profitTimes || '';
   document.getElementById('lossResetAmount').value = config.LossResetAmount || config.lossResetAmount || '';
   document.getElementById('walletStopLoss').value = config.WalletStopLoss || config.walletStopLoss || '';
+  document.getElementById('stopOnProfitAmount').value = config.StopOnProfitAmount || config.stopOnProfitAmount || '';
+  document.getElementById('stopOnLossAmount').value = config.StopOnLossAmount || config.stopOnLossAmount || '';
   document.getElementById('decimalPlaces').value = config.DecimalPlaces || config.decimalPlaces || '';
   
   if (configName) {

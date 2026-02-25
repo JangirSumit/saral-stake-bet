@@ -62,6 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const profitTimes = document.getElementById("profitTimes");
   const lossResetAmount = document.getElementById("lossResetAmount");
   const walletStopLoss = document.getElementById("walletStopLoss");
+  const stopOnProfitAmount = document.getElementById("stopOnProfitAmount");
+  const stopOnLossAmount = document.getElementById("stopOnLossAmount");
   const decimalPlaces = document.getElementById("decimalPlaces");
   // const resetBetBtn = document.getElementById("resetBetBtn");
   const screenshotBtn = document.getElementById("screenshotBtn");
@@ -112,6 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.profitTimes) profitTimes.value = data.profitTimes;
       if (data.lossResetAmount) lossResetAmount.value = data.lossResetAmount;
       if (data.walletStopLoss) walletStopLoss.value = data.walletStopLoss;
+      if (data.stopOnProfitAmount !== undefined) stopOnProfitAmount.value = data.stopOnProfitAmount;
+      if (data.stopOnLossAmount !== undefined) stopOnLossAmount.value = data.stopOnLossAmount;
       
       // Load decimal places setting
       if (data.decimalPlaces !== undefined) {
@@ -209,6 +213,8 @@ document.addEventListener("DOMContentLoaded", () => {
         profitTimes: profitTimes.value,
         lossResetAmount: lossResetAmount.value,
         walletStopLoss: walletStopLoss.value,
+        stopOnProfitAmount: stopOnProfitAmount.value,
+        stopOnLossAmount: stopOnLossAmount.value,
         decimalPlaces: decimalPlaces.value,
       };
 
@@ -377,6 +383,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     autoBettingActive = false;
     
     // Stop timer
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  if (message.action === "sessionAmountStopTriggered") {
+    const notification = document.getElementById("betNotification");
+    if (notification) {
+      notification.textContent = `⛔ ${message.data.reason}`;
+      notification.className = "bet-notification error";
+      notification.classList.remove("hidden");
+    }
+
+    const startStopBtn = document.getElementById("startStopBtn");
+    if (startStopBtn) {
+      startStopBtn.textContent = "▶️ Start";
+      startStopBtn.className = "btn-stopped";
+    }
+    autoBettingActive = false;
+
     if (timerInterval) {
       clearInterval(timerInterval);
       timerInterval = null;
@@ -700,6 +727,8 @@ function showScreenshotFallback() {
   csvContent += `Resume Bet Adjust,${document.getElementById('resumeAdjust')?.value || 'Not Set'}%\n`;
   csvContent += `Reset Threshold,${document.getElementById('resetThreshold')?.value || 'Not Set'}%\n`;
   csvContent += `Profit Reset Times,${document.getElementById('profitTimes')?.value || 'Not Set'}\n`;
+  csvContent += `Complete Stop On Profit Amount,${document.getElementById('stopOnProfitAmount')?.value || 'Not Set'}\n`;
+  csvContent += `Complete Stop On Loss Amount,${document.getElementById('stopOnLossAmount')?.value || 'Not Set'}\n`;
   csvContent += `Wallet Stop Loss,${document.getElementById('walletStopLoss')?.value || 'Not Set'}%\n`;
   csvContent += `Decimal Places,${document.getElementById('decimalPlaces')?.value || 'Not Set'}\n\n`;
   

@@ -602,6 +602,8 @@ function adjustBetAmountBasedOnResult(crash) {
       superBets: superTotalBets,
     },
   });
+
+  checkSessionAmountStopRules();
 }
 
 function setInputValue(input, value) {
@@ -714,6 +716,37 @@ function adjustBetAmount(amount, percentage) {
   const multiplier = 1 + percent / 100;
   const adjustedAmount = amount * multiplier;
   return roundBetAmount(adjustedAmount);
+}
+
+function checkSessionAmountStopRules() {
+  if (!autoBetRunning) return;
+
+  const stopOnProfitAmount = parseFloat(betConfig.stopOnProfitAmount) || 0;
+  const stopOnLossAmount = parseFloat(betConfig.stopOnLossAmount) || 0;
+  const sessionNet = superTotalProfit - superTotalLoss;
+
+  if (stopOnProfitAmount > 0 && sessionNet >= stopOnProfitAmount) {
+    autoBetRunning = false;
+    skipBetting = false;
+    chrome.runtime.sendMessage({
+      action: "sessionAmountStopTriggered",
+      data: {
+        reason: `Profit target reached (${currentCurrency}${sessionNet.toFixed(2)} >= ${currentCurrency}${stopOnProfitAmount.toFixed(2)})`,
+      },
+    });
+    return;
+  }
+
+  if (stopOnLossAmount > 0 && sessionNet <= -stopOnLossAmount) {
+    autoBetRunning = false;
+    skipBetting = false;
+    chrome.runtime.sendMessage({
+      action: "sessionAmountStopTriggered",
+      data: {
+        reason: `Loss limit reached (${currentCurrency}${Math.abs(sessionNet).toFixed(2)} >= ${currentCurrency}${stopOnLossAmount.toFixed(2)})`,
+      },
+    });
+  }
 }
 
 function walletWatcher() {
@@ -844,6 +877,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       profitTimes,
       lossResetAmount,
       walletStopLoss,
+      stopOnProfitAmount,
+      stopOnLossAmount,
       decimalPlaces,
     } = message.data;
 
@@ -862,6 +897,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       profitTimes: parseFloat(profitTimes) || 0,
       lossResetAmount: parseFloat(lossResetAmount) || 0,
       walletStopLoss: parseFloat(walletStopLoss) || 0,
+      stopOnProfitAmount: parseFloat(stopOnProfitAmount) || 0,
+      stopOnLossAmount: parseFloat(stopOnLossAmount) || 0,
       decimalPlaces: parseInt(decimalPlaces) || 0,
     };
 

@@ -164,6 +164,18 @@
             <input type="number" id="walletStopLoss" step="0.01" min="0" max="100" placeholder="0" />
           </div>
         </div>
+
+        <h4>⛔ Completely Stop If</h4>
+        <div class="form-row">
+          <div class="form-half">
+            <label>On Profit (Fixed Amount +)</label>
+            <input type="number" id="stopOnProfitAmount" step="0.01" min="0" max="1000000" placeholder="0.00" />
+          </div>
+          <div class="form-half">
+            <label>On Loss (Fixed Amount +)</label>
+            <input type="number" id="stopOnLossAmount" step="0.01" min="0" max="1000000" placeholder="0.00" />
+          </div>
+        </div>
         
         <h4>🔢 Display Settings</h4>
         <div class="form-row">
@@ -295,6 +307,21 @@
             <p><strong>Wallet Protection:</strong> Stop if wallet drops by % (0 = disabled)</p>
             <p><strong>Auto-refresh:</strong> Page refreshes on connection loss</p>
             <p><strong>Decimal Places:</strong> Number format precision (0-5)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <div class="panel-header" data-panel="completeStop">
+          <h4>⛔ Complete Stop Rules</h4>
+          <span class="toggle-icon collapsed" id="completeStopToggle">▼</span>
+        </div>
+        <div class="panel-content collapsed" id="completeStopContent">
+          <div class="help-text">
+            <p><strong>On Profit (Fixed Amount +):</strong> Stop full auto-betting when net session profit reaches this amount</p>
+            <p><strong>On Loss (Fixed Amount +):</strong> Stop full auto-betting when net session loss reaches this amount</p>
+            <p><strong>Net Session:</strong> Total Profit - Total Loss</p>
+            <p><em>Set value 0 to disable each stop rule.</em></p>
           </div>
         </div>
       </div>
