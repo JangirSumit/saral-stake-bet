@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace CrashAnalyzer
 {
@@ -42,6 +44,8 @@ namespace CrashAnalyzer
             txtProfitTimes.Text = "3";
             txtLossResetAmount.Text = "5000";
             txtWalletStopLoss.Text = "0";
+            txtStopOnProfitAmount.Text = "0";
+            txtStopOnLossAmount.Text = "0";
             txtDecimalPlaces.Text = "2";
 
             LoadConfiguration();
@@ -53,8 +57,8 @@ namespace CrashAnalyzer
         {
             var openFileDialog = new OpenFileDialog
             {
-                Filter = "Text files (*.txt)|*.txt|Log files (*.log)|*.log|All files (*.*)|*.*",
-                Title = "Select Console Log File"
+                Filter = "Supported files (*.txt;*.log;*.csv)|*.txt;*.log;*.csv|Text files (*.txt)|*.txt|Log files (*.log)|*.log|CSV files (*.csv)|*.csv|All files (*.*)|*.*",
+                Title = "Select Console Log or Extension CSV Report"
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -66,9 +70,19 @@ namespace CrashAnalyzer
 
                 await System.Threading.Tasks.Task.Run(() =>
                 {
-                    crashes = LoadCrashesFromLog(filePath);
-                    var originalBets = LoadOriginalBetsFromLog(filePath);
-                    ExtractLogFileConfig(filePath);
+                    var extension = Path.GetExtension(filePath).ToLowerInvariant();
+                    if (extension == ".csv")
+                    {
+                        crashes = LoadCrashesFromExtensionCsv(filePath, out var loadedBets);
+                        originalBets = loadedBets;
+                        ExtractConfigFromExtensionCsv(filePath);
+                    }
+                    else
+                    {
+                        crashes = LoadCrashesFromLog(filePath);
+                        originalBets = LoadOriginalBetsFromLog(filePath);
+                        ExtractLogFileConfig(filePath);
+                    }
 
                     Dispatcher.Invoke(() =>
                     {
@@ -81,10 +95,247 @@ namespace CrashAnalyzer
                             return;
                         }
 
+                        if (logFileConfig != null)
+                        {
+                            ApplyConfigToInputs(logFileConfig);
+                        }
+
                         ShowOriginalData(originalBets);
                     });
                 });
             }
+        }
+
+        private void ApplyConfigToInputs(BettingConfig config)
+        {
+            txtBetAmount.Text = config.BetAmount.ToString(CultureInfo.InvariantCulture);
+            txtCashoutAt.Text = config.CashoutAt.ToString(CultureInfo.InvariantCulture);
+            txtOnLoss.Text = config.OnLoss.ToString(CultureInfo.InvariantCulture);
+            txtOnWin.Text = config.OnWin.ToString(CultureInfo.InvariantCulture);
+            txtCrashAt.Text = config.CrashAt.ToString(CultureInfo.InvariantCulture);
+            txtCrashTimes.Text = config.CrashTimes.ToString(CultureInfo.InvariantCulture);
+            txtResumeAt.Text = config.ResumeAt.ToString(CultureInfo.InvariantCulture);
+            txtResumeAdjust.Text = config.ResumeAdjust.ToString(CultureInfo.InvariantCulture);
+            txtResumeBelowAt.Text = config.ResumeBelowAt.ToString(CultureInfo.InvariantCulture);
+            txtResumeBelowTimes.Text = config.ResumeBelowTimes.ToString(CultureInfo.InvariantCulture);
+            txtResumeLastCrashes.Text = config.ResumeLastCrashes.ToString(CultureInfo.InvariantCulture);
+            txtResumeAtValue.Text = config.ResumeAtValue.ToString(CultureInfo.InvariantCulture);
+            txtResumeAtTimes.Text = config.ResumeAtTimes.ToString(CultureInfo.InvariantCulture);
+            txtResetThreshold.Text = config.ResetThreshold.ToString(CultureInfo.InvariantCulture);
+            txtProfitTimes.Text = config.ProfitTimes.ToString(CultureInfo.InvariantCulture);
+            txtLossResetAmount.Text = config.LossResetAmount.ToString(CultureInfo.InvariantCulture);
+            txtWalletStopLoss.Text = config.WalletStopLoss.ToString(CultureInfo.InvariantCulture);
+            txtStopOnProfitAmount.Text = config.StopOnProfitAmount.ToString(CultureInfo.InvariantCulture);
+            txtStopOnLossAmount.Text = config.StopOnLossAmount.ToString(CultureInfo.InvariantCulture);
+            txtDecimalPlaces.Text = config.DecimalPlaces.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private List<double> LoadCrashesFromExtensionCsv(string csvPath, out List<OriginalBet> bets)
+        {
+            var loadedCrashes = new List<double>();
+            bets = new List<OriginalBet>();
+            crashTimestamps = new List<DateTime>();
+
+            var lines = File.ReadAllLines(csvPath);
+            bool inHistorySection = false;
+            bool passedHistoryHeader = false;
+
+            foreach (var rawLine in lines)
+            {
+                var line = rawLine?.TrimEnd() ?? "";
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                if (!inHistorySection)
+                {
+                    if (line.Equals("BETTING HISTORY", StringComparison.OrdinalIgnoreCase))
+                    {
+                        inHistorySection = true;
+                    }
+                    continue;
+                }
+
+                if (!passedHistoryHeader)
+                {
+                    // Skip header row: Time,Status,Crash Value,...
+                    passedHistoryHeader = true;
+                    continue;
+                }
+
+                var cols = ParseCsvLine(rawLine ?? string.Empty);
+                if (cols.Count < 3)
+                {
+                    continue;
+                }
+
+                var timeText = cols[0].Trim();
+                var status = cols[1].Trim();
+                var crashText = cols[2].Trim();
+                var betText = cols.Count > 3 ? cols[3].Trim() : "0";
+                var profitText = cols.Count > 5 ? cols[5].Trim() : "0";
+
+                var crash = ParseNumericValue(crashText);
+                if (crash <= 0)
+                {
+                    continue;
+                }
+
+                loadedCrashes.Add(crash);
+                crashTimestamps.Add(ParseTimeOnlyValue(timeText));
+
+                bets.Add(new OriginalBet
+                {
+                    Status = string.IsNullOrWhiteSpace(status) ? "Skipped" : status,
+                    BetAmount = ParseNumericValue(betText),
+                    Profit = ParseNumericValue(profitText)
+                });
+            }
+
+            return loadedCrashes;
+        }
+
+        private void ExtractConfigFromExtensionCsv(string csvPath)
+        {
+            try
+            {
+                var lines = File.ReadAllLines(csvPath);
+                bool inCurrentSettings = false;
+                var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var rawLine in lines)
+                {
+                    var line = rawLine?.Trim() ?? "";
+                    if (string.IsNullOrWhiteSpace(line))
+                    {
+                        continue;
+                    }
+
+                    if (!inCurrentSettings)
+                    {
+                        if (line.Equals("CURRENT SETTINGS", StringComparison.OrdinalIgnoreCase))
+                        {
+                            inCurrentSettings = true;
+                        }
+                        continue;
+                    }
+
+                    if (line.Equals("SUB-SESSION RESETS", StringComparison.OrdinalIgnoreCase) ||
+                        line.Equals("BETTING HISTORY", StringComparison.OrdinalIgnoreCase))
+                    {
+                        break;
+                    }
+
+                    var cols = ParseCsvLine(rawLine ?? string.Empty);
+                    if (cols.Count >= 2)
+                    {
+                        settings[cols[0].Trim()] = cols[1].Trim();
+                    }
+                }
+
+                logFileConfig = new BettingConfig
+                {
+                    BetAmount = ParseNumericValue(GetSetting(settings, "Bet Amount")),
+                    CashoutAt = ParseNumericValue(GetSetting(settings, "Cashout At")),
+                    OnLoss = ParseNumericValue(GetSetting(settings, "On Loss Increase", "On Loss %")),
+                    OnWin = ParseNumericValue(GetSetting(settings, "On Win Decrease", "On Win %")),
+                    CrashAt = ParseNumericValue(GetSetting(settings, "Stop After Crash At", "Crash At")),
+                    CrashTimes = ParseIntValue(GetSetting(settings, "Stop After Times", "Crash Times")),
+                    ResumeAt = ParseNumericValue(GetSetting(settings, "Resume At Crash", "Resume At")),
+                    ResumeAdjust = ParseNumericValue(GetSetting(settings, "Resume Bet Adjust", "Resume Adjust %")),
+                    ResumeBelowAt = ParseNumericValue(GetSetting(settings, "Resume Below At")),
+                    ResumeBelowTimes = ParseIntValue(GetSetting(settings, "Resume Below Times")),
+                    ResumeLastCrashes = ParseIntValue(GetSetting(settings, "Resume Last Crashes Window")),
+                    ResumeAtValue = ParseNumericValue(GetSetting(settings, "Resume Threshold")),
+                    ResumeAtTimes = ParseIntValue(GetSetting(settings, "Resume Required Matches")),
+                    ResetThreshold = ParseNumericValue(GetSetting(settings, "Reset Threshold", "Reset Threshold %")),
+                    ProfitTimes = ParseIntValue(GetSetting(settings, "Profit Reset Times", "Profit Times")),
+                    LossResetAmount = ParseNumericValue(GetSetting(settings, "Loss Reset Amount")),
+                    WalletStopLoss = ParseNumericValue(GetSetting(settings, "Wallet Stop Loss", "Wallet Stop Loss %")),
+                    StopOnProfitAmount = ParseNumericValue(GetSetting(settings, "Complete Stop On Profit Amount", "Stop On Profit Amount")),
+                    StopOnLossAmount = ParseNumericValue(GetSetting(settings, "Complete Stop On Loss Amount", "Stop On Loss Amount")),
+                    DecimalPlaces = ParseIntValue(GetSetting(settings, "Decimal Places"), 2)
+                };
+            }
+            catch
+            {
+                logFileConfig = null;
+            }
+        }
+
+        private static string GetSetting(Dictionary<string, string> settings, params string[] keys)
+        {
+            foreach (var key in keys)
+            {
+                if (settings.TryGetValue(key, out var value))
+                {
+                    return value;
+                }
+            }
+
+            return "0";
+        }
+
+        private static List<string> ParseCsvLine(string line)
+        {
+            var values = new List<string>();
+            if (line == null) return values;
+
+            var current = new StringBuilder();
+            bool inQuotes = false;
+
+            foreach (var ch in line)
+            {
+                if (ch == '"')
+                {
+                    inQuotes = !inQuotes;
+                    continue;
+                }
+
+                if (ch == ',' && !inQuotes)
+                {
+                    values.Add(current.ToString());
+                    current.Clear();
+                    continue;
+                }
+
+                current.Append(ch);
+            }
+
+            values.Add(current.ToString());
+            return values;
+        }
+
+        private static double ParseNumericValue(string input, double fallback = 0)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return fallback;
+            }
+
+            var match = Regex.Match(input, @"-?\d+(\.\d+)?");
+            if (!match.Success)
+            {
+                return fallback;
+            }
+
+            return double.TryParse(match.Value, out var value) ? value : fallback;
+        }
+
+        private static int ParseIntValue(string input, int fallback = 0)
+        {
+            return (int)Math.Round(ParseNumericValue(input, fallback));
+        }
+
+        private static DateTime ParseTimeOnlyValue(string input)
+        {
+            if (TimeSpan.TryParse(input, out var time))
+            {
+                return DateTime.Today.Add(time);
+            }
+
+            return DateTime.Now;
         }
 
         private async void BtnAnalyze_Click(object sender, RoutedEventArgs e)
@@ -119,16 +370,34 @@ namespace CrashAnalyzer
                     ProfitTimes = int.Parse(txtProfitTimes.Text),
                     LossResetAmount = double.Parse(txtLossResetAmount.Text),
                     WalletStopLoss = double.Parse(txtWalletStopLoss.Text),
+                    StopOnProfitAmount = double.Parse(txtStopOnProfitAmount.Text),
+                    StopOnLossAmount = double.Parse(txtStopOnLossAmount.Text),
                     DecimalPlaces = int.Parse(txtDecimalPlaces.Text)
                 };
 
+                var analysisCrashes = originalCrashes.Any() ? originalCrashes : crashes;
+                var analysisTimestamps = originalCrashTimestamps.Any() ? originalCrashTimestamps : crashTimestamps;
+
                 await System.Threading.Tasks.Task.Run(() =>
                 {
-                    betResults = AnalyzeConfigurationDetailed(crashes, config);
+                    var fullResults = AnalyzeConfigurationDetailed(analysisCrashes, analysisTimestamps, config);
 
                     Dispatcher.Invoke(() =>
                     {
-                        allBetResults = new List<BetResult>(betResults);
+                        allBetResults = new List<BetResult>(fullResults);
+
+                        if (isFilterActive && currentFilteredIndices.Any())
+                        {
+                            betResults = currentFilteredIndices
+                                .Where(i => i >= 0 && i < allBetResults.Count)
+                                .Select(i => allBetResults[i])
+                                .ToList();
+                        }
+                        else
+                        {
+                            betResults = new List<BetResult>(allBetResults);
+                        }
+
                         ShowComparisonData(betResults);
                         AutoFillDateTimeRange();
                         btnAnalyze.Content = "⚡ Analyze";
@@ -270,6 +539,8 @@ namespace CrashAnalyzer
         private List<DateTime> originalCrashTimestamps = new List<DateTime>();
         private List<OriginalBet> allOriginalBets = new List<OriginalBet>();
         private List<BetResult> allBetResults = new List<BetResult>();
+        private List<int> currentFilteredIndices = new List<int>();
+        private bool isFilterActive = false;
 
         private void BtnFilter_Click(object sender, RoutedEventArgs e)
         {
@@ -297,6 +568,9 @@ namespace CrashAnalyzer
                 MessageBox.Show("No data found in the selected date range.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
+
+            currentFilteredIndices = new List<int>(filteredIndices);
+            isFilterActive = true;
 
             crashes = filteredIndices.Select(i => originalCrashes[i]).ToList();
             crashTimestamps = filteredIndices.Select(i => originalCrashTimestamps[i]).ToList();
@@ -326,6 +600,8 @@ namespace CrashAnalyzer
 
         private void BtnClearFilter_Click(object sender, RoutedEventArgs e)
         {
+            isFilterActive = false;
+            currentFilteredIndices.Clear();
             crashes = new List<double>(originalCrashes);
             crashTimestamps = new List<DateTime>(originalCrashTimestamps);
             ShowOriginalData(allOriginalBets);
@@ -495,6 +771,8 @@ namespace CrashAnalyzer
                 ProfitTimes = int.Parse(txtProfitTimes.Text),
                 LossResetAmount = double.Parse(txtLossResetAmount.Text),
                 WalletStopLoss = double.Parse(txtWalletStopLoss.Text),
+                StopOnProfitAmount = double.Parse(txtStopOnProfitAmount.Text),
+                StopOnLossAmount = double.Parse(txtStopOnLossAmount.Text),
                 DecimalPlaces = int.Parse(txtDecimalPlaces.Text)
             };
 
@@ -662,7 +940,7 @@ namespace CrashAnalyzer
             return new List<OriginalBet>();
         }
 
-        private List<BetResult> AnalyzeConfigurationDetailed(List<double> crashes, BettingConfig config)
+        private List<BetResult> AnalyzeConfigurationDetailed(List<double> crashes, List<DateTime> timestamps, BettingConfig config)
         {
             var results = new List<BetResult>();
             var crashHistory = new List<double>();
@@ -676,6 +954,7 @@ namespace CrashAnalyzer
             int consecutiveLowCrashes = 0;
             int consecutiveResumeBelowCrashes = 0;
             bool skipBetting = false;
+            bool autoBetRunning = true;
             bool currentBetExists = false;
 
             for (int i = 0; i < crashes.Count; i++)
@@ -685,22 +964,40 @@ namespace CrashAnalyzer
                 var result = new BetResult 
                 { 
                     CrashValue = crash,
-                    Timestamp = i < crashTimestamps.Count ? crashTimestamps[i] : DateTime.Now
+                    Timestamp = i < timestamps.Count ? timestamps[i] : DateTime.Now
                 };
                 currentBetExists = false; // Reset each round
+
+                if (!autoBetRunning)
+                {
+                    result.RunningTotal = runningTotal;
+                    result.ConsecutiveLowCrashes = consecutiveLowCrashes;
+                    result.SkipBetting = skipBetting;
+                    results.Add(result);
+                    continue;
+                }
 
                 if (i == 20)
                 {
                     Console.WriteLine("");
                 }
 
-                // Step 1: Handle stop/resume logic (matches handleStopResumeLogic)
+                // Step 1: Determine if bet was placed for this round
+                // This must use previous-round state (matches extension timing).
+                if (!skipBetting)
+                {
+                    result.BetPlaced = true;
+                    result.BetAmount = currentBetAmount;
+                    lastBetAmount = currentBetAmount;
+                    currentBetExists = true;
+                    result.Won = crash >= config.CashoutAt;
+                }
+
+                // Step 2: Handle stop/resume logic for NEXT round (matches addCrashToHistory order)
                 if (skipBetting)
                 {
-                    // Check resume logic first (matches checkResumeLogic)
                     if (config.ResumeAt > 0 && crash >= config.ResumeAt)
                     {
-                        // Resume betting (matches resumeBetting)
                         if (config.ResumeAdjust != 0)
                         {
                             currentBetAmount = AdjustBetAmount(lastBetAmount, config.ResumeAdjust, config.DecimalPlaces);
@@ -713,28 +1010,29 @@ namespace CrashAnalyzer
                         consecutiveLowCrashes = 0;
                         consecutiveResumeBelowCrashes = 0;
                     }
-                    // Alternative resume logic
-                    else if (config.ResumeBelowAt > 0 && config.ResumeBelowTimes > 0)
+                    else if (config.ResumeBelowAt != 0 && config.ResumeBelowTimes > 0)
                     {
-                        if (consecutiveResumeBelowCrashes >= config.ResumeBelowTimes)
-                        {
-                            // Resume betting
-                            if (config.ResumeAdjust != 0)
-                            {
-                                currentBetAmount = AdjustBetAmount(lastBetAmount, config.ResumeAdjust, config.DecimalPlaces);
-                            }
-                            else
-                            {
-                                currentBetAmount = lastBetAmount;
-                            }
-                            skipBetting = false;
-                            consecutiveLowCrashes = 0;
-                            consecutiveResumeBelowCrashes = 0;
-                        }
-                        
-                        if (crash < config.ResumeBelowAt)
+                        bool conditionMet = config.ResumeBelowAt > 0
+                            ? crash < config.ResumeBelowAt
+                            : crash > Math.Abs(config.ResumeBelowAt);
+
+                        if (conditionMet)
                         {
                             consecutiveResumeBelowCrashes++;
+                            if (consecutiveResumeBelowCrashes >= config.ResumeBelowTimes)
+                            {
+                                if (config.ResumeAdjust != 0)
+                                {
+                                    currentBetAmount = AdjustBetAmount(lastBetAmount, config.ResumeAdjust, config.DecimalPlaces);
+                                }
+                                else
+                                {
+                                    currentBetAmount = lastBetAmount;
+                                }
+                                skipBetting = false;
+                                consecutiveLowCrashes = 0;
+                                consecutiveResumeBelowCrashes = 0;
+                            }
                         }
                         else
                         {
@@ -758,23 +1056,32 @@ namespace CrashAnalyzer
                     }
                 }
 
-                // Step 2: Place bet or skip (matches betWatcher logic)
-                if (!skipBetting)
+                // Step 3: Update crash pattern only if this round had a bet
+                if (autoBetRunning && currentBetExists && config.CrashAt != 0 && config.CrashTimes > 0)
                 {
-                    result.BetPlaced = true;
-                    result.BetAmount = currentBetAmount;
-                    lastBetAmount = currentBetAmount;
-                    currentBetExists = true;
-                    result.Won = crash >= config.CashoutAt;
+                    if (IsCrashSkipConditionMet(crash, config.CrashAt))
+                    {
+                        consecutiveLowCrashes++;
+                        if (consecutiveLowCrashes >= config.CrashTimes)
+                        {
+                            skipBetting = true;
+                        }
+                    }
+                    else
+                    {
+                        consecutiveLowCrashes = 0;
+                    }
+                }
 
-                    // Process bet result (matches adjustBetAmountBasedOnResult)
+                // Step 4: Process bet result after stop/resume checks (matches extension order)
+                if (currentBetExists)
+                {
                     if (result.Won)
                     {
                         result.Profit = (currentBetAmount * config.CashoutAt) - currentBetAmount;
                         totalProfit += result.Profit;
                         runningTotal += result.Profit;
 
-                        // Check profit reset threshold
                         if (config.ProfitTimes > 0 && totalProfit >= originalBetAmount * config.ProfitTimes)
                         {
                             currentBetAmount = originalBetAmount;
@@ -790,17 +1097,15 @@ namespace CrashAnalyzer
                         result.Profit = -currentBetAmount;
                         totalProfit -= currentBetAmount;
                         runningTotal += result.Profit;
-
                         currentBetAmount = AdjustBetAmount(currentBetAmount, config.OnLoss, config.DecimalPlaces);
                     }
 
-                    // Check reset thresholds
                     if (config.ResetThreshold != 0)
                     {
                         double changePercent = ((currentBetAmount - originalBetAmount) / originalBetAmount) * 100;
-                        bool thresholdExceeded = config.ResetThreshold > 0 ?
-                            changePercent >= config.ResetThreshold :
-                            changePercent <= config.ResetThreshold;
+                        bool thresholdExceeded = config.ResetThreshold > 0
+                            ? changePercent >= config.ResetThreshold
+                            : changePercent <= config.ResetThreshold;
 
                         if (thresholdExceeded)
                         {
@@ -819,7 +1124,6 @@ namespace CrashAnalyzer
                         }
                     }
 
-                    // Wallet stop loss check
                     if (config.WalletStopLoss > 0)
                     {
                         double lossPercentage = (Math.Abs(runningTotal) / (originalBetAmount * 100)) * 100;
@@ -828,23 +1132,17 @@ namespace CrashAnalyzer
                             skipBetting = true;
                         }
                     }
-                }
 
-                // Step 3: Process crash patterns AFTER bet result (matches checkCrashPattern)
-                if (currentBetExists && config.CrashAt != 0 && config.CrashTimes > 0)
-                {
-                    if (IsCrashSkipConditionMet(crash, config.CrashAt))
+                    if (config.StopOnProfitAmount > 0 && runningTotal >= config.StopOnProfitAmount)
                     {
-                        consecutiveLowCrashes++;
-                        if (consecutiveLowCrashes >= config.CrashTimes)
-                        {
-                            skipBetting = true;
-                            consecutiveResumeBelowCrashes = 0;
-                        }
+                        autoBetRunning = false;
+                        skipBetting = false;
                     }
-                    else
+
+                    if (config.StopOnLossAmount > 0 && runningTotal <= -config.StopOnLossAmount)
                     {
-                        consecutiveLowCrashes = 0;
+                        autoBetRunning = false;
+                        skipBetting = false;
                     }
                 }
 
@@ -904,7 +1202,7 @@ namespace CrashAnalyzer
         {
             if (logFileConfig != null)
             {
-                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | OnLoss: {logFileConfig.OnLoss}% | OnWin: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | ResumeWindow: {logFileConfig.ResumeLastCrashes}@{logFileConfig.ResumeAtValue}x/{logFileConfig.ResumeAtTimes} | Reset: {logFileConfig.ResetThreshold}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | Decimals: {logFileConfig.DecimalPlaces}";
+                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | OnLoss: {logFileConfig.OnLoss}% | OnWin: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | ResumeWindow: {logFileConfig.ResumeLastCrashes}@{logFileConfig.ResumeAtValue}x/{logFileConfig.ResumeAtTimes} | Reset: {logFileConfig.ResetThreshold}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | StopProfitAmt: ${logFileConfig.StopOnProfitAmount} | StopLossAmt: ${logFileConfig.StopOnLossAmount} | Decimals: {logFileConfig.DecimalPlaces}";
             }
             else
             {
@@ -916,7 +1214,7 @@ namespace CrashAnalyzer
         {
             try
             {
-                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | OnLoss: {txtOnLoss.Text}% | OnWin: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | ResumeWindow: {txtResumeLastCrashes.Text}@{txtResumeAtValue.Text}x/{txtResumeAtTimes.Text} | Reset: {txtResetThreshold.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | Decimals: {txtDecimalPlaces.Text}";
+                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | OnLoss: {txtOnLoss.Text}% | OnWin: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | ResumeWindow: {txtResumeLastCrashes.Text}@{txtResumeAtValue.Text}x/{txtResumeAtTimes.Text} | Reset: {txtResetThreshold.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | StopProfitAmt: ${txtStopOnProfitAmount.Text} | StopLossAmt: ${txtStopOnLossAmount.Text} | Decimals: {txtDecimalPlaces.Text}";
             }
             catch
             {
@@ -958,6 +1256,8 @@ namespace CrashAnalyzer
                                 ProfitTimes = config["profitTimes"].GetInt32(),
                                 LossResetAmount = config["lossResetAmount"].GetDouble(),
                                 WalletStopLoss = config["walletStopLoss"].GetDouble(),
+                                StopOnProfitAmount = config.ContainsKey("stopOnProfitAmount") ? config["stopOnProfitAmount"].GetDouble() : 0,
+                                StopOnLossAmount = config.ContainsKey("stopOnLossAmount") ? config["stopOnLossAmount"].GetDouble() : 0,
                                 DecimalPlaces = config["decimalPlaces"].GetInt32()
                             };
                             break;
@@ -994,6 +1294,8 @@ namespace CrashAnalyzer
             csv.AppendLine($"Profit Times,{config.ProfitTimes}");
             csv.AppendLine($"Loss Reset Amount,{config.LossResetAmount}");
             csv.AppendLine($"Wallet Stop Loss %,{config.WalletStopLoss}");
+            csv.AppendLine($"Stop On Profit Amount,{config.StopOnProfitAmount}");
+            csv.AppendLine($"Stop On Loss Amount,{config.StopOnLossAmount}");
             csv.AppendLine($"Decimal Places,{config.DecimalPlaces}");
             csv.AppendLine();
 
@@ -1038,6 +1340,8 @@ namespace CrashAnalyzer
                     ProfitTimes = txtProfitTimes.Text,
                     LossResetAmount = txtLossResetAmount.Text,
                     WalletStopLoss = txtWalletStopLoss.Text,
+                    StopOnProfitAmount = txtStopOnProfitAmount.Text,
+                    StopOnLossAmount = txtStopOnLossAmount.Text,
                     DecimalPlaces = txtDecimalPlaces.Text
                 };
 
@@ -1068,6 +1372,8 @@ namespace CrashAnalyzer
             txtProfitTimes.TextChanged -= OnConfigChanged;
             txtLossResetAmount.TextChanged -= OnConfigChanged;
             txtWalletStopLoss.TextChanged -= OnConfigChanged;
+            txtStopOnProfitAmount.TextChanged -= OnConfigChanged;
+            txtStopOnLossAmount.TextChanged -= OnConfigChanged;
             txtDecimalPlaces.TextChanged -= OnConfigChanged;
 
             try
@@ -1095,6 +1401,8 @@ namespace CrashAnalyzer
                     txtProfitTimes.Text = config["ProfitTimes"].GetString();
                     txtLossResetAmount.Text = config["LossResetAmount"].GetString();
                     txtWalletStopLoss.Text = config["WalletStopLoss"].GetString();
+                    txtStopOnProfitAmount.Text = GetConfigValue(config, "StopOnProfitAmount");
+                    txtStopOnLossAmount.Text = GetConfigValue(config, "StopOnLossAmount");
                     txtDecimalPlaces.Text = config["DecimalPlaces"].GetString();
                 }
                 else
@@ -1117,6 +1425,8 @@ namespace CrashAnalyzer
                     txtProfitTimes.Text = "3";
                     txtLossResetAmount.Text = "5000";
                     txtWalletStopLoss.Text = "0";
+                    txtStopOnProfitAmount.Text = "0";
+                    txtStopOnLossAmount.Text = "0";
                     txtDecimalPlaces.Text = "2";
                 }
             }
@@ -1140,6 +1450,8 @@ namespace CrashAnalyzer
                 txtProfitTimes.Text = "3";
                 txtLossResetAmount.Text = "5000";
                 txtWalletStopLoss.Text = "0";
+                txtStopOnProfitAmount.Text = "0";
+                txtStopOnLossAmount.Text = "0";
                 txtDecimalPlaces.Text = "2";
             }
 
@@ -1161,6 +1473,8 @@ namespace CrashAnalyzer
             txtProfitTimes.TextChanged += OnConfigChanged;
             txtLossResetAmount.TextChanged += OnConfigChanged;
             txtWalletStopLoss.TextChanged += OnConfigChanged;
+            txtStopOnProfitAmount.TextChanged += OnConfigChanged;
+            txtStopOnLossAmount.TextChanged += OnConfigChanged;
             txtDecimalPlaces.TextChanged += OnConfigChanged;
 
             // Save configuration after loading
@@ -1199,6 +1513,8 @@ namespace CrashAnalyzer
                         ProfitTimes = txtProfitTimes.Text,
                         LossResetAmount = txtLossResetAmount.Text,
                         WalletStopLoss = txtWalletStopLoss.Text,
+                        StopOnProfitAmount = txtStopOnProfitAmount.Text,
+                        StopOnLossAmount = txtStopOnLossAmount.Text,
                         DecimalPlaces = txtDecimalPlaces.Text
                     };
 
@@ -1246,6 +1562,8 @@ namespace CrashAnalyzer
                     txtProfitTimes.Text = GetConfigValue(config, "ProfitTimes");
                     txtLossResetAmount.Text = GetConfigValue(config, "LossResetAmount");
                     txtWalletStopLoss.Text = GetConfigValue(config, "WalletStopLoss");
+                    txtStopOnProfitAmount.Text = GetConfigValue(config, "StopOnProfitAmount");
+                    txtStopOnLossAmount.Text = GetConfigValue(config, "StopOnLossAmount");
                     txtDecimalPlaces.Text = GetConfigValue(config, "DecimalPlaces");
 
                     MessageBox.Show("Configuration loaded successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -1753,6 +2071,8 @@ namespace CrashAnalyzer
         public int ProfitTimes { get; set; }
         public double LossResetAmount { get; set; }
         public double WalletStopLoss { get; set; }
+        public double StopOnProfitAmount { get; set; }
+        public double StopOnLossAmount { get; set; }
         public int DecimalPlaces { get; set; }
     }
 

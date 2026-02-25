@@ -183,6 +183,21 @@
                                 <TextBox Name="txtDecimalPlaces" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                <TextBlock Text="Stop On Profit Amount" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtStopOnProfitAmount" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="4,0,0,0">
+                                <TextBlock Text="Stop On Loss Amount" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtStopOnLossAmount" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                     
                     <!-- Load Log Button -->
