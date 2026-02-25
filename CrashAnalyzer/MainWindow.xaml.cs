@@ -754,13 +754,9 @@ namespace CrashAnalyzer
                             currentBetAmount = originalBetAmount;
                             totalProfit = 0;
                         }
-                        else if (config.OnWin == 0)
-                        {
-                            currentBetAmount = originalBetAmount;
-                        }
                         else
                         {
-                            currentBetAmount = AdjustBetAmount(currentBetAmount, -Math.Abs(config.OnWin), config.DecimalPlaces);
+                            currentBetAmount = AdjustBetAmount(currentBetAmount, config.OnWin, config.DecimalPlaces);
                         }
                     }
                     else
@@ -769,7 +765,7 @@ namespace CrashAnalyzer
                         totalProfit -= currentBetAmount;
                         runningTotal += result.Profit;
 
-                        currentBetAmount = AdjustBetAmount(currentBetAmount, Math.Abs(config.OnLoss), config.DecimalPlaces);
+                        currentBetAmount = AdjustBetAmount(currentBetAmount, config.OnLoss, config.DecimalPlaces);
                     }
 
                     // Check reset thresholds
@@ -849,7 +845,7 @@ namespace CrashAnalyzer
         {
             if (logFileConfig != null)
             {
-                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | Loss: +{logFileConfig.OnLoss}% | Win: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | Reset: {logFileConfig.ResetThreshold}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | Decimals: {logFileConfig.DecimalPlaces}";
+                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | OnLoss: {logFileConfig.OnLoss}% | OnWin: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | Reset: {logFileConfig.ResetThreshold}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | Decimals: {logFileConfig.DecimalPlaces}";
             }
             else
             {
@@ -861,7 +857,7 @@ namespace CrashAnalyzer
         {
             try
             {
-                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | Loss: +{txtOnLoss.Text}% | Win: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | Reset: {txtResetThreshold.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | Decimals: {txtDecimalPlaces.Text}";
+                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | OnLoss: {txtOnLoss.Text}% | OnWin: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | Reset: {txtResetThreshold.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | Decimals: {txtDecimalPlaces.Text}";
             }
             catch
             {

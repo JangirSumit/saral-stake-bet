@@ -24,7 +24,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://stake.bet/*/crash"],
+      "matches": ["https://*/*/crash"],
       "js": ["content.js"]
     }
   ]

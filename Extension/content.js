@@ -545,14 +545,10 @@ function adjustBetAmountBasedOnResult(crash) {
       chrome.runtime.sendMessage({
         action: "resetProfitTracking",
       });
-    } else if (onWin === 0) {
-      // Won - check if onWin is 0% to reset to original amount
-      currentBetAmount = originalBetAmount;
-      console.log(`WON: ${oldAmount} -> ${currentBetAmount} (reset to original)`);
     } else {
-      // Won - adjust by onWin % (typically negative to decrease bet)
-      currentBetAmount = adjustBetAmount(currentBetAmount, -Math.abs(onWin));
-      console.log(`WON: ${oldAmount} -> ${currentBetAmount} (${onWin}% decrease)`);
+      // Won - apply OnWin sign directly (+ increase, - decrease)
+      currentBetAmount = adjustBetAmount(currentBetAmount, onWin);
+      console.log(`WON: ${oldAmount} -> ${currentBetAmount} (${onWin}% adjust)`);
     }
   } else {
     // Lost - subtract loss from total profit
@@ -562,9 +558,9 @@ function adjustBetAmountBasedOnResult(crash) {
     superTotalBets++;
     console.log(`Loss this round: ${loss}, Total profit: ${totalProfit.toFixed(2)}`);
 
-    // Lost - adjust by onLoss % (typically positive to increase bet)
-    currentBetAmount = adjustBetAmount(currentBetAmount, Math.abs(onLoss));
-    console.log(`LOST: ${oldAmount} -> ${currentBetAmount} (${onLoss}% increase)`);
+    // Lost - apply OnLoss sign directly (+ increase, - decrease)
+    currentBetAmount = adjustBetAmount(currentBetAmount, onLoss);
+    console.log(`LOST: ${oldAmount} -> ${currentBetAmount} (${onLoss}% adjust)`);
   }
 
   // Check if reset threshold is exceeded

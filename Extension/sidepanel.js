@@ -17,13 +17,34 @@ let maxSubSessionLoss = 0;
 let decimalPlacesCount = 0;
 let currentCurrency = '$';
 
+function isCrashGameUrl(url) {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.pathname.includes("/casino/games/crash") || parsed.pathname.endsWith("/crash");
+  } catch {
+    return false;
+  }
+}
+
+function buildCrashGameUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.origin}/casino/games/crash`;
+  } catch {
+    return null;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Auto-navigate to crash game when sidepanel opens
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const currentTab = tabs[0];
-    if (currentTab && !currentTab.url.includes('stake.bet/casino/games/crash')) {
+    if (currentTab && !isCrashGameUrl(currentTab.url)) {
+      const crashUrl = buildCrashGameUrl(currentTab.url);
+      if (!crashUrl) return;
       chrome.tabs.update(currentTab.id, {
-        url: 'https://stake.bet/casino/games/crash'
+        url: crashUrl
       });
     }
   });
@@ -671,8 +692,8 @@ function showScreenshotFallback() {
   csvContent += 'CURRENT SETTINGS\n';
   csvContent += `Bet Amount,${document.getElementById('betAmount')?.value || 'Not Set'}\n`;
   csvContent += `Cashout At,${document.getElementById('cashoutAt')?.value || 'Not Set'}x\n`;
-  csvContent += `On Loss Increase,${document.getElementById('onLoss')?.value || 'Not Set'}%\n`;
-  csvContent += `On Win Decrease,${document.getElementById('onWin')?.value || 'Not Set'}%\n`;
+  csvContent += `On Loss %,${document.getElementById('onLoss')?.value || 'Not Set'}%\n`;
+  csvContent += `On Win %,${document.getElementById('onWin')?.value || 'Not Set'}%\n`;
   csvContent += `Stop After Crash At,${document.getElementById('crashAt')?.value || 'Not Set'}x\n`;
   csvContent += `Stop After Times,${document.getElementById('crashTimes')?.value || 'Not Set'}\n`;
   csvContent += `Resume At Crash,${document.getElementById('resumeAt')?.value || 'Not Set'}x\n`;

@@ -97,11 +97,11 @@
         <div class="form-row">
           <div class="form-half">
             <label>On Loss (%)</label>
-            <input type="number" id="onLoss" step="0.01" min="-100" max="500" placeholder="50.00" required />
+            <input type="number" id="onLoss" step="0.01" min="-100" max="500" placeholder="35.00" required />
           </div>
           <div class="form-half">
             <label>On Win (%)</label>
-            <input type="number" id="onWin" step="0.01" min="-100" max="100" placeholder="25.00" required />
+            <input type="number" id="onWin" step="0.01" min="-100" max="500" placeholder="-25.00" required />
           </div>
         </div>
         
@@ -239,8 +239,10 @@
           <div class="help-text">
             <p><strong>Bet Amount:</strong> Initial betting amount</p>
             <p><strong>Cashout At:</strong> Target multiplier to cash out (e.g., 2.5x)</p>
-            <p><strong>On Loss (%):</strong> Increase bet by this % after loss (e.g., 30%)</p>
-            <p><strong>On Win (%):</strong> Decrease bet by this % after win (e.g., -25%)</p>
+            <p><strong>On Loss (%):</strong> Applied directly after loss</p>
+            <p><strong>• +30:</strong> Increase next bet by 30% | <strong>• -30:</strong> Decrease next bet by 30%</p>
+            <p><strong>On Win (%):</strong> Applied directly after win</p>
+            <p><strong>• -25:</strong> Decrease next bet by 25% | <strong>• +25:</strong> Increase next bet by 25%</p>
           </div>
         </div>
       </div>
@@ -303,7 +305,7 @@
         </div>
         <div class="panel-content collapsed" id="notesContent">
           <div class="help-text">
-            <p><strong>•</strong> Only works on stake.bet crash game page</p>
+            <p><strong>•</strong> Works on supported crash game domains/pages</p>
             <p><strong>•</strong> Green dot = Connected, Red dot = Disconnected</p>
             <p><strong>•</strong> Set values to 0 to disable specific rules</p>
             <p><strong>•</strong> Always test with small amounts first</p>
