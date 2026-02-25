@@ -58,6 +58,7 @@
     <div class="tab-container">
       <button class="tab-btn active" id="settingsTab">⚙️ Settings</button>
       <button class="tab-btn" id="historyTab">📊 History</button>
+      <button class="tab-btn" id="crashTab">📈 Deep Analyze</button>
       <button class="tab-btn" id="helpTab">❓ Help</button>
     </div>
 
@@ -241,6 +242,46 @@
       </div>
     </div>
 
+    <!-- Deep Analyze Tab Content -->
+    <div id="crashContent" class="tab-content">
+      <div class="profit-summary">
+        <h4>📈 Deep Crash Analysis</h4>
+        <div class="cycle-info">
+          <div class="cycle-stat">
+            <span class="cycle-label">Total Crashes:</span>
+            <span id="crashTotalCount" class="cycle-value">0</span>
+          </div>
+          <div class="cycle-stat">
+            <span class="cycle-label">Average:</span>
+            <span id="crashAverage" class="cycle-value">0.00x</span>
+          </div>
+        </div>
+        <div class="profit-stats">
+          <span class="profit-label">Min: <span id="crashMin">0.00x</span></span>
+          <span class="loss-label">Max: <span id="crashMax">0.00x</span></span>
+          <span class="net-label">Trend: <span id="crashTrend">Flat</span></span>
+        </div>
+      </div>
+
+      <div class="history-section">
+        <div class="history-header">
+          <h4>🔥 Crash Heat Map</h4>
+        </div>
+        <div class="graph-container">
+          <canvas id="crashHeatMap" width="260" height="120"></canvas>
+        </div>
+      </div>
+
+      <div class="history-section">
+        <div class="history-header">
+          <h4>📉 Crash Trend</h4>
+        </div>
+        <div class="graph-container">
+          <canvas id="crashTrendChart" width="260" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+
     <!-- Help Tab Content -->
     <div id="helpContent" class="tab-content">
       <div class="help-section">
@@ -357,6 +398,7 @@
             <p><strong>•</strong> Works on supported crash game domains/pages</p>
             <p><strong>•</strong> Green dot = Connected, Red dot = Disconnected</p>
             <p><strong>•</strong> Set values to 0 to disable specific rules</p>
+            <p><strong>•</strong> Deep Analyze tracks full crash stream and does not reset on sub-session resets</p>
             <p><strong>•</strong> Always test with small amounts first</p>
             <p><strong>•</strong> Gambling involves risk - bet responsibly</p>
           </div>

@@ -24,7 +24,10 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*/*/crash"],
+      "matches": [
+        "https://stake.ac/casino/games/crash*",
+        "https://stake.bet/casino/games/crash*"
+      ],
       "js": ["content.js"]
     }
   ]

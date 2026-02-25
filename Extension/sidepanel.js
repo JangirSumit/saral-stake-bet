@@ -16,12 +16,16 @@ let superTotalBets = 0;
 let maxSubSessionLoss = 0;
 let decimalPlacesCount = 0;
 let currentCurrency = '$';
+let crashAnalysisHistory = [];
+let crashHeatCanvas, crashHeatCtx;
+let crashTrendCanvas, crashTrendCtx;
 
 function isCrashGameUrl(url) {
   if (!url) return false;
   try {
     const parsed = new URL(url);
-    return parsed.pathname.includes("/casino/games/crash") || parsed.pathname.endsWith("/crash");
+    const allowedHosts = new Set(["stake.ac", "stake.bet"]);
+    return allowedHosts.has(parsed.hostname) && parsed.pathname.includes("/casino/games/crash");
   } catch {
     return false;
   }
@@ -30,9 +34,13 @@ function isCrashGameUrl(url) {
 function buildCrashGameUrl(url) {
   try {
     const parsed = new URL(url);
+    const allowedHosts = new Set(["stake.ac", "stake.bet"]);
+    if (!allowedHosts.has(parsed.hostname)) {
+      return "https://stake.ac/casino/games/crash";
+    }
     return `${parsed.origin}/casino/games/crash`;
   } catch {
-    return null;
+    return "https://stake.ac/casino/games/crash";
   }
 }
 
@@ -42,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentTab = tabs[0];
     if (currentTab && !isCrashGameUrl(currentTab.url)) {
       const crashUrl = buildCrashGameUrl(currentTab.url);
-      if (!crashUrl) return;
       chrome.tabs.update(currentTab.id, {
         url: crashUrl
       });
@@ -78,10 +85,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize canvas and context
   canvas = document.getElementById('profitChart');
   ctx = canvas.getContext('2d');
+  crashHeatCanvas = document.getElementById('crashHeatMap');
+  crashHeatCtx = crashHeatCanvas ? crashHeatCanvas.getContext('2d') : null;
+  crashTrendCanvas = document.getElementById('crashTrendChart');
+  crashTrendCtx = crashTrendCanvas ? crashTrendCanvas.getContext('2d') : null;
 
   // Tab switching functionality
   document.getElementById("settingsTab").addEventListener("click", () => switchTab("settings"));
   document.getElementById("historyTab").addEventListener("click", () => switchTab("history"));
+  document.getElementById("crashTab").addEventListener("click", () => switchTab("crash"));
   document.getElementById("helpTab").addEventListener("click", () => switchTab("help"));
   
   // Help panel toggle functionality
@@ -581,6 +593,117 @@ function addHistoryItem(data) {
   while (historyList.children.length > 50) {
     historyList.removeChild(historyList.lastChild);
   }
+
+  updateCrashAnalysis(data.crashValue);
+}
+
+function updateCrashAnalysis(crashValue) {
+  const crash = parseFloat(crashValue);
+  if (Number.isNaN(crash) || crash <= 0) return;
+
+  crashAnalysisHistory.push(crash);
+  if (crashAnalysisHistory.length > 10000) {
+    crashAnalysisHistory = crashAnalysisHistory.slice(-10000);
+  }
+
+  const total = crashAnalysisHistory.length;
+  const avg = crashAnalysisHistory.reduce((a, b) => a + b, 0) / total;
+  const min = Math.min(...crashAnalysisHistory);
+  const max = Math.max(...crashAnalysisHistory);
+
+  const recent = crashAnalysisHistory.slice(-20);
+  const previous = crashAnalysisHistory.slice(-40, -20);
+  let trend = "Flat";
+  if (recent.length >= 5 && previous.length >= 5) {
+    const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+    const prevAvg = previous.reduce((a, b) => a + b, 0) / previous.length;
+    if (recentAvg > prevAvg * 1.05) trend = "Up";
+    else if (recentAvg < prevAvg * 0.95) trend = "Down";
+  }
+
+  const totalEl = document.getElementById("crashTotalCount");
+  const avgEl = document.getElementById("crashAverage");
+  const minEl = document.getElementById("crashMin");
+  const maxEl = document.getElementById("crashMax");
+  const trendEl = document.getElementById("crashTrend");
+  if (totalEl) totalEl.textContent = String(total);
+  if (avgEl) avgEl.textContent = `${avg.toFixed(2)}x`;
+  if (minEl) minEl.textContent = `${min.toFixed(2)}x`;
+  if (maxEl) maxEl.textContent = `${max.toFixed(2)}x`;
+  if (trendEl) trendEl.textContent = trend;
+
+  renderCrashHeatMap();
+  renderCrashTrend();
+}
+
+function renderCrashHeatMap() {
+  if (!crashHeatCtx || !crashHeatCanvas) return;
+  crashHeatCtx.clearRect(0, 0, crashHeatCanvas.width, crashHeatCanvas.height);
+  if (crashAnalysisHistory.length === 0) return;
+
+  const buckets = [
+    { label: "<1.2", count: 0, min: 0, max: 1.2 },
+    { label: "1.2-1.5", count: 0, min: 1.2, max: 1.5 },
+    { label: "1.5-2", count: 0, min: 1.5, max: 2.0 },
+    { label: "2-3", count: 0, min: 2.0, max: 3.0 },
+    { label: "3-5", count: 0, min: 3.0, max: 5.0 },
+    { label: "5-10", count: 0, min: 5.0, max: 10.0 },
+    { label: "10+", count: 0, min: 10.0, max: Number.POSITIVE_INFINITY },
+  ];
+
+  crashAnalysisHistory.forEach((value) => {
+    const bucket = buckets.find((b) => value >= b.min && value < b.max);
+    if (bucket) bucket.count++;
+  });
+
+  const maxCount = Math.max(...buckets.map((b) => b.count), 1);
+  const boxWidth = Math.floor(crashHeatCanvas.width / buckets.length);
+
+  buckets.forEach((bucket, index) => {
+    const intensity = bucket.count / maxCount;
+    const red = Math.floor(239 - intensity * 120);
+    const green = Math.floor(68 + intensity * 120);
+    const blue = 68;
+    crashHeatCtx.fillStyle = `rgb(${red},${green},${blue})`;
+    crashHeatCtx.fillRect(index * boxWidth + 2, 18, boxWidth - 4, 55);
+
+    crashHeatCtx.fillStyle = "#e5e7eb";
+    crashHeatCtx.font = "10px Arial";
+    crashHeatCtx.textAlign = "center";
+    crashHeatCtx.fillText(bucket.label, index * boxWidth + boxWidth / 2, 88);
+    crashHeatCtx.fillText(String(bucket.count), index * boxWidth + boxWidth / 2, 50);
+  });
+}
+
+function renderCrashTrend() {
+  if (!crashTrendCtx || !crashTrendCanvas) return;
+  crashTrendCtx.clearRect(0, 0, crashTrendCanvas.width, crashTrendCanvas.height);
+  if (crashAnalysisHistory.length < 2) return;
+
+  const series = crashAnalysisHistory.slice(-100);
+  const width = crashTrendCanvas.width;
+  const height = crashTrendCanvas.height;
+  const maxVal = Math.max(...series);
+  const minVal = Math.min(...series);
+  const range = Math.max(maxVal - minVal, 0.1);
+
+  crashTrendCtx.strokeStyle = "#22c55e";
+  crashTrendCtx.lineWidth = 2;
+  crashTrendCtx.beginPath();
+  series.forEach((value, i) => {
+    const x = (i / (series.length - 1)) * (width - 10) + 5;
+    const y = height - ((value - minVal) / range) * (height - 20) - 10;
+    if (i === 0) crashTrendCtx.moveTo(x, y);
+    else crashTrendCtx.lineTo(x, y);
+  });
+  crashTrendCtx.stroke();
+
+  crashTrendCtx.strokeStyle = "#6b7280";
+  crashTrendCtx.lineWidth = 1;
+  crashTrendCtx.beginPath();
+  crashTrendCtx.moveTo(5, height - 10);
+  crashTrendCtx.lineTo(width - 5, height - 10);
+  crashTrendCtx.stroke();
 }
 
 function updateProfitGraph() {

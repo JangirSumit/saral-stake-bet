@@ -2,7 +2,8 @@ function isCrashGameUrl(url) {
   if (!url) return false;
   try {
     const parsed = new URL(url);
-    return parsed.pathname.includes("/casino/games/crash") || parsed.pathname.endsWith("/crash");
+    const allowedHosts = new Set(["stake.ac", "stake.bet"]);
+    return allowedHosts.has(parsed.hostname) && parsed.pathname.includes("/casino/games/crash");
   } catch {
     return false;
   }
@@ -11,9 +12,13 @@ function isCrashGameUrl(url) {
 function buildCrashGameUrl(url) {
   try {
     const parsed = new URL(url);
+    const allowedHosts = new Set(["stake.ac", "stake.bet"]);
+    if (!allowedHosts.has(parsed.hostname)) {
+      return "https://stake.ac/casino/games/crash";
+    }
     return `${parsed.origin}/casino/games/crash`;
   } catch {
-    return null;
+    return "https://stake.ac/casino/games/crash";
   }
 }
 
@@ -21,10 +26,6 @@ chrome.action.onClicked.addListener((tab) => {
   // Navigate to crash game if not already there
   if (!isCrashGameUrl(tab.url)) {
     const crashUrl = buildCrashGameUrl(tab.url);
-    if (!crashUrl) {
-      chrome.sidePanel.open({ windowId: tab.windowId });
-      return;
-    }
     chrome.tabs.update(tab.id, {
       url: crashUrl
     }, () => {
