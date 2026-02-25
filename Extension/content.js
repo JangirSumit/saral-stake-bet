@@ -332,9 +332,11 @@ function addCrashToHistory(crashValue) {
   const crash = parseFloat(crashValue);
   crashHistory.unshift(crash);
 
-  // Keep only latest 50 crashes to prevent UI performance issues
-  if (crashHistory.length > 10) {
-    crashHistory = crashHistory.slice(0, 10);
+  // Keep enough history for window-based resume rules
+  const dynamicWindow = parseInt(betConfig.resumeLastCrashes) || 0;
+  const maxHistoryLength = Math.max(10, dynamicWindow);
+  if (crashHistory.length > maxHistoryLength) {
+    crashHistory = crashHistory.slice(0, maxHistoryLength);
   }
 
   // Ignore the first crash after starting auto betting
@@ -441,7 +443,40 @@ function checkResumeLogic(crash) {
 
       }
     }
+
+    if (checkResumeWindowRule()) {
+      return true;
+    }
   }
+  return false;
+}
+
+function checkResumeWindowRule() {
+  const x = parseInt(betConfig.resumeLastCrashes) || 0;
+  const y = parseFloat(betConfig.resumeAtValue) || 0;
+  const z = parseInt(betConfig.resumeAtTimes) || 0;
+
+  if (x <= 0 || y === 0 || z <= 0) {
+    return false;
+  }
+
+  const recent = crashHistory.slice(0, x);
+  if (recent.length < x) {
+    return false;
+  }
+
+  const threshold = Math.abs(y);
+  const count = recent.filter((value) =>
+    y > 0 ? value > threshold : value < threshold
+  ).length;
+
+  if (count >= z) {
+    const operator = y > 0 ? ">" : "<";
+    console.log(`RESUME WINDOW: Last ${x} crashes, ${count} ${operator} ${threshold}, need ${z}`);
+    resumeBetting();
+    return true;
+  }
+
   return false;
 }
 
@@ -873,6 +908,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeAdjust,
       resumeBelowAt,
       resumeBelowTimes,
+      resumeLastCrashes,
+      resumeAtValue,
+      resumeAtTimes,
       resetThreshold,
       profitTimes,
       lossResetAmount,
@@ -893,6 +931,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeAdjust: parseFloat(resumeAdjust) || 0,
       resumeBelowAt: parseFloat(resumeBelowAt) || 0,
       resumeBelowTimes: parseInt(resumeBelowTimes) || 0,
+      resumeLastCrashes: parseInt(resumeLastCrashes) || 0,
+      resumeAtValue: parseFloat(resumeAtValue) || 0,
+      resumeAtTimes: parseInt(resumeAtTimes) || 0,
       resetThreshold: parseFloat(resetThreshold) || 0,
       profitTimes: parseFloat(profitTimes) || 0,
       lossResetAmount: parseFloat(lossResetAmount) || 0,

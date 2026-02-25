@@ -1,0 +1,83 @@
+BETTING SESSION REPORT
+Session Started,14/02/2026, 20:23:13
+Report Downloaded,15/02/2026, 17:40:32
+
+SESSION SUMMARY
+Session Time,21:17:18
+Wallet Balance,Balance: $0.00
+Total Profit,$1199.55
+Total Loss,$841.41
+Net Profit/Loss,$358.14
+Max Loss Reached,$143.66
+Total Bets Placed,433
+Sub-Session Resets,0
+
+CURRENT SETTINGS
+Bet Amount,2
+Cashout At,1.6x
+On Loss Increase,160%
+On Win Decrease,0%
+Stop After Crash At,2x
+Stop After Times,3
+Resume At Crash,0x
+Resume Bet Adjust,160%
+Reset Threshold,-40%
+Profit Reset Times,3
+Wallet Stop Loss,0%
+Decimal Places,2
+
+SUB-SESSION RESETS
+Total Resets,0
+
+BETTING HISTORY
+Time,Status,Crash Value,Bet Amount,Cashout Target,Profit/Loss,Details
+17:40:15,Skipped,1.22x,,,0.00,"No bet placed"
+17:40:00,Skipped,1.01x,,,0.00,"No bet placed"
+17:39:48,Skipped,1.18x,,,0.00,"No bet placed"
+17:39:33,Skipped,9.91x,,,0.00,"No bet placed"
+17:38:43,Skipped,1.18x,,,0.00,"No bet placed"
+17:38:30,Skipped,1.36x,,,0.00,"No bet placed"
+17:38:12,Skipped,3.07x,,,0.00,"No bet placed"
+17:37:42,Skipped,1.48x,,,0.00,"No bet placed"
+17:37:23,Skipped,2.58x,,,0.00,"No bet placed"
+17:36:56,Skipped,26.53x,,,0.00,"No bet placed"
+17:35:50,Skipped,3.49x,,,0.00,"No bet placed"
+17:35:17,Skipped,30.70x,,,0.00,"No bet placed"
+17:34:08,Skipped,3.54x,,,0.00,"No bet placed"
+17:33:35,Skipped,10.03x,,,0.00,"No bet placed"
+17:32:46,Skipped,1.65x,,,0.00,"No bet placed"
+17:32:25,Skipped,24.15x,,,0.00,"No bet placed"
+17:31:20,Skipped,1.06x,,,0.00,"No bet placed"
+17:31:07,Skipped,3.16x,,,0.00,"No bet placed"
+17:30:36,Skipped,1.33x,,,0.00,"No bet placed"
+17:30:19,Skipped,1.06x,,,0.00,"No bet placed"
+17:30:07,Skipped,77.43x,,,0.00,"No bet placed"
+17:28:42,Skipped,3.95x,,,0.00,"No bet placed"
+17:28:08,Skipped,7.87x,,,0.00,"No bet placed"
+17:27:22,Skipped,8.35x,,,0.00,"No bet placed"
+17:26:35,Skipped,3.34x,,,0.00,"No bet placed"
+17:26:03,Skipped,4.65x,,,0.00,"No bet placed"
+17:25:26,Skipped,6.81x,,,0.00,"No bet placed"
+17:24:42,Skipped,1.94x,,,0.00,"No bet placed"
+17:24:19,Skipped,1.29x,,,0.00,"No bet placed"
+17:24:03,Skipped,1.49x,,,0.00,"No bet placed"
+17:23:45,Skipped,1.64x,,,0.00,"No bet placed"
+17:23:25,Skipped,1.02x,,,0.00,"No bet placed"
+17:23:13,Skipped,2.88x,,,0.00,"No bet placed"
+17:22:43,Skipped,39.12x,,,0.00,"No bet placed"
+17:21:30,Skipped,1.21x,,,0.00,"No bet placed"
+17:21:15,Skipped,2.35x,,,0.00,"No bet placed"
+17:20:49,Skipped,3.19x,,,0.00,"No bet placed"
+17:20:18,Skipped,1.61x,,,0.00,"No bet placed"
+17:19:59,Skipped,26.29x,,,0.00,"No bet placed"
+17:18:52,Skipped,1.01x,,,0.00,"No bet placed"
+17:18:40,Skipped,1.18x,,,0.00,"No bet placed"
+17:18:25,Skipped,10.09x,,,0.00,"No bet placed"
+17:17:35,Skipped,1.71x,,,0.00,"No bet placed"
+17:17:15,Skipped,1.52x,,,0.00,"No bet placed"
+17:16:56,Skipped,1.24x,,,0.00,"No bet placed"
+17:16:40,Skipped,2.47x,,,0.00,"No bet placed"
+17:16:14,Skipped,5.72x,,,0.00,"No bet placed"
+17:15:33,Skipped,39.26x,,,0.00,"No bet placed"
+17:14:20,Skipped,1.80x,,,0.00,"No bet placed"
+17:13:59,Skipped,1.58x,,,0.00,"No bet placed"

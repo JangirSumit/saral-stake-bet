@@ -138,6 +138,22 @@
             <input type="number" id="resumeBelowTimes" step="1" min="0" max="100" placeholder="0" />
           </div>
         </div>
+        <div class="form-row">
+          <div class="form-half">
+            <label>Last Crashes Window</label>
+            <input type="number" id="resumeLastCrashes" step="1" min="0" max="1000" placeholder="0" />
+          </div>
+          <div class="form-half">
+            <label>Threshold</label>
+            <input type="number" id="resumeAtValue" step="0.01" min="-100" max="100" placeholder="0.00" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-full">
+            <label>Required Matches</label>
+            <input type="number" id="resumeAtTimes" step="1" min="0" max="1000" placeholder="0" />
+          </div>
+        </div>
         
         <h4>🔄 Reset Rules</h4>
         <div class="form-row">
@@ -289,6 +305,11 @@
             <p><strong>• Negative value:</strong> Resume when crashes > |value| (e.g., -3.0)</p>
             <p><strong>Below Times:</strong> Number of consecutive crashes meeting condition</p>
             <p><em>Examples: +1.5 = resume after 3 crashes < 1.5x, -3.0 = resume after 3 crashes > 3.0x</em></p>
+            <p><strong>Ignore Rule with 0:</strong> Resume At = 0 disables this rule; Resume Below At = 0 or Below Times = 0 disables that rule</p>
+            <p><strong>Last Crashes Window + Threshold + Required Matches:</strong> Non-consecutive window-based resume rule</p>
+            <p><strong>• Threshold positive:</strong> Count crashes &gt; threshold in last window</p>
+            <p><strong>• Threshold negative:</strong> Count crashes &lt; |threshold| in last window</p>
+            <p><strong>Resume:</strong> When match count reaches Required Matches (0 = disabled)</p>
             <p><strong>Reset Threshold:</strong> Reset to original bet if change exceeds % (0 = disabled)</p>
             <p><strong>Profit Reset:</strong> Reset bet after profit reaches X times original (0 = disabled)</p>
             <p><strong>Loss Reset:</strong> Reset sub-session when loss reaches amount (0 = disabled)</p>

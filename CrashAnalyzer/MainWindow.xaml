@@ -111,6 +111,26 @@
                                 <TextBox Name="txtResumeBelowTimes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                <TextBlock Text="Last Crashes Window" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtResumeLastCrashes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="4,0,4,0">
+                                <TextBlock Text="Threshold" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtResumeAtValue" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="4,0,0,0">
+                                <TextBlock Text="Required Matches" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtResumeAtTimes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                     
                     <!-- Reset Rules -->

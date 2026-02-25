@@ -58,6 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const resumeAdjust = document.getElementById("resumeAdjust");
   const resumeBelowAt = document.getElementById("resumeBelowAt");
   const resumeBelowTimes = document.getElementById("resumeBelowTimes");
+  const resumeLastCrashes = document.getElementById("resumeLastCrashes");
+  const resumeAtValue = document.getElementById("resumeAtValue");
+  const resumeAtTimes = document.getElementById("resumeAtTimes");
   const resetThreshold = document.getElementById("resetThreshold");
   const profitTimes = document.getElementById("profitTimes");
   const lossResetAmount = document.getElementById("lossResetAmount");
@@ -106,10 +109,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.win) onWin.value = data.win;
       if (data.stopCrashAt) crashAt.value = data.stopCrashAt;
       if (data.stopCrashTimes) crashTimes.value = data.stopCrashTimes;
-      if (data.resumeAt) resumeAt.value = data.resumeAt;
-      if (data.resumeAdjust) resumeAdjust.value = data.resumeAdjust;
-      if (data.resumeBelowAt) resumeBelowAt.value = data.resumeBelowAt;
-      if (data.resumeBelowTimes) resumeBelowTimes.value = data.resumeBelowTimes;
+      if (data.resumeAt !== undefined) resumeAt.value = data.resumeAt;
+      if (data.resumeAdjust !== undefined) resumeAdjust.value = data.resumeAdjust;
+      if (data.resumeBelowAt !== undefined) resumeBelowAt.value = data.resumeBelowAt;
+      if (data.resumeBelowTimes !== undefined) resumeBelowTimes.value = data.resumeBelowTimes;
+      if (data.resumeLastCrashes !== undefined) resumeLastCrashes.value = data.resumeLastCrashes;
+      if (data.resumeAtValue !== undefined) resumeAtValue.value = data.resumeAtValue;
+      if (data.resumeAtTimes !== undefined) resumeAtTimes.value = data.resumeAtTimes;
       if (data.resetThreshold) resetThreshold.value = data.resetThreshold;
       if (data.profitTimes) profitTimes.value = data.profitTimes;
       if (data.lossResetAmount) lossResetAmount.value = data.lossResetAmount;
@@ -209,6 +215,9 @@ document.addEventListener("DOMContentLoaded", () => {
         resumeAdjust: resumeAdjust.value,
         resumeBelowAt: resumeBelowAt.value,
         resumeBelowTimes: resumeBelowTimes.value,
+        resumeLastCrashes: resumeLastCrashes.value,
+        resumeAtValue: resumeAtValue.value,
+        resumeAtTimes: resumeAtTimes.value,
         resetThreshold: resetThreshold.value,
         profitTimes: profitTimes.value,
         lossResetAmount: lossResetAmount.value,
@@ -725,6 +734,9 @@ function showScreenshotFallback() {
   csvContent += `Stop After Times,${document.getElementById('crashTimes')?.value || 'Not Set'}\n`;
   csvContent += `Resume At Crash,${document.getElementById('resumeAt')?.value || 'Not Set'}x\n`;
   csvContent += `Resume Bet Adjust,${document.getElementById('resumeAdjust')?.value || 'Not Set'}%\n`;
+  csvContent += `Resume Last Crashes Window,${document.getElementById('resumeLastCrashes')?.value || 'Not Set'}\n`;
+  csvContent += `Resume Threshold,${document.getElementById('resumeAtValue')?.value || 'Not Set'}\n`;
+  csvContent += `Resume Required Matches,${document.getElementById('resumeAtTimes')?.value || 'Not Set'}\n`;
   csvContent += `Reset Threshold,${document.getElementById('resetThreshold')?.value || 'Not Set'}%\n`;
   csvContent += `Profit Reset Times,${document.getElementById('profitTimes')?.value || 'Not Set'}\n`;
   csvContent += `Complete Stop On Profit Amount,${document.getElementById('stopOnProfitAmount')?.value || 'Not Set'}\n`;

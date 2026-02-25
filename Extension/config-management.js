@@ -126,6 +126,9 @@ function getCurrentConfig() {
     ResumeAdjust: parseFloat(document.getElementById('resumeAdjust').value) || 0,
     ResumeBelowAt: parseFloat(document.getElementById('resumeBelowAt').value) || 0,
     ResumeBelowTimes: parseInt(document.getElementById('resumeBelowTimes').value) || 0,
+    ResumeLastCrashes: parseInt(document.getElementById('resumeLastCrashes').value) || 0,
+    ResumeAtValue: parseFloat(document.getElementById('resumeAtValue').value) || 0,
+    ResumeAtTimes: parseInt(document.getElementById('resumeAtTimes').value) || 0,
     ResetThreshold: parseFloat(document.getElementById('resetThreshold').value) || 0,
     ProfitTimes: parseInt(document.getElementById('profitTimes').value) || 0,
     LossResetAmount: parseFloat(document.getElementById('lossResetAmount').value) || 0,
@@ -143,10 +146,13 @@ function loadConfigToForm(config, configName = null) {
   document.getElementById('onWin').value = config.OnWin || config.onWin || '';
   document.getElementById('crashAt').value = config.CrashAt || config.crashAt || '';
   document.getElementById('crashTimes').value = config.CrashTimes || config.crashTimes || '';
-  document.getElementById('resumeAt').value = config.ResumeAt || config.resumeAt || '';
-  document.getElementById('resumeAdjust').value = config.ResumeAdjust || config.resumeAdjust || '';
-  document.getElementById('resumeBelowAt').value = config.ResumeBelowAt || config.resumeBelowAt || '';
-  document.getElementById('resumeBelowTimes').value = config.ResumeBelowTimes || config.resumeBelowTimes || '';
+  document.getElementById('resumeAt').value = config.ResumeAt ?? config.resumeAt ?? '';
+  document.getElementById('resumeAdjust').value = config.ResumeAdjust ?? config.resumeAdjust ?? '';
+  document.getElementById('resumeBelowAt').value = config.ResumeBelowAt ?? config.resumeBelowAt ?? '';
+  document.getElementById('resumeBelowTimes').value = config.ResumeBelowTimes ?? config.resumeBelowTimes ?? '';
+  document.getElementById('resumeLastCrashes').value = config.ResumeLastCrashes ?? config.resumeLastCrashes ?? '';
+  document.getElementById('resumeAtValue').value = config.ResumeAtValue ?? config.resumeAtValue ?? '';
+  document.getElementById('resumeAtTimes').value = config.ResumeAtTimes ?? config.resumeAtTimes ?? '';
   document.getElementById('resetThreshold').value = config.ResetThreshold || config.resetThreshold || '';
   document.getElementById('profitTimes').value = config.ProfitTimes || config.profitTimes || '';
   document.getElementById('lossResetAmount').value = config.LossResetAmount || config.lossResetAmount || '';

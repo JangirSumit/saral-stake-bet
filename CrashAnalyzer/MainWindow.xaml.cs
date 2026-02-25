@@ -35,6 +35,9 @@ namespace CrashAnalyzer
             txtResumeAdjust.Text = "35";
             txtResumeBelowAt.Text = "2.9";
             txtResumeBelowTimes.Text = "5";
+            txtResumeLastCrashes.Text = "0";
+            txtResumeAtValue.Text = "0";
+            txtResumeAtTimes.Text = "0";
             txtResetThreshold.Text = "-40";
             txtProfitTimes.Text = "3";
             txtLossResetAmount.Text = "5000";
@@ -109,6 +112,9 @@ namespace CrashAnalyzer
                     ResumeAdjust = double.Parse(txtResumeAdjust.Text),
                     ResumeBelowAt = double.Parse(txtResumeBelowAt.Text),
                     ResumeBelowTimes = int.Parse(txtResumeBelowTimes.Text),
+                    ResumeLastCrashes = int.Parse(txtResumeLastCrashes.Text),
+                    ResumeAtValue = double.Parse(txtResumeAtValue.Text),
+                    ResumeAtTimes = int.Parse(txtResumeAtTimes.Text),
                     ResetThreshold = double.Parse(txtResetThreshold.Text),
                     ProfitTimes = int.Parse(txtProfitTimes.Text),
                     LossResetAmount = double.Parse(txtLossResetAmount.Text),
@@ -482,6 +488,9 @@ namespace CrashAnalyzer
                 ResumeAdjust = double.Parse(txtResumeAdjust.Text),
                 ResumeBelowAt = double.Parse(txtResumeBelowAt.Text),
                 ResumeBelowTimes = int.Parse(txtResumeBelowTimes.Text),
+                ResumeLastCrashes = int.Parse(txtResumeLastCrashes.Text),
+                ResumeAtValue = double.Parse(txtResumeAtValue.Text),
+                ResumeAtTimes = int.Parse(txtResumeAtTimes.Text),
                 ResetThreshold = double.Parse(txtResetThreshold.Text),
                 ProfitTimes = int.Parse(txtProfitTimes.Text),
                 LossResetAmount = double.Parse(txtLossResetAmount.Text),
@@ -656,6 +665,7 @@ namespace CrashAnalyzer
         private List<BetResult> AnalyzeConfigurationDetailed(List<double> crashes, BettingConfig config)
         {
             var results = new List<BetResult>();
+            var crashHistory = new List<double>();
 
             // Initialize variables exactly like content.js
             double currentBetAmount = config.BetAmount;
@@ -671,6 +681,7 @@ namespace CrashAnalyzer
             for (int i = 0; i < crashes.Count; i++)
             {
                 var crash = crashes[i];
+                crashHistory.Add(crash);
                 var result = new BetResult 
                 { 
                     CrashValue = crash,
@@ -729,6 +740,21 @@ namespace CrashAnalyzer
                         {
                             consecutiveResumeBelowCrashes = 0;
                         }
+                    }
+
+                    if (skipBetting && CheckResumeWindowRule(crashHistory, config))
+                    {
+                        if (config.ResumeAdjust != 0)
+                        {
+                            currentBetAmount = AdjustBetAmount(lastBetAmount, config.ResumeAdjust, config.DecimalPlaces);
+                        }
+                        else
+                        {
+                            currentBetAmount = lastBetAmount;
+                        }
+                        skipBetting = false;
+                        consecutiveLowCrashes = 0;
+                        consecutiveResumeBelowCrashes = 0;
                     }
                 }
 
@@ -854,13 +880,31 @@ namespace CrashAnalyzer
             return false;
         }
 
+        private bool CheckResumeWindowRule(List<double> crashHistory, BettingConfig config)
+        {
+            if (config.ResumeLastCrashes <= 0 || config.ResumeAtValue == 0 || config.ResumeAtTimes <= 0)
+            {
+                return false;
+            }
+
+            if (crashHistory.Count < config.ResumeLastCrashes)
+            {
+                return false;
+            }
+
+            var recent = crashHistory.Skip(crashHistory.Count - config.ResumeLastCrashes);
+            double threshold = Math.Abs(config.ResumeAtValue);
+            int count = recent.Count(c => config.ResumeAtValue > 0 ? c > threshold : c < threshold);
+            return count >= config.ResumeAtTimes;
+        }
+
         private BettingConfig logFileConfig = null;
 
         private void UpdateLogSettingsDisplay()
         {
             if (logFileConfig != null)
             {
-                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | OnLoss: {logFileConfig.OnLoss}% | OnWin: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | Reset: {logFileConfig.ResetThreshold}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | Decimals: {logFileConfig.DecimalPlaces}";
+                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | OnLoss: {logFileConfig.OnLoss}% | OnWin: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | ResumeWindow: {logFileConfig.ResumeLastCrashes}@{logFileConfig.ResumeAtValue}x/{logFileConfig.ResumeAtTimes} | Reset: {logFileConfig.ResetThreshold}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | Decimals: {logFileConfig.DecimalPlaces}";
             }
             else
             {
@@ -872,7 +916,7 @@ namespace CrashAnalyzer
         {
             try
             {
-                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | OnLoss: {txtOnLoss.Text}% | OnWin: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | Reset: {txtResetThreshold.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | Decimals: {txtDecimalPlaces.Text}";
+                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | OnLoss: {txtOnLoss.Text}% | OnWin: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | ResumeWindow: {txtResumeLastCrashes.Text}@{txtResumeAtValue.Text}x/{txtResumeAtTimes.Text} | Reset: {txtResetThreshold.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | Decimals: {txtDecimalPlaces.Text}";
             }
             catch
             {
@@ -907,6 +951,9 @@ namespace CrashAnalyzer
                                 ResumeAdjust = config["resumeAdjust"].GetDouble(),
                                 ResumeBelowAt = config["resumeBelowAt"].GetDouble(),
                                 ResumeBelowTimes = config["resumeBelowTimes"].GetInt32(),
+                                ResumeLastCrashes = config.ContainsKey("resumeLastCrashes") ? config["resumeLastCrashes"].GetInt32() : 0,
+                                ResumeAtValue = config.ContainsKey("resumeAtValue") ? config["resumeAtValue"].GetDouble() : 0,
+                                ResumeAtTimes = config.ContainsKey("resumeAtTimes") ? config["resumeAtTimes"].GetInt32() : 0,
                                 ResetThreshold = config["resetThreshold"].GetDouble(),
                                 ProfitTimes = config["profitTimes"].GetInt32(),
                                 LossResetAmount = config["lossResetAmount"].GetDouble(),
@@ -940,6 +987,9 @@ namespace CrashAnalyzer
             csv.AppendLine($"Resume Adjust %,{config.ResumeAdjust}");
             csv.AppendLine($"Resume Below At,{config.ResumeBelowAt}");
             csv.AppendLine($"Resume Below Times,{config.ResumeBelowTimes}");
+            csv.AppendLine($"Resume Last Crashes Window,{config.ResumeLastCrashes}");
+            csv.AppendLine($"Resume Threshold,{config.ResumeAtValue}");
+            csv.AppendLine($"Resume Required Matches,{config.ResumeAtTimes}");
             csv.AppendLine($"Reset Threshold %,{config.ResetThreshold}");
             csv.AppendLine($"Profit Times,{config.ProfitTimes}");
             csv.AppendLine($"Loss Reset Amount,{config.LossResetAmount}");
@@ -981,6 +1031,9 @@ namespace CrashAnalyzer
                     ResumeAdjust = txtResumeAdjust.Text,
                     ResumeBelowAt = txtResumeBelowAt.Text,
                     ResumeBelowTimes = txtResumeBelowTimes.Text,
+                    ResumeLastCrashes = txtResumeLastCrashes.Text,
+                    ResumeAtValue = txtResumeAtValue.Text,
+                    ResumeAtTimes = txtResumeAtTimes.Text,
                     ResetThreshold = txtResetThreshold.Text,
                     ProfitTimes = txtProfitTimes.Text,
                     LossResetAmount = txtLossResetAmount.Text,
@@ -1008,6 +1061,9 @@ namespace CrashAnalyzer
             txtResumeAdjust.TextChanged -= OnConfigChanged;
             txtResumeBelowAt.TextChanged -= OnConfigChanged;
             txtResumeBelowTimes.TextChanged -= OnConfigChanged;
+            txtResumeLastCrashes.TextChanged -= OnConfigChanged;
+            txtResumeAtValue.TextChanged -= OnConfigChanged;
+            txtResumeAtTimes.TextChanged -= OnConfigChanged;
             txtResetThreshold.TextChanged -= OnConfigChanged;
             txtProfitTimes.TextChanged -= OnConfigChanged;
             txtLossResetAmount.TextChanged -= OnConfigChanged;
@@ -1032,6 +1088,9 @@ namespace CrashAnalyzer
                     txtResumeAdjust.Text = config["ResumeAdjust"].GetString();
                     txtResumeBelowAt.Text = config["ResumeBelowAt"].GetString();
                     txtResumeBelowTimes.Text = config["ResumeBelowTimes"].GetString();
+                    txtResumeLastCrashes.Text = GetConfigValue(config, "ResumeLastCrashes");
+                    txtResumeAtValue.Text = GetConfigValue(config, "ResumeAtValue");
+                    txtResumeAtTimes.Text = GetConfigValue(config, "ResumeAtTimes");
                     txtResetThreshold.Text = config["ResetThreshold"].GetString();
                     txtProfitTimes.Text = config["ProfitTimes"].GetString();
                     txtLossResetAmount.Text = config["LossResetAmount"].GetString();
@@ -1051,6 +1110,9 @@ namespace CrashAnalyzer
                     txtResumeAdjust.Text = "35";
                     txtResumeBelowAt.Text = "2.9";
                     txtResumeBelowTimes.Text = "5";
+                    txtResumeLastCrashes.Text = "0";
+                    txtResumeAtValue.Text = "0";
+                    txtResumeAtTimes.Text = "0";
                     txtResetThreshold.Text = "-40";
                     txtProfitTimes.Text = "3";
                     txtLossResetAmount.Text = "5000";
@@ -1071,6 +1133,9 @@ namespace CrashAnalyzer
                 txtResumeAdjust.Text = "35";
                 txtResumeBelowAt.Text = "2.9";
                 txtResumeBelowTimes.Text = "5";
+                txtResumeLastCrashes.Text = "0";
+                txtResumeAtValue.Text = "0";
+                txtResumeAtTimes.Text = "0";
                 txtResetThreshold.Text = "-40";
                 txtProfitTimes.Text = "3";
                 txtLossResetAmount.Text = "5000";
@@ -1089,6 +1154,9 @@ namespace CrashAnalyzer
             txtResumeAdjust.TextChanged += OnConfigChanged;
             txtResumeBelowAt.TextChanged += OnConfigChanged;
             txtResumeBelowTimes.TextChanged += OnConfigChanged;
+            txtResumeLastCrashes.TextChanged += OnConfigChanged;
+            txtResumeAtValue.TextChanged += OnConfigChanged;
+            txtResumeAtTimes.TextChanged += OnConfigChanged;
             txtResetThreshold.TextChanged += OnConfigChanged;
             txtProfitTimes.TextChanged += OnConfigChanged;
             txtLossResetAmount.TextChanged += OnConfigChanged;
@@ -1124,6 +1192,9 @@ namespace CrashAnalyzer
                         ResumeAdjust = txtResumeAdjust.Text,
                         ResumeBelowAt = txtResumeBelowAt.Text,
                         ResumeBelowTimes = txtResumeBelowTimes.Text,
+                        ResumeLastCrashes = txtResumeLastCrashes.Text,
+                        ResumeAtValue = txtResumeAtValue.Text,
+                        ResumeAtTimes = txtResumeAtTimes.Text,
                         ResetThreshold = txtResetThreshold.Text,
                         ProfitTimes = txtProfitTimes.Text,
                         LossResetAmount = txtLossResetAmount.Text,
@@ -1168,6 +1239,9 @@ namespace CrashAnalyzer
                     txtResumeAdjust.Text = GetConfigValue(config, "ResumeAdjust");
                     txtResumeBelowAt.Text = GetConfigValue(config, "ResumeBelowAt");
                     txtResumeBelowTimes.Text = GetConfigValue(config, "ResumeBelowTimes");
+                    txtResumeLastCrashes.Text = GetConfigValue(config, "ResumeLastCrashes");
+                    txtResumeAtValue.Text = GetConfigValue(config, "ResumeAtValue");
+                    txtResumeAtTimes.Text = GetConfigValue(config, "ResumeAtTimes");
                     txtResetThreshold.Text = GetConfigValue(config, "ResetThreshold");
                     txtProfitTimes.Text = GetConfigValue(config, "ProfitTimes");
                     txtLossResetAmount.Text = GetConfigValue(config, "LossResetAmount");
@@ -1672,6 +1746,9 @@ namespace CrashAnalyzer
         public double ResumeAdjust { get; set; }
         public double ResumeBelowAt { get; set; }
         public int ResumeBelowTimes { get; set; }
+        public int ResumeLastCrashes { get; set; }
+        public double ResumeAtValue { get; set; }
+        public int ResumeAtTimes { get; set; }
         public double ResetThreshold { get; set; }
         public int ProfitTimes { get; set; }
         public double LossResetAmount { get; set; }
