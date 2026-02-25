@@ -109,7 +109,7 @@
         <div class="form-row">
           <div class="form-half">
             <label>Crash At</label>
-            <input type="number" id="crashAt" step="0.01" min="0" max="10000" placeholder="2.90" required />
+            <input type="number" id="crashAt" step="0.01" min="-10000" max="10000" placeholder="2.90" required />
           </div>
           <div class="form-half">
             <label>Times</label>
@@ -254,10 +254,11 @@
         </div>
         <div class="panel-content collapsed" id="stopContent">
           <div class="help-text">
-            <p><strong>Crash At:</strong> Skip when consecutive crashes don't reach threshold (0 = disabled)</p>
-            <p><strong>Times:</strong> Number of consecutive low crashes to trigger skip</p>
-            <p><em>Example: Skip after 5 bet crashes < 2.9x (regardless of win/loss)</em></p>
-            <p><em>Logic: If crashes consistently stay below threshold, pause betting</em></p>
+            <p><strong>Crash At:</strong> Skip rule threshold (0 = disabled)</p>
+            <p><strong>• Positive value:</strong> Count crashes below threshold (e.g., +2.9 means crash &lt; 2.9)</p>
+            <p><strong>• Negative value:</strong> Count crashes above |threshold| (e.g., -2.9 means crash &gt; 2.9)</p>
+            <p><strong>Times:</strong> Number of consecutive crashes meeting the selected condition</p>
+            <p><em>Example: -2.9 with Times 5 = skip after 5 consecutive crashes above 2.9x</em></p>
           </div>
         </div>
       </div>

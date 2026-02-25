@@ -207,12 +207,12 @@ function betWatcher() {
 
             // Check if we should skip due to consecutive low crashes
             if (
-              betConfig.crashAt > 0 &&
+              betConfig.crashAt !== 0 &&
               betConfig.crashTimes > 0 &&
               consecutiveLowCrashes >= betConfig.crashTimes
             ) {
               skipBetting = true;
-              console.log(`SKIP: ${consecutiveLowCrashes} consecutive crashes < ${betConfig.crashAt}`);
+              console.log(`SKIP: ${consecutiveLowCrashes} consecutive crashes ${getCrashSkipConditionLabel()}`);
             }
 
             if (!skipBetting && !refreshInProgress) {
@@ -382,6 +382,26 @@ function handleStopResumeLogic(crash) {
   }
 }
 
+function isCrashSkipConditionMet(crash) {
+  if (betConfig.crashAt > 0) {
+    return crash < betConfig.crashAt;
+  }
+  if (betConfig.crashAt < 0) {
+    return crash > Math.abs(betConfig.crashAt);
+  }
+  return false;
+}
+
+function getCrashSkipConditionLabel() {
+  if (betConfig.crashAt > 0) {
+    return `< ${betConfig.crashAt}`;
+  }
+  if (betConfig.crashAt < 0) {
+    return `> ${Math.abs(betConfig.crashAt)}`;
+  }
+  return "disabled";
+}
+
 function checkResumeLogic(crash) {
   if (skipBetting) {
     // Check high crash resume (original logic)
@@ -448,18 +468,18 @@ function resumeBetting() {
 
 function checkCrashPattern(crash) {
   // Check crash pattern (all bet outcomes)
-  if (betConfig.crashAt > 0 && betConfig.crashTimes > 0) {
-    if (crash < betConfig.crashAt) {
+  if (betConfig.crashAt !== 0 && betConfig.crashTimes > 0) {
+    if (isCrashSkipConditionMet(crash)) {
       consecutiveLowCrashes++;
-      console.log(`Low crash: ${crash} < ${betConfig.crashAt}. Count: ${consecutiveLowCrashes}`);
+      console.log(`Crash matched skip condition: ${crash} ${getCrashSkipConditionLabel()}. Count: ${consecutiveLowCrashes}`);
 
       if (consecutiveLowCrashes >= betConfig.crashTimes) {
-        console.log(`SKIP TRIGGERED: ${consecutiveLowCrashes} crashes < ${betConfig.crashAt}`);
+        console.log(`SKIP TRIGGERED: ${consecutiveLowCrashes} crashes ${getCrashSkipConditionLabel()}`);
         skipBetting = true;
       }
     } else {
       consecutiveLowCrashes = 0;
-      console.log(`Crash reached threshold: ${crash} >= ${betConfig.crashAt}, reset count`);
+      console.log(`Crash failed skip condition (${getCrashSkipConditionLabel()}), reset count`);
     }
   }
 }

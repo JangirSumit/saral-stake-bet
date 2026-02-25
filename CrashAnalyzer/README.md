@@ -56,8 +56,8 @@ Create a JSON file with betting configurations:
 - **CashoutAt**: Target multiplier to cash out
 - **OnLoss**: Percentage to increase bet after loss
 - **OnWin**: Percentage to decrease bet after win (negative value)
-- **CrashAt**: Threshold for consecutive low crashes
-- **CrashTimes**: Number of consecutive low crashes before skipping
+- **CrashAt**: Skip threshold; positive = count crashes below threshold, negative = count crashes above absolute threshold
+- **CrashTimes**: Number of consecutive crashes meeting CrashAt condition before skipping
 - **ResumeAt**: Crash value to resume betting after skipping
 
 ## Log File Format

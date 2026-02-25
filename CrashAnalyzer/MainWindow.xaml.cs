@@ -805,9 +805,9 @@ namespace CrashAnalyzer
                 }
 
                 // Step 3: Process crash patterns AFTER bet result (matches checkCrashPattern)
-                if (currentBetExists && config.CrashAt > 0 && config.CrashTimes > 0)
+                if (currentBetExists && config.CrashAt != 0 && config.CrashTimes > 0)
                 {
-                    if (crash < config.CrashAt)
+                    if (IsCrashSkipConditionMet(crash, config.CrashAt))
                     {
                         consecutiveLowCrashes++;
                         if (consecutiveLowCrashes >= config.CrashTimes)
@@ -837,6 +837,21 @@ namespace CrashAnalyzer
             double multiplier = 1 + percent / 100.0;
             double adjustedAmount = amount * multiplier;
             return Math.Round(adjustedAmount, decimalPlaces);
+        }
+
+        private bool IsCrashSkipConditionMet(double crash, double crashAt)
+        {
+            if (crashAt > 0)
+            {
+                return crash < crashAt;
+            }
+
+            if (crashAt < 0)
+            {
+                return crash > Math.Abs(crashAt);
+            }
+
+            return false;
         }
 
         private BettingConfig logFileConfig = null;
