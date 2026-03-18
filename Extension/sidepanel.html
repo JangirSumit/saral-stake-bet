@@ -140,18 +140,16 @@
           </div>
         </div>
         <div class="form-row">
-          <div class="form-half">
-            <label>Last Crashes Window</label>
+          <div class="form-third">
+            <label>Last Crashes</label>
             <input type="number" id="resumeLastCrashes" step="1" min="0" max="1000" placeholder="0" />
           </div>
-          <div class="form-half">
+          <div class="form-third">
             <label>Threshold</label>
             <input type="number" id="resumeAtValue" step="0.01" min="-100" max="100" placeholder="0.00" />
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-full">
-            <label>Required Matches</label>
+          <div class="form-third">
+            <label>Matches</label>
             <input type="number" id="resumeAtTimes" step="1" min="0" max="1000" placeholder="0" />
           </div>
         </div>
@@ -159,16 +157,21 @@
         <h4>🔄 Reset Rules</h4>
         <div class="form-row">
           <div class="form-half">
-            <label>If Changes (%)</label>
-            <input type="number" id="resetThreshold" step="0.01" min="-100" max="1000" placeholder="0.00" />
+            <label>If Changes Positive (%)</label>
+            <input type="number" id="resetThresholdPositive" step="0.01" min="0" max="1000" placeholder="0.00" />
           </div>
+          <div class="form-half">
+            <label>If Changes Negative (%)</label>
+            <input type="number" id="resetThresholdNegative" step="0.01" min="-100" max="0" placeholder="-0.00" />
+          </div>
+        </div>
+        <div class="form-row">
+          <input type="hidden" id="resetThreshold" />
           <div class="form-half">
             <label>If Profit (x times)</label>
             <input type="number" id="profitTimes" step="1" min="0" max="100" placeholder="0" />
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-full">
+          <div class="form-half">
             <label>If Loss Amount</label>
             <input type="number" id="lossResetAmount" step="0.01" min="0" max="10000" placeholder="0.00" />
           </div>
@@ -351,7 +354,9 @@
             <p><strong>• Threshold positive:</strong> Count crashes &gt; threshold in last window</p>
             <p><strong>• Threshold negative:</strong> Count crashes &lt; |threshold| in last window</p>
             <p><strong>Resume:</strong> When match count reaches Required Matches (0 = disabled)</p>
-            <p><strong>Reset Threshold:</strong> Reset to original bet if change exceeds % (0 = disabled)</p>
+            <p><strong>Reset Positive %:</strong> Reset to original bet when bet grows by this % or more (0 = disabled)</p>
+            <p><strong>Reset Negative %:</strong> Reset to original bet when bet falls by this % or more below original (0 = disabled)</p>
+            <p><strong>Legacy Reset Threshold:</strong> Old single signed field still loads older configs</p>
             <p><strong>Profit Reset:</strong> Reset bet after profit reaches X times original (0 = disabled)</p>
             <p><strong>Loss Reset:</strong> Reset sub-session when loss reaches amount (0 = disabled)</p>
             <p><em>Sub-session resets: Click reset count in summary to view detailed history</em></p>

@@ -20,6 +20,18 @@ let crashAnalysisHistory = [];
 let crashHeatCanvas, crashHeatCtx;
 let crashTrendCanvas, crashTrendCtx;
 
+function syncLegacyResetThreshold() {
+  const positiveInput = document.getElementById("resetThresholdPositive");
+  const negativeInput = document.getElementById("resetThresholdNegative");
+  const legacyInput = document.getElementById("resetThreshold");
+  if (!positiveInput || !negativeInput || !legacyInput) return;
+
+  const positiveValue = parseFloat(positiveInput.value) || 0;
+  const negativeValue = Math.abs(parseFloat(negativeInput.value) || 0);
+
+  legacyInput.value = positiveValue > 0 ? positiveValue : negativeValue > 0 ? -negativeValue : "";
+}
+
 function isCrashGameUrl(url) {
   if (!url) return false;
   try {
@@ -68,6 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const resumeLastCrashes = document.getElementById("resumeLastCrashes");
   const resumeAtValue = document.getElementById("resumeAtValue");
   const resumeAtTimes = document.getElementById("resumeAtTimes");
+  const resetThresholdPositive = document.getElementById("resetThresholdPositive");
+  const resetThresholdNegative = document.getElementById("resetThresholdNegative");
   const resetThreshold = document.getElementById("resetThreshold");
   const profitTimes = document.getElementById("profitTimes");
   const lossResetAmount = document.getElementById("lossResetAmount");
@@ -78,6 +92,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // const resetBetBtn = document.getElementById("resetBetBtn");
   const screenshotBtn = document.getElementById("screenshotBtn");
   const downloadLogsBtn = document.getElementById("downloadLogsBtn");
+
+  [resetThresholdPositive, resetThresholdNegative].forEach((input) => {
+    input.addEventListener("input", syncLegacyResetThreshold);
+  });
 
   const startStopBtn = document.getElementById("startStopBtn");
   let isRunning = false;
@@ -110,38 +128,68 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeDialog();
   
   // Load saved configuration
-  chrome.storage.local.get(["betData"], (result) => {
-    if (result.betData) {
+  chrome.storage.local.get(["betData", "savedConfigs", "currentConfigName"], (result) => {
+    // First try to load from current config
+    if (result.currentConfigName && result.savedConfigs && result.savedConfigs[result.currentConfigName]) {
+      const config = result.savedConfigs[result.currentConfigName];
+      betAmount.value = config.BetAmount ?? '';
+      cashoutAt.value = config.CashoutAt ?? '';
+      onLoss.value = config.OnLoss ?? '';
+      onWin.value = config.OnWin ?? '';
+      crashAt.value = config.CrashAt ?? '';
+      crashTimes.value = config.CrashTimes ?? '';
+      resumeAt.value = config.ResumeAt ?? '';
+      resumeAdjust.value = config.ResumeAdjust ?? '';
+      resumeBelowAt.value = config.ResumeBelowAt ?? '';
+      resumeBelowTimes.value = config.ResumeBelowTimes ?? '';
+      resumeLastCrashes.value = config.ResumeLastCrashes ?? '';
+      resumeAtValue.value = config.ResumeAtValue ?? '';
+      resumeAtTimes.value = config.ResumeAtTimes ?? '';
+      const configResetThreshold = config.ResetThreshold ?? 0;
+      resetThresholdPositive.value = config.ResetThresholdPositive ?? (configResetThreshold > 0 ? configResetThreshold : '');
+      resetThresholdNegative.value = config.ResetThresholdNegative != null
+        ? -Math.abs(config.ResetThresholdNegative)
+        : (configResetThreshold < 0 ? configResetThreshold : '');
+      resetThreshold.value = config.ResetThreshold ?? '';
+      syncLegacyResetThreshold();
+      profitTimes.value = config.ProfitTimes ?? '';
+      lossResetAmount.value = config.LossResetAmount ?? '';
+      walletStopLoss.value = config.WalletStopLoss ?? '';
+      stopOnProfitAmount.value = config.StopOnProfitAmount ?? '';
+      stopOnLossAmount.value = config.StopOnLossAmount ?? '';
+      decimalPlacesCount = parseInt(config.DecimalPlaces) || 0;
+      decimalPlaces.value = config.DecimalPlaces ?? '';
+    }
+    // Fallback to old betData format
+    else if (result.betData) {
       const data = result.betData;
-      
-      // Load all form values
-      if (data.amount) betAmount.value = data.amount;
-      if (data.cashout) cashoutAt.value = data.cashout;
-      if (data.loss) onLoss.value = data.loss;
-      if (data.win) onWin.value = data.win;
-      if (data.stopCrashAt) crashAt.value = data.stopCrashAt;
-      if (data.stopCrashTimes) crashTimes.value = data.stopCrashTimes;
-      if (data.resumeAt !== undefined) resumeAt.value = data.resumeAt;
-      if (data.resumeAdjust !== undefined) resumeAdjust.value = data.resumeAdjust;
-      if (data.resumeBelowAt !== undefined) resumeBelowAt.value = data.resumeBelowAt;
-      if (data.resumeBelowTimes !== undefined) resumeBelowTimes.value = data.resumeBelowTimes;
-      if (data.resumeLastCrashes !== undefined) resumeLastCrashes.value = data.resumeLastCrashes;
-      if (data.resumeAtValue !== undefined) resumeAtValue.value = data.resumeAtValue;
-      if (data.resumeAtTimes !== undefined) resumeAtTimes.value = data.resumeAtTimes;
-      if (data.resetThreshold) resetThreshold.value = data.resetThreshold;
-      if (data.profitTimes) profitTimes.value = data.profitTimes;
-      if (data.lossResetAmount) lossResetAmount.value = data.lossResetAmount;
-      if (data.walletStopLoss) walletStopLoss.value = data.walletStopLoss;
-      if (data.stopOnProfitAmount !== undefined) stopOnProfitAmount.value = data.stopOnProfitAmount;
-      if (data.stopOnLossAmount !== undefined) stopOnLossAmount.value = data.stopOnLossAmount;
-      
-      // Load decimal places setting
-      if (data.decimalPlaces !== undefined) {
-        decimalPlacesCount = parseInt(data.decimalPlaces) || 0;
-        decimalPlaces.value = data.decimalPlaces;
-      }
-      
-
+      betAmount.value = data.amount ?? '';
+      cashoutAt.value = data.cashout ?? '';
+      onLoss.value = data.loss ?? '';
+      onWin.value = data.win ?? '';
+      crashAt.value = data.stopCrashAt ?? '';
+      crashTimes.value = data.stopCrashTimes ?? '';
+      resumeAt.value = data.resumeAt ?? '';
+      resumeAdjust.value = data.resumeAdjust ?? '';
+      resumeBelowAt.value = data.resumeBelowAt ?? '';
+      resumeBelowTimes.value = data.resumeBelowTimes ?? '';
+      resumeLastCrashes.value = data.resumeLastCrashes ?? '';
+      resumeAtValue.value = data.resumeAtValue ?? '';
+      resumeAtTimes.value = data.resumeAtTimes ?? '';
+      const dataResetThreshold = data.resetThreshold ?? 0;
+      resetThresholdPositive.value = data.resetThresholdPositive ?? (dataResetThreshold > 0 ? dataResetThreshold : '');
+      resetThresholdNegative.value = data.resetThresholdNegative != null
+        ? -Math.abs(data.resetThresholdNegative)
+        : (dataResetThreshold < 0 ? dataResetThreshold : '');
+      resetThreshold.value = data.resetThreshold ?? '';
+      syncLegacyResetThreshold();
+      profitTimes.value = data.profitTimes ?? '';
+      lossResetAmount.value = data.lossResetAmount ?? '';
+      walletStopLoss.value = data.walletStopLoss ?? '';
+      stopOnProfitAmount.value = data.stopOnProfitAmount ?? '';
+      stopOnLossAmount.value = data.stopOnLossAmount ?? '';
+      decimalPlacesCount = parseInt(data.decimalPlaces) || 0;
+      decimalPlaces.value = data.decimalPlaces ?? '';
     }
   });
   
@@ -216,7 +264,10 @@ document.addEventListener("DOMContentLoaded", () => {
       startStopBtn.className = "btn-running";
 
       // Send config and start betting
+      syncLegacyResetThreshold();
       const betData = {
+        resetThresholdPositive: resetThresholdPositive.value,
+        resetThresholdNegative: resetThresholdNegative.value,
         amount: betAmount.value,
         cashout: cashoutAt.value,
         loss: onLoss.value,
@@ -860,7 +911,8 @@ function showScreenshotFallback() {
   csvContent += `Resume Last Crashes Window,${document.getElementById('resumeLastCrashes')?.value || 'Not Set'}\n`;
   csvContent += `Resume Threshold,${document.getElementById('resumeAtValue')?.value || 'Not Set'}\n`;
   csvContent += `Resume Required Matches,${document.getElementById('resumeAtTimes')?.value || 'Not Set'}\n`;
-  csvContent += `Reset Threshold,${document.getElementById('resetThreshold')?.value || 'Not Set'}%\n`;
+  csvContent += `Reset Positive Threshold,${document.getElementById('resetThresholdPositive')?.value || 'Not Set'}%\n`;
+  csvContent += `Reset Negative Threshold,${document.getElementById('resetThresholdNegative')?.value || 'Not Set'}%\n`;
   csvContent += `Profit Reset Times,${document.getElementById('profitTimes')?.value || 'Not Set'}\n`;
   csvContent += `Complete Stop On Profit Amount,${document.getElementById('stopOnProfitAmount')?.value || 'Not Set'}\n`;
   csvContent += `Complete Stop On Loss Amount,${document.getElementById('stopOnLossAmount')?.value || 'Not Set'}\n`;

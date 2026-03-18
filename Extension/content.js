@@ -472,7 +472,7 @@ function checkResumeWindowRule() {
 
   if (count >= z) {
     const operator = y > 0 ? ">" : "<";
-    console.log(`RESUME WINDOW: Last ${x} crashes, ${count} ${operator} ${threshold}, need ${z}`);
+    console.log(`RESUME WINDOW: Last ${x} | ${operator}${threshold} | ${count}/${z} matches`);
     resumeBetting();
     return true;
   }
@@ -657,31 +657,42 @@ function roundBetAmount(amount) {
 }
 
 function checkResetThreshold() {
-  if (betConfig.resetThreshold !== 0) {
-    const changePercent =
-      ((currentBetAmount - originalBetAmount) / originalBetAmount) * 100;
+  const changePercent =
+    ((currentBetAmount - originalBetAmount) / originalBetAmount) * 100;
+  const positiveThreshold = parseFloat(betConfig.resetThresholdPositive) || 0;
+  const negativeThreshold = Math.abs(parseFloat(betConfig.resetThresholdNegative) || 0);
+  const legacyThreshold = parseFloat(betConfig.resetThreshold) || 0;
 
-    // Check if threshold is exceeded (positive or negative)
-    const thresholdExceeded =
-      betConfig.resetThreshold > 0
-        ? changePercent >= betConfig.resetThreshold
-        : changePercent <= betConfig.resetThreshold;
+  let thresholdExceeded = false;
+  let thresholdLabel = "";
 
+  if (positiveThreshold > 0 && changePercent >= positiveThreshold) {
+    thresholdExceeded = true;
+    thresholdLabel = `>= ${positiveThreshold}%`;
+  } else if (negativeThreshold > 0 && changePercent <= -negativeThreshold) {
+    thresholdExceeded = true;
+    thresholdLabel = `<= -${negativeThreshold}%`;
+  } else if (legacyThreshold !== 0) {
+    thresholdExceeded =
+      legacyThreshold > 0
+        ? changePercent >= legacyThreshold
+        : changePercent <= legacyThreshold;
     if (thresholdExceeded) {
-      console.log(`Reset threshold reached: ${changePercent.toFixed(2)}% ${
-          betConfig.resetThreshold > 0 ? ">=" : "<="
-        } ${betConfig.resetThreshold}%`);
-      currentBetAmount = originalBetAmount;
-      console.log(`Bet amount reset to original: ${originalBetAmount}`);
-
-      // Update current bet amount display
-      chrome.runtime.sendMessage({
-        action: "updateCurrentBetAmount",
-        data: { amount: currentBetAmount },
-      });
-
-      return true;
+      thresholdLabel = `${legacyThreshold > 0 ? ">=" : "<="} ${legacyThreshold}%`;
     }
+  }
+
+  if (thresholdExceeded) {
+    console.log(`Reset threshold reached: ${changePercent.toFixed(2)}% ${thresholdLabel}`);
+    currentBetAmount = originalBetAmount;
+    console.log(`Bet amount reset to original: ${originalBetAmount}`);
+
+    chrome.runtime.sendMessage({
+      action: "updateCurrentBetAmount",
+      data: { amount: currentBetAmount },
+    });
+
+    return true;
   }
   return false;
 }
@@ -911,6 +922,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeLastCrashes,
       resumeAtValue,
       resumeAtTimes,
+      resetThresholdPositive,
+      resetThresholdNegative,
       resetThreshold,
       profitTimes,
       lossResetAmount,
@@ -934,6 +947,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resumeLastCrashes: parseInt(resumeLastCrashes) || 0,
       resumeAtValue: parseFloat(resumeAtValue) || 0,
       resumeAtTimes: parseInt(resumeAtTimes) || 0,
+      resetThresholdPositive: parseFloat(resetThresholdPositive) || 0,
+      resetThresholdNegative: parseFloat(resetThresholdNegative) || 0,
       resetThreshold: parseFloat(resetThreshold) || 0,
       profitTimes: parseFloat(profitTimes) || 0,
       lossResetAmount: parseFloat(lossResetAmount) || 0,

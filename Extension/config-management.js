@@ -115,6 +115,15 @@ document.getElementById('configSelect').addEventListener('change', (e) => {
 });
 
 function getCurrentConfig() {
+  const resetThresholdPositive = parseFloat(document.getElementById('resetThresholdPositive').value) || 0;
+  const resetThresholdNegative = parseFloat(document.getElementById('resetThresholdNegative').value) || 0;
+  const negativeResetMagnitude = Math.abs(resetThresholdNegative);
+  const legacyResetThreshold = resetThresholdPositive > 0
+    ? resetThresholdPositive
+    : negativeResetMagnitude > 0
+      ? -negativeResetMagnitude
+      : 0;
+
   return {
     BetAmount: parseFloat(document.getElementById('betAmount').value) || 0,
     CashoutAt: parseFloat(document.getElementById('cashoutAt').value) || 0,
@@ -129,7 +138,9 @@ function getCurrentConfig() {
     ResumeLastCrashes: parseInt(document.getElementById('resumeLastCrashes').value) || 0,
     ResumeAtValue: parseFloat(document.getElementById('resumeAtValue').value) || 0,
     ResumeAtTimes: parseInt(document.getElementById('resumeAtTimes').value) || 0,
-    ResetThreshold: parseFloat(document.getElementById('resetThreshold').value) || 0,
+    ResetThresholdPositive: resetThresholdPositive,
+    ResetThresholdNegative: resetThresholdNegative,
+    ResetThreshold: legacyResetThreshold,
     ProfitTimes: parseInt(document.getElementById('profitTimes').value) || 0,
     LossResetAmount: parseFloat(document.getElementById('lossResetAmount').value) || 0,
     WalletStopLoss: parseFloat(document.getElementById('walletStopLoss').value) || 0,
@@ -140,12 +151,25 @@ function getCurrentConfig() {
 }
 
 function loadConfigToForm(config, configName = null) {
-  document.getElementById('betAmount').value = config.BetAmount || config.amount || '';
-  document.getElementById('cashoutAt').value = config.CashoutAt || config.cashout || '';
-  document.getElementById('onLoss').value = config.OnLoss || config.onLoss || '';
-  document.getElementById('onWin').value = config.OnWin || config.onWin || '';
-  document.getElementById('crashAt').value = config.CrashAt || config.crashAt || '';
-  document.getElementById('crashTimes').value = config.CrashTimes || config.crashTimes || '';
+  const positiveThreshold =
+    config.ResetThresholdPositive ??
+    config.resetThresholdPositive ??
+    ((config.ResetThreshold ?? config.resetThreshold ?? 0) > 0
+      ? (config.ResetThreshold ?? config.resetThreshold ?? 0)
+      : '');
+  const negativeThreshold =
+    config.ResetThresholdNegative ??
+    config.resetThresholdNegative ??
+    ((config.ResetThreshold ?? config.resetThreshold ?? 0) < 0
+      ? (config.ResetThreshold ?? config.resetThreshold ?? 0)
+      : '');
+
+  document.getElementById('betAmount').value = config.BetAmount ?? config.amount ?? '';
+  document.getElementById('cashoutAt').value = config.CashoutAt ?? config.cashout ?? '';
+  document.getElementById('onLoss').value = config.OnLoss ?? config.onLoss ?? '';
+  document.getElementById('onWin').value = config.OnWin ?? config.onWin ?? '';
+  document.getElementById('crashAt').value = config.CrashAt ?? config.crashAt ?? '';
+  document.getElementById('crashTimes').value = config.CrashTimes ?? config.crashTimes ?? '';
   document.getElementById('resumeAt').value = config.ResumeAt ?? config.resumeAt ?? '';
   document.getElementById('resumeAdjust').value = config.ResumeAdjust ?? config.resumeAdjust ?? '';
   document.getElementById('resumeBelowAt').value = config.ResumeBelowAt ?? config.resumeBelowAt ?? '';
@@ -153,13 +177,16 @@ function loadConfigToForm(config, configName = null) {
   document.getElementById('resumeLastCrashes').value = config.ResumeLastCrashes ?? config.resumeLastCrashes ?? '';
   document.getElementById('resumeAtValue').value = config.ResumeAtValue ?? config.resumeAtValue ?? '';
   document.getElementById('resumeAtTimes').value = config.ResumeAtTimes ?? config.resumeAtTimes ?? '';
-  document.getElementById('resetThreshold').value = config.ResetThreshold || config.resetThreshold || '';
-  document.getElementById('profitTimes').value = config.ProfitTimes || config.profitTimes || '';
-  document.getElementById('lossResetAmount').value = config.LossResetAmount || config.lossResetAmount || '';
-  document.getElementById('walletStopLoss').value = config.WalletStopLoss || config.walletStopLoss || '';
-  document.getElementById('stopOnProfitAmount').value = config.StopOnProfitAmount || config.stopOnProfitAmount || '';
-  document.getElementById('stopOnLossAmount').value = config.StopOnLossAmount || config.stopOnLossAmount || '';
-  document.getElementById('decimalPlaces').value = config.DecimalPlaces || config.decimalPlaces || '';
+  document.getElementById('resetThresholdPositive').value = positiveThreshold;
+  document.getElementById('resetThresholdNegative').value =
+    negativeThreshold === '' ? '' : -Math.abs(negativeThreshold);
+  document.getElementById('resetThreshold').value = config.ResetThreshold ?? config.resetThreshold ?? '';
+  document.getElementById('profitTimes').value = config.ProfitTimes ?? config.profitTimes ?? '';
+  document.getElementById('lossResetAmount').value = config.LossResetAmount ?? config.lossResetAmount ?? '';
+  document.getElementById('walletStopLoss').value = config.WalletStopLoss ?? config.walletStopLoss ?? '';
+  document.getElementById('stopOnProfitAmount').value = config.StopOnProfitAmount ?? config.stopOnProfitAmount ?? '';
+  document.getElementById('stopOnLossAmount').value = config.StopOnLossAmount ?? config.stopOnLossAmount ?? '';
+  document.getElementById('decimalPlaces').value = config.DecimalPlaces ?? config.decimalPlaces ?? '';
   
   if (configName) {
     currentConfigName = configName;

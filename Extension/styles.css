@@ -130,6 +130,18 @@ button:hover {
   max-width: 100%;
 }
 
+.form-third {
+  flex: 1;
+}
+.form-third label {
+  margin-top: 0;
+}
+.form-third input {
+  width: calc(100% - 24px);
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
 /* Spacing utilities */
 .mt-1 { margin-top: 5px; }
 .mt-2 { margin-top: 10px; }
