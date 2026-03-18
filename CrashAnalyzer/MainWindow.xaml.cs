@@ -40,6 +40,8 @@ namespace CrashAnalyzer
             txtResumeLastCrashes.Text = "0";
             txtResumeAtValue.Text = "0";
             txtResumeAtTimes.Text = "0";
+            txtResetThresholdPositive.Text = "0";
+            txtResetThresholdNegative.Text = "-40";
             txtResetThreshold.Text = "-40";
             txtProfitTimes.Text = "3";
             txtLossResetAmount.Text = "5000";
@@ -49,6 +51,54 @@ namespace CrashAnalyzer
             txtDecimalPlaces.Text = "2";
 
             LoadConfiguration();
+        }
+
+        private void SyncLegacyResetThreshold()
+        {
+            double.TryParse(txtResetThresholdPositive.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out var positiveThreshold);
+            double.TryParse(txtResetThresholdNegative.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out var negativeThreshold);
+            var negativeMagnitude = Math.Abs(negativeThreshold);
+
+            txtResetThreshold.Text = positiveThreshold > 0
+                ? positiveThreshold.ToString(CultureInfo.InvariantCulture)
+                : negativeMagnitude > 0
+                    ? (-negativeMagnitude).ToString(CultureInfo.InvariantCulture)
+                    : "0";
+        }
+
+        private double GetResetThresholdPositiveValue()
+        {
+            double.TryParse(txtResetThresholdPositive.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out var threshold);
+            return threshold;
+        }
+
+        private double GetResetThresholdNegativeValue()
+        {
+            double.TryParse(txtResetThresholdNegative.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out var threshold);
+            return threshold;
+        }
+
+        private void ApplyResetThresholdInputs(double legacyThreshold, double? positiveThreshold = null, double? negativeThreshold = null)
+        {
+            txtResetThresholdPositive.Text = positiveThreshold.HasValue
+                ? positiveThreshold.Value.ToString(CultureInfo.InvariantCulture)
+                : legacyThreshold > 0
+                    ? legacyThreshold.ToString(CultureInfo.InvariantCulture)
+                    : "0";
+
+            txtResetThresholdNegative.Text = negativeThreshold.HasValue
+                ? (-Math.Abs(negativeThreshold.Value)).ToString(CultureInfo.InvariantCulture)
+                : legacyThreshold < 0
+                    ? legacyThreshold.ToString(CultureInfo.InvariantCulture)
+                    : "0";
+
+            SyncLegacyResetThreshold();
+        }
+
+        private void OnResetThresholdChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            SyncLegacyResetThreshold();
+            OnConfigChanged(sender, e);
         }
 
 
@@ -121,7 +171,7 @@ namespace CrashAnalyzer
             txtResumeLastCrashes.Text = config.ResumeLastCrashes.ToString(CultureInfo.InvariantCulture);
             txtResumeAtValue.Text = config.ResumeAtValue.ToString(CultureInfo.InvariantCulture);
             txtResumeAtTimes.Text = config.ResumeAtTimes.ToString(CultureInfo.InvariantCulture);
-            txtResetThreshold.Text = config.ResetThreshold.ToString(CultureInfo.InvariantCulture);
+            ApplyResetThresholdInputs(config.ResetThreshold, config.ResetThresholdPositive, config.ResetThresholdNegative);
             txtProfitTimes.Text = config.ProfitTimes.ToString(CultureInfo.InvariantCulture);
             txtLossResetAmount.Text = config.LossResetAmount.ToString(CultureInfo.InvariantCulture);
             txtWalletStopLoss.Text = config.WalletStopLoss.ToString(CultureInfo.InvariantCulture);
@@ -249,6 +299,8 @@ namespace CrashAnalyzer
                     ResumeLastCrashes = ParseIntValue(GetSetting(settings, "Resume Last Crashes Window")),
                     ResumeAtValue = ParseNumericValue(GetSetting(settings, "Resume Threshold")),
                     ResumeAtTimes = ParseIntValue(GetSetting(settings, "Resume Required Matches")),
+                    ResetThresholdPositive = ParseNumericValue(GetSetting(settings, "Reset Positive Threshold")),
+                    ResetThresholdNegative = ParseNumericValue(GetSetting(settings, "Reset Negative Threshold")),
                     ResetThreshold = ParseNumericValue(GetSetting(settings, "Reset Threshold", "Reset Threshold %")),
                     ProfitTimes = ParseIntValue(GetSetting(settings, "Profit Reset Times", "Profit Times")),
                     LossResetAmount = ParseNumericValue(GetSetting(settings, "Loss Reset Amount")),
@@ -351,6 +403,7 @@ namespace CrashAnalyzer
 
             try
             {
+                SyncLegacyResetThreshold();
                 var config = new BettingConfig
                 {
                     BetAmount = double.Parse(txtBetAmount.Text),
@@ -366,6 +419,8 @@ namespace CrashAnalyzer
                     ResumeLastCrashes = int.Parse(txtResumeLastCrashes.Text),
                     ResumeAtValue = double.Parse(txtResumeAtValue.Text),
                     ResumeAtTimes = int.Parse(txtResumeAtTimes.Text),
+                    ResetThresholdPositive = double.Parse(txtResetThresholdPositive.Text),
+                    ResetThresholdNegative = double.Parse(txtResetThresholdNegative.Text),
                     ResetThreshold = double.Parse(txtResetThreshold.Text),
                     ProfitTimes = int.Parse(txtProfitTimes.Text),
                     LossResetAmount = double.Parse(txtLossResetAmount.Text),
@@ -767,6 +822,8 @@ namespace CrashAnalyzer
                 ResumeLastCrashes = int.Parse(txtResumeLastCrashes.Text),
                 ResumeAtValue = double.Parse(txtResumeAtValue.Text),
                 ResumeAtTimes = int.Parse(txtResumeAtTimes.Text),
+                ResetThresholdPositive = double.Parse(txtResetThresholdPositive.Text),
+                ResetThresholdNegative = double.Parse(txtResetThresholdNegative.Text),
                 ResetThreshold = double.Parse(txtResetThreshold.Text),
                 ProfitTimes = int.Parse(txtProfitTimes.Text),
                 LossResetAmount = double.Parse(txtLossResetAmount.Text),
@@ -1100,17 +1157,29 @@ namespace CrashAnalyzer
                         currentBetAmount = AdjustBetAmount(currentBetAmount, config.OnLoss, config.DecimalPlaces);
                     }
 
-                    if (config.ResetThreshold != 0)
+                    double changePercent = ((currentBetAmount - originalBetAmount) / originalBetAmount) * 100;
+                    bool thresholdExceeded = false;
+                    double positiveThreshold = config.ResetThresholdPositive;
+                    double negativeThreshold = Math.Abs(config.ResetThresholdNegative);
+
+                    if (positiveThreshold > 0 && changePercent >= positiveThreshold)
                     {
-                        double changePercent = ((currentBetAmount - originalBetAmount) / originalBetAmount) * 100;
-                        bool thresholdExceeded = config.ResetThreshold > 0
+                        thresholdExceeded = true;
+                    }
+                    else if (negativeThreshold > 0 && changePercent <= -negativeThreshold)
+                    {
+                        thresholdExceeded = true;
+                    }
+                    else if (config.ResetThreshold != 0)
+                    {
+                        thresholdExceeded = config.ResetThreshold > 0
                             ? changePercent >= config.ResetThreshold
                             : changePercent <= config.ResetThreshold;
+                    }
 
-                        if (thresholdExceeded)
-                        {
-                            currentBetAmount = originalBetAmount;
-                        }
+                    if (thresholdExceeded)
+                    {
+                        currentBetAmount = originalBetAmount;
                     }
 
                     if (config.LossResetAmount > 0 && totalProfit < 0)
@@ -1202,7 +1271,7 @@ namespace CrashAnalyzer
         {
             if (logFileConfig != null)
             {
-                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | OnLoss: {logFileConfig.OnLoss}% | OnWin: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | ResumeWindow: {logFileConfig.ResumeLastCrashes}@{logFileConfig.ResumeAtValue}x/{logFileConfig.ResumeAtTimes} | Reset: {logFileConfig.ResetThreshold}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | StopProfitAmt: ${logFileConfig.StopOnProfitAmount} | StopLossAmt: ${logFileConfig.StopOnLossAmount} | Decimals: {logFileConfig.DecimalPlaces}";
+                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | OnLoss: {logFileConfig.OnLoss}% | OnWin: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | ResumeWindow: {logFileConfig.ResumeLastCrashes}@{logFileConfig.ResumeAtValue}x/{logFileConfig.ResumeAtTimes} | Reset+: {logFileConfig.ResetThresholdPositive}% | Reset-: {logFileConfig.ResetThresholdNegative}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | StopProfitAmt: ${logFileConfig.StopOnProfitAmount} | StopLossAmt: ${logFileConfig.StopOnLossAmount} | Decimals: {logFileConfig.DecimalPlaces}";
             }
             else
             {
@@ -1214,7 +1283,7 @@ namespace CrashAnalyzer
         {
             try
             {
-                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | OnLoss: {txtOnLoss.Text}% | OnWin: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | ResumeWindow: {txtResumeLastCrashes.Text}@{txtResumeAtValue.Text}x/{txtResumeAtTimes.Text} | Reset: {txtResetThreshold.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | StopProfitAmt: ${txtStopOnProfitAmount.Text} | StopLossAmt: ${txtStopOnLossAmount.Text} | Decimals: {txtDecimalPlaces.Text}";
+                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | OnLoss: {txtOnLoss.Text}% | OnWin: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | ResumeWindow: {txtResumeLastCrashes.Text}@{txtResumeAtValue.Text}x/{txtResumeAtTimes.Text} | Reset+: {txtResetThresholdPositive.Text}% | Reset-: {txtResetThresholdNegative.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | StopProfitAmt: ${txtStopOnProfitAmount.Text} | StopLossAmt: ${txtStopOnLossAmount.Text} | Decimals: {txtDecimalPlaces.Text}";
             }
             catch
             {
@@ -1252,6 +1321,8 @@ namespace CrashAnalyzer
                                 ResumeLastCrashes = config.ContainsKey("resumeLastCrashes") ? config["resumeLastCrashes"].GetInt32() : 0,
                                 ResumeAtValue = config.ContainsKey("resumeAtValue") ? config["resumeAtValue"].GetDouble() : 0,
                                 ResumeAtTimes = config.ContainsKey("resumeAtTimes") ? config["resumeAtTimes"].GetInt32() : 0,
+                                ResetThresholdPositive = config.ContainsKey("resetThresholdPositive") ? config["resetThresholdPositive"].GetDouble() : 0,
+                                ResetThresholdNegative = config.ContainsKey("resetThresholdNegative") ? config["resetThresholdNegative"].GetDouble() : 0,
                                 ResetThreshold = config["resetThreshold"].GetDouble(),
                                 ProfitTimes = config["profitTimes"].GetInt32(),
                                 LossResetAmount = config["lossResetAmount"].GetDouble(),
@@ -1290,6 +1361,8 @@ namespace CrashAnalyzer
             csv.AppendLine($"Resume Last Crashes Window,{config.ResumeLastCrashes}");
             csv.AppendLine($"Resume Threshold,{config.ResumeAtValue}");
             csv.AppendLine($"Resume Required Matches,{config.ResumeAtTimes}");
+            csv.AppendLine($"Reset Positive Threshold,{config.ResetThresholdPositive}");
+            csv.AppendLine($"Reset Negative Threshold,{config.ResetThresholdNegative}");
             csv.AppendLine($"Reset Threshold %,{config.ResetThreshold}");
             csv.AppendLine($"Profit Times,{config.ProfitTimes}");
             csv.AppendLine($"Loss Reset Amount,{config.LossResetAmount}");
@@ -1336,6 +1409,8 @@ namespace CrashAnalyzer
                     ResumeLastCrashes = txtResumeLastCrashes.Text,
                     ResumeAtValue = txtResumeAtValue.Text,
                     ResumeAtTimes = txtResumeAtTimes.Text,
+                    ResetThresholdPositive = txtResetThresholdPositive.Text,
+                    ResetThresholdNegative = txtResetThresholdNegative.Text,
                     ResetThreshold = txtResetThreshold.Text,
                     ProfitTimes = txtProfitTimes.Text,
                     LossResetAmount = txtLossResetAmount.Text,
@@ -1368,7 +1443,8 @@ namespace CrashAnalyzer
             txtResumeLastCrashes.TextChanged -= OnConfigChanged;
             txtResumeAtValue.TextChanged -= OnConfigChanged;
             txtResumeAtTimes.TextChanged -= OnConfigChanged;
-            txtResetThreshold.TextChanged -= OnConfigChanged;
+            txtResetThresholdPositive.TextChanged -= OnResetThresholdChanged;
+            txtResetThresholdNegative.TextChanged -= OnResetThresholdChanged;
             txtProfitTimes.TextChanged -= OnConfigChanged;
             txtLossResetAmount.TextChanged -= OnConfigChanged;
             txtWalletStopLoss.TextChanged -= OnConfigChanged;
@@ -1397,7 +1473,13 @@ namespace CrashAnalyzer
                     txtResumeLastCrashes.Text = GetConfigValue(config, "ResumeLastCrashes");
                     txtResumeAtValue.Text = GetConfigValue(config, "ResumeAtValue");
                     txtResumeAtTimes.Text = GetConfigValue(config, "ResumeAtTimes");
-                    txtResetThreshold.Text = config["ResetThreshold"].GetString();
+                    var positiveReset = GetConfigValue(config, "ResetThresholdPositive");
+                    var negativeReset = GetConfigValue(config, "ResetThresholdNegative");
+                    var legacyReset = GetConfigValue(config, "ResetThreshold");
+                    ApplyResetThresholdInputs(
+                        ParseNumericValue(legacyReset),
+                        positiveReset == "0" && !config.ContainsKey("ResetThresholdPositive") ? (double?)null : ParseNumericValue(positiveReset),
+                        negativeReset == "0" && !config.ContainsKey("ResetThresholdNegative") ? (double?)null : ParseNumericValue(negativeReset));
                     txtProfitTimes.Text = config["ProfitTimes"].GetString();
                     txtLossResetAmount.Text = config["LossResetAmount"].GetString();
                     txtWalletStopLoss.Text = config["WalletStopLoss"].GetString();
@@ -1421,6 +1503,8 @@ namespace CrashAnalyzer
                     txtResumeLastCrashes.Text = "0";
                     txtResumeAtValue.Text = "0";
                     txtResumeAtTimes.Text = "0";
+                    txtResetThresholdPositive.Text = "0";
+                    txtResetThresholdNegative.Text = "-40";
                     txtResetThreshold.Text = "-40";
                     txtProfitTimes.Text = "3";
                     txtLossResetAmount.Text = "5000";
@@ -1446,6 +1530,8 @@ namespace CrashAnalyzer
                 txtResumeLastCrashes.Text = "0";
                 txtResumeAtValue.Text = "0";
                 txtResumeAtTimes.Text = "0";
+                txtResetThresholdPositive.Text = "0";
+                txtResetThresholdNegative.Text = "-40";
                 txtResetThreshold.Text = "-40";
                 txtProfitTimes.Text = "3";
                 txtLossResetAmount.Text = "5000";
@@ -1469,7 +1555,8 @@ namespace CrashAnalyzer
             txtResumeLastCrashes.TextChanged += OnConfigChanged;
             txtResumeAtValue.TextChanged += OnConfigChanged;
             txtResumeAtTimes.TextChanged += OnConfigChanged;
-            txtResetThreshold.TextChanged += OnConfigChanged;
+            txtResetThresholdPositive.TextChanged += OnResetThresholdChanged;
+            txtResetThresholdNegative.TextChanged += OnResetThresholdChanged;
             txtProfitTimes.TextChanged += OnConfigChanged;
             txtLossResetAmount.TextChanged += OnConfigChanged;
             txtWalletStopLoss.TextChanged += OnConfigChanged;
@@ -1505,12 +1592,14 @@ namespace CrashAnalyzer
                         ResumeAt = txtResumeAt.Text,
                         ResumeAdjust = txtResumeAdjust.Text,
                         ResumeBelowAt = txtResumeBelowAt.Text,
-                        ResumeBelowTimes = txtResumeBelowTimes.Text,
-                        ResumeLastCrashes = txtResumeLastCrashes.Text,
-                        ResumeAtValue = txtResumeAtValue.Text,
-                        ResumeAtTimes = txtResumeAtTimes.Text,
-                        ResetThreshold = txtResetThreshold.Text,
-                        ProfitTimes = txtProfitTimes.Text,
+                    ResumeBelowTimes = txtResumeBelowTimes.Text,
+                    ResumeLastCrashes = txtResumeLastCrashes.Text,
+                    ResumeAtValue = txtResumeAtValue.Text,
+                    ResumeAtTimes = txtResumeAtTimes.Text,
+                    ResetThresholdPositive = txtResetThresholdPositive.Text,
+                    ResetThresholdNegative = txtResetThresholdNegative.Text,
+                    ResetThreshold = txtResetThreshold.Text,
+                    ProfitTimes = txtProfitTimes.Text,
                         LossResetAmount = txtLossResetAmount.Text,
                         WalletStopLoss = txtWalletStopLoss.Text,
                         StopOnProfitAmount = txtStopOnProfitAmount.Text,
@@ -1558,7 +1647,13 @@ namespace CrashAnalyzer
                     txtResumeLastCrashes.Text = GetConfigValue(config, "ResumeLastCrashes");
                     txtResumeAtValue.Text = GetConfigValue(config, "ResumeAtValue");
                     txtResumeAtTimes.Text = GetConfigValue(config, "ResumeAtTimes");
-                    txtResetThreshold.Text = GetConfigValue(config, "ResetThreshold");
+                    var positiveReset = GetConfigValue(config, "ResetThresholdPositive");
+                    var negativeReset = GetConfigValue(config, "ResetThresholdNegative");
+                    var legacyReset = GetConfigValue(config, "ResetThreshold");
+                    ApplyResetThresholdInputs(
+                        ParseNumericValue(legacyReset),
+                        positiveReset == "0" && !config.ContainsKey("ResetThresholdPositive") ? (double?)null : ParseNumericValue(positiveReset),
+                        negativeReset == "0" && !config.ContainsKey("ResetThresholdNegative") ? (double?)null : ParseNumericValue(negativeReset));
                     txtProfitTimes.Text = GetConfigValue(config, "ProfitTimes");
                     txtLossResetAmount.Text = GetConfigValue(config, "LossResetAmount");
                     txtWalletStopLoss.Text = GetConfigValue(config, "WalletStopLoss");
@@ -2067,6 +2162,8 @@ namespace CrashAnalyzer
         public int ResumeLastCrashes { get; set; }
         public double ResumeAtValue { get; set; }
         public int ResumeAtTimes { get; set; }
+        public double ResetThresholdPositive { get; set; }
+        public double ResetThresholdNegative { get; set; }
         public double ResetThreshold { get; set; }
         public int ProfitTimes { get; set; }
         public double LossResetAmount { get; set; }

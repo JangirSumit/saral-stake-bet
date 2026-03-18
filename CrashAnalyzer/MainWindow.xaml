@@ -144,20 +144,26 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,4,0">
-                                <TextBlock Text="If Changes (%)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtResetThreshold" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBlock Text="If Changes Positive (%)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtResetThresholdPositive" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnResetThresholdChanged"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="4,0,0,0">
-                                <TextBlock Text="If Profit (x times)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
-                                <TextBox Name="txtProfitTimes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                                <TextBlock Text="If Changes Negative (%)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtResetThresholdNegative" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnResetThresholdChanged"/>
                             </StackPanel>
                         </Grid>
-                        
+
                         <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
+                            <TextBox Name="txtResetThreshold" Visibility="Collapsed"/>
+                            <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                <TextBlock Text="If Profit (x times)" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtProfitTimes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="4,0,0,0">
                                 <TextBlock Text="If Loss Amount" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
                                 <TextBox Name="txtLossResetAmount" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
