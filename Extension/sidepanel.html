@@ -117,6 +117,20 @@
             <input type="number" id="crashTimes" step="1" min="0" max="100" placeholder="5" required />
           </div>
         </div>
+        <div class="form-row">
+          <div class="form-third">
+            <label>Stop Last Crashes</label>
+            <input type="number" id="stopLastCrashes" step="1" min="0" max="1000" placeholder="0" />
+          </div>
+          <div class="form-third">
+            <label>Stop Threshold</label>
+            <input type="number" id="stopAtValue" step="0.01" min="-100" max="100" placeholder="0.00" />
+          </div>
+          <div class="form-third">
+            <label>Stop Matches</label>
+            <input type="number" id="stopAtTimes" step="1" min="0" max="1000" placeholder="0" />
+          </div>
+        </div>
         
         <h4>🔄 Resume Betting Rules</h4>
         <div class="form-row">
@@ -331,6 +345,10 @@
             <p><strong>• Negative value:</strong> Count crashes above |threshold| (e.g., -2.9 means crash &gt; 2.9)</p>
             <p><strong>Times:</strong> Number of consecutive crashes meeting the selected condition</p>
             <p><em>Example: -2.9 with Times 5 = skip after 5 consecutive crashes above 2.9x</em></p>
+            <p><strong>Last Crashes Window + Threshold + Required Matches:</strong> Non-consecutive window-based stop rule</p>
+            <p><strong>• Threshold positive:</strong> Count crashes &gt; threshold in last window</p>
+            <p><strong>• Threshold negative:</strong> Count crashes &lt; |threshold| in last window</p>
+            <p><strong>Stop:</strong> When match count reaches Stop Matches (0 = disabled)</p>
           </div>
         </div>
       </div>

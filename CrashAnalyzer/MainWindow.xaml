@@ -75,6 +75,26 @@
                                 <TextBox Name="txtCrashTimes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
                             </StackPanel>
                         </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                <TextBlock Text="Stop Last Crashes" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtStopLastCrashes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="4,0,4,0">
+                                <TextBlock Text="Stop Threshold" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtStopAtValue" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="4,0,0,0">
+                                <TextBlock Text="Stop Matches" Foreground="#94A3B8" FontSize="10" Margin="0,0,0,3"/>
+                                <TextBox Name="txtStopAtTimes" Background="#1E293B" Foreground="White" BorderBrush="#22C55E" Padding="6" Height="30" TextChanged="OnConfigChanged"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                     
                     <!-- Resume Betting Rules -->

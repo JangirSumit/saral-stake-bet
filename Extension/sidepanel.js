@@ -73,6 +73,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const onWin = document.getElementById("onWin");
   const crashAt = document.getElementById("crashAt");
   const crashTimes = document.getElementById("crashTimes");
+  const stopLastCrashes = document.getElementById("stopLastCrashes");
+  const stopAtValue = document.getElementById("stopAtValue");
+  const stopAtTimes = document.getElementById("stopAtTimes");
   const resumeAt = document.getElementById("resumeAt");
   const resumeAdjust = document.getElementById("resumeAdjust");
   const resumeBelowAt = document.getElementById("resumeBelowAt");
@@ -138,6 +141,9 @@ document.addEventListener("DOMContentLoaded", () => {
       onWin.value = config.OnWin ?? '';
       crashAt.value = config.CrashAt ?? '';
       crashTimes.value = config.CrashTimes ?? '';
+      stopLastCrashes.value = config.StopLastCrashes ?? '';
+      stopAtValue.value = config.StopAtValue ?? '';
+      stopAtTimes.value = config.StopAtTimes ?? '';
       resumeAt.value = config.ResumeAt ?? '';
       resumeAdjust.value = config.ResumeAdjust ?? '';
       resumeBelowAt.value = config.ResumeBelowAt ?? '';
@@ -169,6 +175,9 @@ document.addEventListener("DOMContentLoaded", () => {
       onWin.value = data.win ?? '';
       crashAt.value = data.stopCrashAt ?? '';
       crashTimes.value = data.stopCrashTimes ?? '';
+      stopLastCrashes.value = data.stopLastCrashes ?? '';
+      stopAtValue.value = data.stopAtValue ?? '';
+      stopAtTimes.value = data.stopAtTimes ?? '';
       resumeAt.value = data.resumeAt ?? '';
       resumeAdjust.value = data.resumeAdjust ?? '';
       resumeBelowAt.value = data.resumeBelowAt ?? '';
@@ -274,6 +283,9 @@ document.addEventListener("DOMContentLoaded", () => {
         win: onWin.value,
         stopCrashAt: crashAt.value,
         stopCrashTimes: crashTimes.value,
+        stopLastCrashes: stopLastCrashes.value,
+        stopAtValue: stopAtValue.value,
+        stopAtTimes: stopAtTimes.value,
         resumeAt: resumeAt.value,
         resumeAdjust: resumeAdjust.value,
         resumeBelowAt: resumeBelowAt.value,
@@ -906,6 +918,9 @@ function showScreenshotFallback() {
   csvContent += `On Win %,${document.getElementById('onWin')?.value || 'Not Set'}%\n`;
   csvContent += `Stop After Crash At,${document.getElementById('crashAt')?.value || 'Not Set'}x\n`;
   csvContent += `Stop After Times,${document.getElementById('crashTimes')?.value || 'Not Set'}\n`;
+  csvContent += `Stop Last Crashes Window,${document.getElementById('stopLastCrashes')?.value || 'Not Set'}\n`;
+  csvContent += `Stop Threshold,${document.getElementById('stopAtValue')?.value || 'Not Set'}\n`;
+  csvContent += `Stop Required Matches,${document.getElementById('stopAtTimes')?.value || 'Not Set'}\n`;
   csvContent += `Resume At Crash,${document.getElementById('resumeAt')?.value || 'Not Set'}x\n`;
   csvContent += `Resume Bet Adjust,${document.getElementById('resumeAdjust')?.value || 'Not Set'}%\n`;
   csvContent += `Resume Last Crashes Window,${document.getElementById('resumeLastCrashes')?.value || 'Not Set'}\n`;

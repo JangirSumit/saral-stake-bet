@@ -332,8 +332,11 @@ function addCrashToHistory(crashValue) {
   const crash = parseFloat(crashValue);
   crashHistory.unshift(crash);
 
-  // Keep enough history for window-based resume rules
-  const dynamicWindow = parseInt(betConfig.resumeLastCrashes) || 0;
+  // Keep enough history for window-based stop/resume rules
+  const dynamicWindow = Math.max(
+    parseInt(betConfig.stopLastCrashes) || 0,
+    parseInt(betConfig.resumeLastCrashes) || 0
+  );
   const maxHistoryLength = Math.max(10, dynamicWindow);
   if (crashHistory.length > maxHistoryLength) {
     crashHistory = crashHistory.slice(0, maxHistoryLength);
@@ -517,6 +520,37 @@ function checkCrashPattern(crash) {
       console.log(`Crash failed skip condition (${getCrashSkipConditionLabel()}), reset count`);
     }
   }
+
+  checkStopWindowRule();
+}
+
+function checkStopWindowRule() {
+  const x = parseInt(betConfig.stopLastCrashes) || 0;
+  const y = parseFloat(betConfig.stopAtValue) || 0;
+  const z = parseInt(betConfig.stopAtTimes) || 0;
+
+  if (x <= 0 || y === 0 || z <= 0) {
+    return false;
+  }
+
+  const recent = crashHistory.slice(0, x);
+  if (recent.length < x) {
+    return false;
+  }
+
+  const threshold = Math.abs(y);
+  const count = recent.filter((value) =>
+    y > 0 ? value > threshold : value < threshold
+  ).length;
+
+  if (count >= z) {
+    const operator = y > 0 ? ">" : "<";
+    console.log(`STOP WINDOW: Last ${x} | ${operator}${threshold} | ${count}/${z} matches`);
+    skipBetting = true;
+    return true;
+  }
+
+  return false;
 }
 
 function placeBet() {
@@ -913,6 +947,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       cashout,
       stopCrashAt,
       stopCrashTimes,
+      stopLastCrashes,
+      stopAtValue,
+      stopAtTimes,
       loss,
       win,
       resumeAt,
@@ -938,6 +975,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       cashout: parseFloat(cashout),
       crashAt: parseFloat(stopCrashAt),
       crashTimes: parseInt(stopCrashTimes),
+      stopLastCrashes: parseInt(stopLastCrashes) || 0,
+      stopAtValue: parseFloat(stopAtValue) || 0,
+      stopAtTimes: parseInt(stopAtTimes) || 0,
       onLoss: parseFloat(loss),
       onWin: parseFloat(win),
       resumeAt: parseFloat(resumeAt),

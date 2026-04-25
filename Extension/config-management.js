@@ -131,6 +131,9 @@ function getCurrentConfig() {
     OnWin: parseFloat(document.getElementById('onWin').value) || 0,
     CrashAt: parseFloat(document.getElementById('crashAt').value) || 0,
     CrashTimes: parseInt(document.getElementById('crashTimes').value) || 0,
+    StopLastCrashes: parseInt(document.getElementById('stopLastCrashes').value) || 0,
+    StopAtValue: parseFloat(document.getElementById('stopAtValue').value) || 0,
+    StopAtTimes: parseInt(document.getElementById('stopAtTimes').value) || 0,
     ResumeAt: parseFloat(document.getElementById('resumeAt').value) || 0,
     ResumeAdjust: parseFloat(document.getElementById('resumeAdjust').value) || 0,
     ResumeBelowAt: parseFloat(document.getElementById('resumeBelowAt').value) || 0,
@@ -170,6 +173,9 @@ function loadConfigToForm(config, configName = null) {
   document.getElementById('onWin').value = config.OnWin ?? config.onWin ?? '';
   document.getElementById('crashAt').value = config.CrashAt ?? config.crashAt ?? '';
   document.getElementById('crashTimes').value = config.CrashTimes ?? config.crashTimes ?? '';
+  document.getElementById('stopLastCrashes').value = config.StopLastCrashes ?? config.stopLastCrashes ?? '';
+  document.getElementById('stopAtValue').value = config.StopAtValue ?? config.stopAtValue ?? '';
+  document.getElementById('stopAtTimes').value = config.StopAtTimes ?? config.stopAtTimes ?? '';
   document.getElementById('resumeAt').value = config.ResumeAt ?? config.resumeAt ?? '';
   document.getElementById('resumeAdjust').value = config.ResumeAdjust ?? config.resumeAdjust ?? '';
   document.getElementById('resumeBelowAt').value = config.ResumeBelowAt ?? config.resumeBelowAt ?? '';

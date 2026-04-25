@@ -33,6 +33,9 @@ namespace CrashAnalyzer
             txtOnWin.Text = "-50";
             txtCrashAt.Text = "2.9";
             txtCrashTimes.Text = "3";
+            txtStopLastCrashes.Text = "0";
+            txtStopAtValue.Text = "0";
+            txtStopAtTimes.Text = "0";
             txtResumeAt.Text = "0";
             txtResumeAdjust.Text = "35";
             txtResumeBelowAt.Text = "2.9";
@@ -164,6 +167,9 @@ namespace CrashAnalyzer
             txtOnWin.Text = config.OnWin.ToString(CultureInfo.InvariantCulture);
             txtCrashAt.Text = config.CrashAt.ToString(CultureInfo.InvariantCulture);
             txtCrashTimes.Text = config.CrashTimes.ToString(CultureInfo.InvariantCulture);
+            txtStopLastCrashes.Text = config.StopLastCrashes.ToString(CultureInfo.InvariantCulture);
+            txtStopAtValue.Text = config.StopAtValue.ToString(CultureInfo.InvariantCulture);
+            txtStopAtTimes.Text = config.StopAtTimes.ToString(CultureInfo.InvariantCulture);
             txtResumeAt.Text = config.ResumeAt.ToString(CultureInfo.InvariantCulture);
             txtResumeAdjust.Text = config.ResumeAdjust.ToString(CultureInfo.InvariantCulture);
             txtResumeBelowAt.Text = config.ResumeBelowAt.ToString(CultureInfo.InvariantCulture);
@@ -292,6 +298,9 @@ namespace CrashAnalyzer
                     OnWin = ParseNumericValue(GetSetting(settings, "On Win Decrease", "On Win %")),
                     CrashAt = ParseNumericValue(GetSetting(settings, "Stop After Crash At", "Crash At")),
                     CrashTimes = ParseIntValue(GetSetting(settings, "Stop After Times", "Crash Times")),
+                    StopLastCrashes = ParseIntValue(GetSetting(settings, "Stop Last Crashes Window")),
+                    StopAtValue = ParseNumericValue(GetSetting(settings, "Stop Threshold")),
+                    StopAtTimes = ParseIntValue(GetSetting(settings, "Stop Required Matches")),
                     ResumeAt = ParseNumericValue(GetSetting(settings, "Resume At Crash", "Resume At")),
                     ResumeAdjust = ParseNumericValue(GetSetting(settings, "Resume Bet Adjust", "Resume Adjust %")),
                     ResumeBelowAt = ParseNumericValue(GetSetting(settings, "Resume Below At")),
@@ -412,6 +421,9 @@ namespace CrashAnalyzer
                     OnWin = double.Parse(txtOnWin.Text),
                     CrashAt = double.Parse(txtCrashAt.Text),
                     CrashTimes = int.Parse(txtCrashTimes.Text),
+                    StopLastCrashes = int.Parse(txtStopLastCrashes.Text),
+                    StopAtValue = double.Parse(txtStopAtValue.Text),
+                    StopAtTimes = int.Parse(txtStopAtTimes.Text),
                     ResumeAt = double.Parse(txtResumeAt.Text),
                     ResumeAdjust = double.Parse(txtResumeAdjust.Text),
                     ResumeBelowAt = double.Parse(txtResumeBelowAt.Text),
@@ -815,6 +827,9 @@ namespace CrashAnalyzer
                 OnWin = double.Parse(txtOnWin.Text),
                 CrashAt = double.Parse(txtCrashAt.Text),
                 CrashTimes = int.Parse(txtCrashTimes.Text),
+                StopLastCrashes = int.Parse(txtStopLastCrashes.Text),
+                StopAtValue = double.Parse(txtStopAtValue.Text),
+                StopAtTimes = int.Parse(txtStopAtTimes.Text),
                 ResumeAt = double.Parse(txtResumeAt.Text),
                 ResumeAdjust = double.Parse(txtResumeAdjust.Text),
                 ResumeBelowAt = double.Parse(txtResumeBelowAt.Text),
@@ -1113,20 +1128,28 @@ namespace CrashAnalyzer
                     }
                 }
 
-                // Step 3: Update crash pattern only if this round had a bet
-                if (autoBetRunning && currentBetExists && config.CrashAt != 0 && config.CrashTimes > 0)
+                // Step 3: Update crash patterns only if this round had a bet
+                if (autoBetRunning && currentBetExists)
                 {
-                    if (IsCrashSkipConditionMet(crash, config.CrashAt))
+                    if (config.CrashAt != 0 && config.CrashTimes > 0)
                     {
-                        consecutiveLowCrashes++;
-                        if (consecutiveLowCrashes >= config.CrashTimes)
+                        if (IsCrashSkipConditionMet(crash, config.CrashAt))
                         {
-                            skipBetting = true;
+                            consecutiveLowCrashes++;
+                            if (consecutiveLowCrashes >= config.CrashTimes)
+                            {
+                                skipBetting = true;
+                            }
+                        }
+                        else
+                        {
+                            consecutiveLowCrashes = 0;
                         }
                     }
-                    else
+
+                    if (CheckStopWindowRule(crashHistory, config))
                     {
-                        consecutiveLowCrashes = 0;
+                        skipBetting = true;
                     }
                 }
 
@@ -1265,13 +1288,31 @@ namespace CrashAnalyzer
             return count >= config.ResumeAtTimes;
         }
 
+        private bool CheckStopWindowRule(List<double> crashHistory, BettingConfig config)
+        {
+            if (config.StopLastCrashes <= 0 || config.StopAtValue == 0 || config.StopAtTimes <= 0)
+            {
+                return false;
+            }
+
+            if (crashHistory.Count < config.StopLastCrashes)
+            {
+                return false;
+            }
+
+            var recent = crashHistory.Skip(crashHistory.Count - config.StopLastCrashes);
+            double threshold = Math.Abs(config.StopAtValue);
+            int count = recent.Count(c => config.StopAtValue > 0 ? c > threshold : c < threshold);
+            return count >= config.StopAtTimes;
+        }
+
         private BettingConfig logFileConfig = null;
 
         private void UpdateLogSettingsDisplay()
         {
             if (logFileConfig != null)
             {
-                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | OnLoss: {logFileConfig.OnLoss}% | OnWin: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | ResumeWindow: {logFileConfig.ResumeLastCrashes}@{logFileConfig.ResumeAtValue}x/{logFileConfig.ResumeAtTimes} | Reset+: {logFileConfig.ResetThresholdPositive}% | Reset-: {logFileConfig.ResetThresholdNegative}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | StopProfitAmt: ${logFileConfig.StopOnProfitAmount} | StopLossAmt: ${logFileConfig.StopOnLossAmount} | Decimals: {logFileConfig.DecimalPlaces}";
+                txtLogSettings.Text = $"Bet: ${logFileConfig.BetAmount} | Cashout: {logFileConfig.CashoutAt}x | OnLoss: {logFileConfig.OnLoss}% | OnWin: {logFileConfig.OnWin}% | Skip: {logFileConfig.CrashTimes}@{logFileConfig.CrashAt}x | StopWindow: {logFileConfig.StopLastCrashes}@{logFileConfig.StopAtValue}x/{logFileConfig.StopAtTimes} | Resume: {logFileConfig.ResumeAt}x | ResumeAdj: {logFileConfig.ResumeAdjust}% | ResumeBelow: {logFileConfig.ResumeBelowTimes}@{logFileConfig.ResumeBelowAt}x | ResumeWindow: {logFileConfig.ResumeLastCrashes}@{logFileConfig.ResumeAtValue}x/{logFileConfig.ResumeAtTimes} | Reset+: {logFileConfig.ResetThresholdPositive}% | Reset-: {logFileConfig.ResetThresholdNegative}% | ProfitReset: {logFileConfig.ProfitTimes}x | LossReset: ${logFileConfig.LossResetAmount} | WalletStop: {logFileConfig.WalletStopLoss}% | StopProfitAmt: ${logFileConfig.StopOnProfitAmount} | StopLossAmt: ${logFileConfig.StopOnLossAmount} | Decimals: {logFileConfig.DecimalPlaces}";
             }
             else
             {
@@ -1283,7 +1324,7 @@ namespace CrashAnalyzer
         {
             try
             {
-                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | OnLoss: {txtOnLoss.Text}% | OnWin: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | ResumeWindow: {txtResumeLastCrashes.Text}@{txtResumeAtValue.Text}x/{txtResumeAtTimes.Text} | Reset+: {txtResetThresholdPositive.Text}% | Reset-: {txtResetThresholdNegative.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | StopProfitAmt: ${txtStopOnProfitAmount.Text} | StopLossAmt: ${txtStopOnLossAmount.Text} | Decimals: {txtDecimalPlaces.Text}";
+                txtCurrentSettings.Text = $"Bet: ${txtBetAmount.Text} | Cashout: {txtCashoutAt.Text}x | OnLoss: {txtOnLoss.Text}% | OnWin: {txtOnWin.Text}% | Skip: {txtCrashTimes.Text}@{txtCrashAt.Text}x | StopWindow: {txtStopLastCrashes.Text}@{txtStopAtValue.Text}x/{txtStopAtTimes.Text} | Resume: {txtResumeAt.Text}x | ResumeAdj: {txtResumeAdjust.Text}% | ResumeBelow: {txtResumeBelowTimes.Text}@{txtResumeBelowAt.Text}x | ResumeWindow: {txtResumeLastCrashes.Text}@{txtResumeAtValue.Text}x/{txtResumeAtTimes.Text} | Reset+: {txtResetThresholdPositive.Text}% | Reset-: {txtResetThresholdNegative.Text}% | ProfitReset: {txtProfitTimes.Text}x | LossReset: ${txtLossResetAmount.Text} | WalletStop: {txtWalletStopLoss.Text}% | StopProfitAmt: ${txtStopOnProfitAmount.Text} | StopLossAmt: ${txtStopOnLossAmount.Text} | Decimals: {txtDecimalPlaces.Text}";
             }
             catch
             {
@@ -1314,6 +1355,9 @@ namespace CrashAnalyzer
                                 OnWin = config["onWin"].GetDouble(),
                                 CrashAt = config["crashAt"].GetDouble(),
                                 CrashTimes = config["crashTimes"].GetInt32(),
+                                StopLastCrashes = config.ContainsKey("stopLastCrashes") ? config["stopLastCrashes"].GetInt32() : 0,
+                                StopAtValue = config.ContainsKey("stopAtValue") ? config["stopAtValue"].GetDouble() : 0,
+                                StopAtTimes = config.ContainsKey("stopAtTimes") ? config["stopAtTimes"].GetInt32() : 0,
                                 ResumeAt = config["resumeAt"].GetDouble(),
                                 ResumeAdjust = config["resumeAdjust"].GetDouble(),
                                 ResumeBelowAt = config["resumeBelowAt"].GetDouble(),
@@ -1354,6 +1398,9 @@ namespace CrashAnalyzer
             csv.AppendLine($"On Win %,{config.OnWin}");
             csv.AppendLine($"Crash At,{config.CrashAt}");
             csv.AppendLine($"Crash Times,{config.CrashTimes}");
+            csv.AppendLine($"Stop Last Crashes Window,{config.StopLastCrashes}");
+            csv.AppendLine($"Stop Threshold,{config.StopAtValue}");
+            csv.AppendLine($"Stop Required Matches,{config.StopAtTimes}");
             csv.AppendLine($"Resume At,{config.ResumeAt}");
             csv.AppendLine($"Resume Adjust %,{config.ResumeAdjust}");
             csv.AppendLine($"Resume Below At,{config.ResumeBelowAt}");
@@ -1402,6 +1449,9 @@ namespace CrashAnalyzer
                     OnWin = txtOnWin.Text,
                     CrashAt = txtCrashAt.Text,
                     CrashTimes = txtCrashTimes.Text,
+                    StopLastCrashes = txtStopLastCrashes.Text,
+                    StopAtValue = txtStopAtValue.Text,
+                    StopAtTimes = txtStopAtTimes.Text,
                     ResumeAt = txtResumeAt.Text,
                     ResumeAdjust = txtResumeAdjust.Text,
                     ResumeBelowAt = txtResumeBelowAt.Text,
@@ -1436,6 +1486,9 @@ namespace CrashAnalyzer
             txtOnWin.TextChanged -= OnConfigChanged;
             txtCrashAt.TextChanged -= OnConfigChanged;
             txtCrashTimes.TextChanged -= OnConfigChanged;
+            txtStopLastCrashes.TextChanged -= OnConfigChanged;
+            txtStopAtValue.TextChanged -= OnConfigChanged;
+            txtStopAtTimes.TextChanged -= OnConfigChanged;
             txtResumeAt.TextChanged -= OnConfigChanged;
             txtResumeAdjust.TextChanged -= OnConfigChanged;
             txtResumeBelowAt.TextChanged -= OnConfigChanged;
@@ -1466,6 +1519,9 @@ namespace CrashAnalyzer
                     txtOnWin.Text = config["OnWin"].GetString();
                     txtCrashAt.Text = config["CrashAt"].GetString();
                     txtCrashTimes.Text = config["CrashTimes"].GetString();
+                    txtStopLastCrashes.Text = GetConfigValue(config, "StopLastCrashes");
+                    txtStopAtValue.Text = GetConfigValue(config, "StopAtValue");
+                    txtStopAtTimes.Text = GetConfigValue(config, "StopAtTimes");
                     txtResumeAt.Text = config["ResumeAt"].GetString();
                     txtResumeAdjust.Text = config["ResumeAdjust"].GetString();
                     txtResumeBelowAt.Text = config["ResumeBelowAt"].GetString();
@@ -1496,6 +1552,9 @@ namespace CrashAnalyzer
                     txtOnWin.Text = "-50";
                     txtCrashAt.Text = "2.9";
                     txtCrashTimes.Text = "3";
+                    txtStopLastCrashes.Text = "0";
+                    txtStopAtValue.Text = "0";
+                    txtStopAtTimes.Text = "0";
                     txtResumeAt.Text = "0";
                     txtResumeAdjust.Text = "35";
                     txtResumeBelowAt.Text = "2.9";
@@ -1523,6 +1582,9 @@ namespace CrashAnalyzer
                 txtOnWin.Text = "-50";
                 txtCrashAt.Text = "2.9";
                 txtCrashTimes.Text = "3";
+                txtStopLastCrashes.Text = "0";
+                txtStopAtValue.Text = "0";
+                txtStopAtTimes.Text = "0";
                 txtResumeAt.Text = "0";
                 txtResumeAdjust.Text = "35";
                 txtResumeBelowAt.Text = "2.9";
@@ -1548,6 +1610,9 @@ namespace CrashAnalyzer
             txtOnWin.TextChanged += OnConfigChanged;
             txtCrashAt.TextChanged += OnConfigChanged;
             txtCrashTimes.TextChanged += OnConfigChanged;
+            txtStopLastCrashes.TextChanged += OnConfigChanged;
+            txtStopAtValue.TextChanged += OnConfigChanged;
+            txtStopAtTimes.TextChanged += OnConfigChanged;
             txtResumeAt.TextChanged += OnConfigChanged;
             txtResumeAdjust.TextChanged += OnConfigChanged;
             txtResumeBelowAt.TextChanged += OnConfigChanged;
@@ -1589,6 +1654,9 @@ namespace CrashAnalyzer
                         OnWin = txtOnWin.Text,
                         CrashAt = txtCrashAt.Text,
                         CrashTimes = txtCrashTimes.Text,
+                        StopLastCrashes = txtStopLastCrashes.Text,
+                        StopAtValue = txtStopAtValue.Text,
+                        StopAtTimes = txtStopAtTimes.Text,
                         ResumeAt = txtResumeAt.Text,
                         ResumeAdjust = txtResumeAdjust.Text,
                         ResumeBelowAt = txtResumeBelowAt.Text,
@@ -1640,6 +1708,9 @@ namespace CrashAnalyzer
                     txtOnWin.Text = GetConfigValue(config, "OnWin");
                     txtCrashAt.Text = GetConfigValue(config, "CrashAt");
                     txtCrashTimes.Text = GetConfigValue(config, "CrashTimes");
+                    txtStopLastCrashes.Text = GetConfigValue(config, "StopLastCrashes");
+                    txtStopAtValue.Text = GetConfigValue(config, "StopAtValue");
+                    txtStopAtTimes.Text = GetConfigValue(config, "StopAtTimes");
                     txtResumeAt.Text = GetConfigValue(config, "ResumeAt");
                     txtResumeAdjust.Text = GetConfigValue(config, "ResumeAdjust");
                     txtResumeBelowAt.Text = GetConfigValue(config, "ResumeBelowAt");
@@ -2155,6 +2226,9 @@ namespace CrashAnalyzer
         public double OnWin { get; set; }
         public double CrashAt { get; set; }
         public int CrashTimes { get; set; }
+        public int StopLastCrashes { get; set; }
+        public double StopAtValue { get; set; }
+        public int StopAtTimes { get; set; }
         public double ResumeAt { get; set; }
         public double ResumeAdjust { get; set; }
         public double ResumeBelowAt { get; set; }
