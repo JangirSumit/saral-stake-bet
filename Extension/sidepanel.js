@@ -56,6 +56,26 @@ function buildCrashGameUrl(url) {
   }
 }
 
+function applyButtonStatus(buttonText) {
+  const statusText = document.querySelector(".status-text");
+  const statusDot = document.querySelector(".status-dot");
+  const startStopBtn = document.getElementById("startStopBtn");
+  const refreshNote = document.getElementById("refreshNote");
+  const buttonStatus = document.getElementById("buttonStatus");
+  if (!statusText || !statusDot || !startStopBtn || !refreshNote || !buttonStatus) return;
+
+  statusText.textContent = buttonText || "Ready";
+  const connected = Boolean(buttonText) && buttonText !== "Ready";
+  statusDot.className = connected ? "status-dot green" : "status-dot red";
+  statusDot.title = connected ? "Connected" : "Not Connected";
+  startStopBtn.disabled = !connected;
+  startStopBtn.style.opacity = connected ? "1" : "0.5";
+  refreshNote.style.display = connected ? "none" : "block";
+  buttonStatus.className = connected
+    ? "button-status connected"
+    : "button-status disconnected";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Auto-navigate to crash game when sidepanel opens
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -64,6 +84,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const crashUrl = buildCrashGameUrl(currentTab.url);
       chrome.tabs.update(currentTab.id, {
         url: crashUrl
+      });
+    } else if (currentTab) {
+      // The content script may have reported its initial status before the
+      // side panel opened. Ask for the current status when connecting.
+      chrome.tabs.sendMessage(currentTab.id, { action: "getButtonStatus" }, (response) => {
+        if (!chrome.runtime.lastError && response) {
+          applyButtonStatus(response.buttonText);
+        }
       });
     }
   });
@@ -348,32 +376,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.action === "updateButtonStatus") {
-    const statusText = document.querySelector(".status-text");
-    const statusDot = document.querySelector(".status-dot");
-    const startStopBtn = document.getElementById("startStopBtn");
-    const refreshNote = document.getElementById("refreshNote");
-    const buttonStatus = document.getElementById("buttonStatus");
-
-    if (statusText && statusDot && startStopBtn && refreshNote && buttonStatus) {
-      statusText.textContent = message.data.buttonText;
-      if (message.data.buttonText === "Ready") {
-        // Ready = Not Connected = Red border
-        statusDot.className = "status-dot red";
-        statusDot.title = "Not Connected";
-        startStopBtn.disabled = true;
-        startStopBtn.style.opacity = "0.5";
-        refreshNote.style.display = "block";
-        buttonStatus.className = "button-status disconnected";
-      } else {
-        // Connected = Green border
-        statusDot.className = "status-dot green";
-        statusDot.title = "Connected";
-        startStopBtn.disabled = false;
-        startStopBtn.style.opacity = "1";
-        refreshNote.style.display = "none";
-        buttonStatus.className = "button-status connected";
-      }
-    }
+    applyButtonStatus(message.data.buttonText);
   }
 
   if (message.action === "showBetStatus") {

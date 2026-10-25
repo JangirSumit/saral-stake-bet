@@ -47,7 +47,30 @@ console.log = function (...args) {
   originalConsoleLog.apply(console, args);
 };
 
-const POSSIBLE_BUTTON_TEXTS = ["Bet", "Starting...", "Bet (Next Round)"];
+const POSSIBLE_BUTTON_TEXTS = [
+  "Bet",
+  "Starting...",
+  "Bet Next Round",
+  "Cashout",
+];
+
+function normalizeButtonText(text) {
+  return text.replace(/[()]/g, "").replace(/\s+/g, " ").trim();
+}
+
+function findBetButton(root = gameSidebar) {
+  if (!root) return null;
+
+  // Stake's current markup no longer sets data-testid="bet-button" on this
+  // button, so keep the test id when available and fall back to its label.
+  return (
+    root.querySelector("[data-testid='bet-button']") ||
+    [...root.querySelectorAll("button")].find((button) =>
+      POSSIBLE_BUTTON_TEXTS.includes(normalizeButtonText(button.textContent))
+    ) ||
+    null
+  );
+}
 
 function saveState() {
   const state = {
@@ -182,9 +205,7 @@ function betWatcher() {
 
   if (startBetButton && gameSidebar) {
     const buttonObserver = new MutationObserver(() => {
-      const currentButton = gameSidebar.querySelector(
-        "[data-testid='bet-button']"
-      );
+      const currentButton = findBetButton();
       const currentText = currentButton?.textContent?.trim() || "Cashout";
 
       if (currentText !== lastStatus) {
@@ -196,7 +217,10 @@ function betWatcher() {
           data: { buttonText: currentText },
         });
 
-        if (currentText === "Bet" && autoBetRunning) {
+        if (
+          ["Bet", "Bet Next Round"].includes(normalizeButtonText(currentText)) &&
+          autoBetRunning
+        ) {
           // Check if button is disabled and handle refresh
           if (handleDisabledButton(currentButton)) {
             return;
@@ -296,9 +320,7 @@ function fillProperties() {
   const newGameSidebar = document.querySelector(
     "[data-testid='game-frame'] .game-sidebar"
   );
-  const newStartBetButton = document.querySelector(
-    "[data-testid='game-frame'] [data-testid='bet-button']"
-  );
+  const newStartBetButton = findBetButton(newGameSidebar);
   const newBetAmountInput = document.querySelector(
     "[data-testid='game-frame'] [data-testid='input-game-amount']"
   );
@@ -308,10 +330,9 @@ function fillProperties() {
   const newLastCrashes = document.querySelector(".past-bets");
 
   const newCashoutInput = [
-    ...(newGameSidebar?.querySelectorAll("label span[slot='label']") || []),
+    ...(newGameSidebar?.querySelectorAll("label") || []),
   ]
-    .find((el) => el.textContent.trim() === "Cashout At")
-    ?.closest("label")
+    .find((label) => label.textContent.includes("Cashout At"))
     ?.querySelector("input");
 
   // Update global variables if elements found
@@ -941,6 +962,13 @@ if (document.readyState === "loading") {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "getButtonStatus") {
+    sendResponse({
+      buttonText: lastStatus || startBetButton?.textContent?.trim() || "",
+    });
+    return;
+  }
+
   if (message.action === "fillBetData") {
     const {
       amount,
